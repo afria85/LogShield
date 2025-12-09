@@ -1,57 +1,51 @@
----
+````markdown
+# ðŸ”’ LogShield - Secure Log Sanitizer
 
-# ?? LogShield ? Secure Log Sanitizer
+**Enterprise-grade log sanitizer that never leaves your browser.**  
+Remove API keys, tokens, credentials, emails, IP addresses, and PII â†’ securely and instantly.
 
-**Enterprise-grade log sanitizer that never leaves your browser.**
-Remove API keys, tokens, credentials, emails, IP addresses, and PII ? securely and instantly.
-
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/afria85/LogShield)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/afria85/LogShield)  
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-?? **Live Demo:** [https://logshield.io](https://logshield.io)
-?? **Documentation:** [https://docs.logshield.io](https://docs.logshield.io)
+âš¡ **Live Demo:** [https://logshield.io](https://logshield.io)  
+ðŸ“– **Documentation:** [https://docs.logshield.io](https://docs.logshield.io)
 
 ---
 
-## ? Features
+## âš™ï¸ Features
 
-### ?? Free Tier
+### ðŸ†“ Free Tier
+- 3,000 characters/session
+- 5 uses/month
+- 10 basic patterns (AWS, emails, IPs, etc.)
+- 100% client-side (GDPR-friendly)
+- No tracking, no data transfer
 
-- ? 3,000 characters/session
-- ? 5 uses/month
-- ? 10 basic patterns (AWS, emails, IPs, etc.)
-- ? 100% client-side (GDPR-friendly)
-- ? No tracking, no data transfer
+### ðŸ’Ž Pro Tier ($19/mo)
+- Unlimited characters & usage
+- 70+ advanced security patterns
+- AI-powered entropy detection
+- Batch file processing
+- Export to PDF/CSV/JSON
+- Custom pattern library
+- Priority support
 
-### ?? Pro Tier ($19/mo)
-
-- ? Unlimited characters & usage
-- ? 70+ advanced security patterns
-- ? AI-powered entropy detection
-- ? Batch file processing
-- ? Export to PDF/CSV/JSON
-- ? Custom pattern library
-- ? Priority support
-
-### ?? Team Tier ($79/mo)
-
-- ? Everything in Pro
-- ? 5 team seats
-- ? Shared pattern library
-- ? REST API access
-- ? Usage analytics
-- ? SSO (Google/GitHub)
+### ðŸ‘¥ Team Tier ($79/mo)
+- Everything in Pro
+- 5 team seats
+- Shared pattern library
+- REST API access
+- Usage analytics
+- SSO (Google/GitHub)
 
 ---
 
-## ?? Quick Start
+## ðŸš€ Quick Start
 
-### Option 1 ? **Use Online (Recommended)**
+### Option 1 â€“ Use Online (Recommended)
+Just visit **[https://logshield.io](https://logshield.io)** â†’ no installation required.
 
-Just visit **[https://logshield.io](https://logshield.io)** ? no installation required.
-
-### Option 2 ? **Run Locally**
-
+### Option 2 â€“ Run Locally
 ```bash
 # Clone repository
 git clone https://github.com/afria85/LogShield.git
@@ -60,21 +54,21 @@ cd LogShield
 # Install dependencies
 npm install
 
-# Start dev server
+# Start development server
 npm run dev
 
 # Production build
 npm run build
-```
+````
 
 ---
 
-## ?? Installation Guide
+## ðŸ“¦ Installation Guide
 
 ### Requirements
 
-- Node.js 18+
-- npm or yarn
+* Node.js 18+
+* npm or yarn
 
 ### Steps
 
@@ -98,52 +92,47 @@ npm run dev
 
 ---
 
-## ?? Project Structure
+## ðŸ—‚ Project Structure
 
 ```
-logshield/
-³ÄÄ public/
-³   ÃÄÄ favicon.ico
-³   ÀÄÄ robots.txt
-³
-³ÄÄ src/
-³   ÃÄÄ components/
-³   ³   ÃÄÄ Header.jsx
-³   ³   ÃÄÄ Hero.jsx
-³   ³   ÃÄÄ Sanitizer.jsx
-³   ³   ÃÄÄ Pricing.jsx
-³   ³   ÃÄÄ Features.jsx
-³   ³   ÀÄÄ ui/
-³   ³       ÃÄÄ Button.jsx
-³      	    ÃÄÄ Card.jsx
-³           ÃÄÄ Input.jsx
-³           ÀÄÄ Badge.jsx
-³
-³   ÃÄÄ lib/
-³   ³   ÃÄÄ patterns.js
-³   ³   ÃÄÄ sanitizer.js
-³   ³   ÃÄÄ license.js
-³   ³   ÃÄÄ analytics.js
-³   ³   ÀÄÄ storage.js
-³
-³   ÃÄÄ hooks/
-³   ³   ÃÄÄ useLocalStorage.js
-³   ³   ÀÄÄ useLicense.js
-³
-³   ÃÄÄ App.jsx
-³   ÃÄÄ main.jsx
-³   ÀÄÄ index.css
-³
-ÃÄÄ package.json
-ÃÄÄ vite.config.js
-ÃÄÄ tailwind.config.js
-ÃÄÄ postcss.config.js
-ÀÄÄ README.md
+LogShield/
+â”œâ”€ public/
+â”‚  â”œâ”€ favicon.ico
+â”‚  â””â”€ robots.txt
+â”œâ”€ src/
+â”‚  â”œâ”€ components/
+â”‚  â”‚  â”œâ”€ Header.jsx
+â”‚  â”‚  â”œâ”€ Hero.jsx
+â”‚  â”‚  â”œâ”€ Sanitizer.jsx
+â”‚  â”‚  â”œâ”€ Pricing.jsx
+â”‚  â”‚  â”œâ”€ Features.jsx
+â”‚  â”‚  â””â”€ ui/
+â”‚  â”‚     â”œâ”€ Button.jsx
+â”‚  â”‚     â”œâ”€ Card.jsx
+â”‚  â”‚     â”œâ”€ Input.jsx
+â”‚  â”‚     â””â”€ Badge.jsx
+â”‚  â”œâ”€ lib/
+â”‚  â”‚  â”œâ”€ patterns.js
+â”‚  â”‚  â”œâ”€ sanitizer.js
+â”‚  â”‚  â”œâ”€ license.js
+â”‚  â”‚  â”œâ”€ analytics.js
+â”‚  â”‚  â””â”€ storage.js
+â”‚  â”œâ”€ hooks/
+â”‚  â”‚  â”œâ”€ useLocalStorage.js
+â”‚  â”‚  â””â”€ useLicense.js
+â”‚  â”œâ”€ App.jsx
+â”‚  â”œâ”€ main.jsx
+â”‚  â””â”€ index.css
+â”œâ”€ package.json
+â”œâ”€ vite.config.js
+â”œâ”€ tailwind.config.js
+â”œâ”€ postcss.config.js
+â””â”€ README.md
 ```
 
 ---
 
-## ?? Configuration
+## âš™ï¸ Configuration
 
 ### Environment Variables
 
@@ -165,9 +154,9 @@ VITE_APP_URL=https://logshield.io
 
 ---
 
-## ?? Deployment
+## ðŸš¢ Deployment
 
-### Deploy to Vercel (Recommended)
+### Vercel (Recommended)
 
 ```bash
 npm install -g vercel
@@ -177,9 +166,7 @@ vercel --prod
 
 Add `.env` variables in Vercel > Project Settings.
 
----
-
-### Deploy to Netlify
+### Netlify
 
 ```bash
 npm install -g netlify-cli
@@ -187,9 +174,7 @@ netlify login
 netlify deploy --prod
 ```
 
----
-
-### Deploy to GitHub Pages
+### GitHub Pages
 
 ```bash
 npm run build
@@ -199,116 +184,26 @@ gh-pages -d dist
 
 ---
 
-## ?? Monetization (Lemon Squeezy)
-
-### Why Lemon Squeezy?
-
-- Supports Indonesian payments
-- No US/EU company required
-- VAT handled automatically
-- Easy setup
-- 5% + $0.50 per transaction
-
 ### Plans
 
 ```
-Starter ? $7/mo
-Pro ? $19/mo
-Team ? $79/mo
-Lifetime ? $199 one-time
+Starter â€“ $7/mo
+Pro â€“ $19/mo
+Team â€“ $79/mo
+Lifetime â€“ $199 one-time
 ```
 
 Include checkout URLs in `.env`.
 
 ---
 
-## ?? Analytics (Plausible)
-
-Custom events:
+## ðŸ“Š Analytics (Plausible)
 
 ```javascript
 plausible("Sanitize", { props: { tier: "free" } });
 plausible("Upgrade", { props: { plan: "pro" } });
 ```
-
----
-
-## ?? Revenue Projections (12 Months)
-
-| Month | Free Users | Paid Users | MRR    | Revenue |
-| ----- | ---------- | ---------- | ------ | ------- |
-| 1?3   | 5,000      | 70         | $1,883 | $5,649  |
-| 4?6   | 15,000     | 215        | $2,585 | $7,755  |
-| 7?12  | 30,000     | 430        | $5,170 | $31,020 |
-
-**Total Year 1: ~$44,424**
-
----
-
-## ?? Launch Strategy
-
-### Pre-Launch
-
-- Domain
-- Payments
-- Analytics
-- Landing page
-- Email list
-- Blog post
-
-### Launch Day
-
-- Product Hunt
-- Hacker News
-- LinkedIn/Twitter
-- Reddit
-- Dev.to
-- Email blast
-
-### Post-Launch
-
-- Fix bugs
-- Publish content
-- Tutorials
-- Email sequences
-
-### Growth
-
-- SEO
-- Blog content
-- YouTube
-- CLI tool
-- VS Code extension
-- API documentation
-- Affiliate program
-
----
-
-## ???? Indonesian Tax & Legal
-
-### Options
-
-| Option        | Cost    | Timeline  | Tax             |
-| ------------- | ------- | --------- | --------------- |
-| CV            | 5?10 jt | 2?4 weeks | 0.5%            |
-| PT Perorangan | 1?2 jt  | 1?2 weeks | 0.5%            |
-| Personal      | Free    | Instant   | Report manually |
-
-**Recommended: PT Perorangan**
-
----
-
-## ???? Germany (as Student)
-
-- Passive income allowed
-- ?520/month tax-free
-- Register as _Kleinunternehmer_ (< ?22k/year)
-- No VAT needed
-- Must file annual tax return
-
----
-
-## ?? Troubleshooting
+## âš ï¸ Troubleshooting
 
 ### Build fails
 
@@ -334,72 +229,54 @@ Add to `vercel.json`:
 
 ---
 
-## ?? License
+## ðŸ“ License
 
-- **Core sanitizer engine:** MIT (open source)
-- **Full application:** Commercial
-
-Buy commercial license ? [https://logshield.io/pricing](https://logshield.io/pricing)
-
----
-
-## ?? Support
-
-### Community
-
-GitHub Issues: [https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
-Discord: [https://discord.gg/logshield](https://discord.gg/logshield)
-
-### Priority Support (Pro/Team)
-
-Email: [support@logshield.io](mailto:support@logshield.io)
-Response < 4 hours
+* Core sanitizer engine: MIT (open source)
+* Full application: Commercial license
+  Purchase at [https://logshield.io/pricing](https://logshield.io/pricing)
 
 ---
 
-## ?? Acknowledgments
+## ðŸ’¬ Support
+
+* GitHub Issues: [https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
+* Discord: [https://discord.gg/logshield](https://discord.gg/logshield)
+* Email (Pro/Team): [support@logshield.io](mailto:support@logshield.io) (response <4h)
+
+---
+
+## ðŸ™ Acknowledgments
 
 Built with React, Vite, Tailwind CSS, Lucide Icons, Lemon Squeezy.
 
 ---
 
-## ?? Roadmap
+## ðŸ›£ Roadmap
 
-### Q1 2024
+### Q1 2025
 
-- [x] Core sanitizer
-- [x] 70+ patterns
-- [x] Licensing
-- [x] Payments
-- [ ] CLI
-- [ ] API docs
+* Core sanitizer, 70+ patterns, Licensing, Payments
+* CLI, API docs (pending)
 
-### Q2 2024
+### Q2 2025
 
-- [ ] VS Code extension
-- [ ] GitHub Action
-- [ ] Slack integration
-- [ ] Mobile app
-- [ ] Self-hosted
+* VS Code extension, GitHub Action, Slack integration, Mobile app, Self-hosted
 
-### Q3 2024
+### Q3 2025
 
-- [ ] ML-based detection
-- [ ] Monitoring
-- [ ] Team collaboration
-- [ ] Advanced analytics
+* ML-based detection, Monitoring, Team collaboration, Advanced analytics
 
 ---
 
-## ?? Contact
+## ðŸ“§ Contact
 
-**Email:** [hello@logshield.io](mailto:hello@logshield.io)
-**Website:** [https://logshield.io](https://logshield.io)
-**GitHub:** [https://github.com/afria85](https://github.com/afria85)
-
----
-
-Made with ?? for Developers
-? 20254 LogShield ? All rights reserved.
+* Email: [hello@logshield.io](mailto:hello@logshield.io)
+* Website: [https://logshield.io](https://logshield.io)
+* GitHub: [@afria85](https://github.com/afria85)
 
 ---
+
+Made with â¤ï¸ for Developers
+Â© 2025 LogShield. All rights reserved.
+```
+
