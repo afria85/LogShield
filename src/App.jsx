@@ -107,6 +107,7 @@ function App() {
         <meta name="twitter:title" content="LogShield - Privacy Log Tool for Developers" />
         <meta name="twitter:description" content="Client-side log sanitizer to protect your data. Start free today!" />
         <meta name="twitter:image" content="https://www.logshield.dev/path-to-your-logo-or-screenshot.png" />
+        <meta name="google-site-verification" content="85Gk802UJeWAcLxyMkz_fbX5s5HR7hDI2WCxlR0LkPY" />
       </Helmet>
       
       <Header
