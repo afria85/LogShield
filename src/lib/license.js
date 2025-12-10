@@ -101,6 +101,18 @@ export class LicenseManager {
 
   // Get default free license
   getDefaultLicense() {
+    // Check if dev mode
+    if (import.meta.env.VITE_DEV_MODE === 'true') {
+      return {
+        tier: import.meta.env.VITE_DEV_TIER || 'pro',
+        key: 'DEV-MODE',
+        activated: Date.now(),
+        expires: null,
+        deviceId: 'dev'
+      };
+    }
+    
+    // Normal free tier
     return {
       tier: 'free',
       key: null,
