@@ -7,14 +7,15 @@ Remove API keys, tokens, credentials, emails, IP addresses, and PII → securely
 [![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/afria85/LogShield)  
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-⚡ **Live Demo:** [https://logshield.io](https://logshield.io)  
-📖 **Documentation:** [https://docs.logshield.io](https://docs.logshield.io)
+⚡ **Live Demo:** [https://logshield.dev](https://logshield.dev)  
+📖 **Documentation:** [https://docs.logshield.dev](https://docs.logshield.dev)
 
 ---
 
 ## ⚙️ Features
 
 ### 🆓 Free Tier
+
 - 3,000 characters/session
 - 5 uses/month
 - 10 basic patterns (AWS, emails, IPs, etc.)
@@ -22,6 +23,7 @@ Remove API keys, tokens, credentials, emails, IP addresses, and PII → securely
 - No tracking, no data transfer
 
 ### 💎 Pro Tier ($19/mo)
+
 - Unlimited characters & usage
 - 70+ advanced security patterns
 - AI-powered entropy detection
@@ -31,6 +33,7 @@ Remove API keys, tokens, credentials, emails, IP addresses, and PII → securely
 - Priority support
 
 ### 👥 Team Tier ($79/mo)
+
 - Everything in Pro
 - 5 team seats
 - Shared pattern library
@@ -43,9 +46,11 @@ Remove API keys, tokens, credentials, emails, IP addresses, and PII → securely
 ## 🚀 Quick Start
 
 ### Option 1 – Use Online (Recommended)
-Just visit **[https://logshield.io](https://logshield.io)** → no installation required.
+
+Just visit **[https://logshield.dev](https://logshield.dev)** → no installation required.
 
 ### Option 2 – Run Locally
+
 ```bash
 # Clone repository
 git clone https://github.com/afria85/LogShield.git
@@ -59,6 +64,7 @@ npm run dev
 
 # Production build
 npm run build
+```
 ````
 
 ---
@@ -67,8 +73,8 @@ npm run build
 
 ### Requirements
 
-* Node.js 18+
-* npm or yarn
+- Node.js 18+
+- npm or yarn
 
 ### Steps
 
@@ -146,10 +152,10 @@ VITE_LEMON_TEAM_URL=...
 VITE_LEMON_LIFETIME_URL=...
 
 # Analytics
-VITE_PLAUSIBLE_DOMAIN=logshield.io
+VITE_PLAUSIBLE_DOMAIN=logshield.dev
 
 # App
-VITE_APP_URL=https://logshield.io
+VITE_APP_URL=https://logshield.dev
 ```
 
 ---
@@ -203,6 +209,7 @@ Include checkout URLs in `.env`.
 plausible("Sanitize", { props: { tier: "free" } });
 plausible("Upgrade", { props: { plan: "pro" } });
 ```
+
 ## ⚠️ Troubleshooting
 
 ### Build fails
@@ -231,17 +238,17 @@ Add to `vercel.json`:
 
 ## 📝 License
 
-* Core sanitizer engine: MIT (open source)
-* Full application: Commercial license
-  Purchase at [https://logshield.io/pricing](https://logshield.io/pricing)
+- Core sanitizer engine: MIT (open source)
+- Full application: Commercial license
+  Purchase at [https://logshield.dev/pricing](https://logshield.dev/pricing)
 
 ---
 
 ## 💬 Support
 
-* GitHub Issues: [https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
-* Discord: [https://discord.gg/logshield](https://discord.gg/logshield)
-* Email (Pro/Team): [support@logshield.io](mailto:support@logshield.io) (response <4h)
+- GitHub Issues: [https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
+- Discord: [https://discord.gg/logshield](https://discord.gg/logshield)
+- Email (Pro/Team): [support@logshield.dev](mailto:support@logshield.dev) (response <4h)
 
 ---
 
@@ -255,28 +262,30 @@ Built with React, Vite, Tailwind CSS, Lucide Icons, Lemon Squeezy.
 
 ### Q1 2025
 
-* Core sanitizer, 70+ patterns, Licensing, Payments
-* CLI, API docs (pending)
+- Core sanitizer, 70+ patterns, Licensing, Payments
+- CLI, API docs (pending)
 
 ### Q2 2025
 
-* VS Code extension, GitHub Action, Slack integration, Mobile app, Self-hosted
+- VS Code extension, GitHub Action, Slack integration, Mobile app, Self-hosted
 
 ### Q3 2025
 
-* ML-based detection, Monitoring, Team collaboration, Advanced analytics
+- ML-based detection, Monitoring, Team collaboration, Advanced analytics
 
 ---
 
 ## 📧 Contact
 
-* Email: [hello@logshield.io](mailto:hello@logshield.io)
-* Website: [https://logshield.io](https://logshield.io)
-* GitHub: [@afria85](https://github.com/afria85)
+- Email: [hello@logshield.dev](mailto:hello@logshield.dev)
+- Website: [https://logshield.dev](https://logshield.dev)
+- GitHub: [@afria85](https://github.com/afria85)
 
 ---
 
 Made with ❤️ for Developers
 © 2025 LogShield. All rights reserved.
+
 ```
 
+```

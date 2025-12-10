@@ -34,7 +34,7 @@ function App() {
     if (url) {
       window.open(url, '_blank');
     } else {
-      alert('Payment integration coming soon! For early access, email: hello@logshield.io');
+      alert('Payment integration coming soon! For early access, email: hello@logshield.dev');
     }
   };
 

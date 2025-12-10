@@ -342,10 +342,10 @@ export default function Pricing({ onUpgrade, license }) {
         {/* FAQ or Comparison */}
         <div className="mt-16 text-center">
           <p className="text-gray-600 mb-4">
-            Have questions? <a href="mailto:hello@logshield.io" className="text-blue-600 hover:underline">Contact us</a>
+            Have questions? <a href="mailto:hello@logshield.dev" className="text-blue-600 hover:underline">Contact us</a>
           </p>
           <p className="text-sm text-gray-500">
-            All plans include 14-day money-back guarantee • Secure payment via Lemon Squeezy
+            All plans include 14-day money-back guarantee ? Secure payment via Paddle
           </p>
         </div>
       </div>
