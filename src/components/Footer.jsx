@@ -1,4 +1,3 @@
-// src/components/Footer.jsx
 import { Shield, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
 export default function Footer() {
@@ -12,7 +11,7 @@ export default function Footer() {
     company: [
       { name: 'About', href: '#about' },
       { name: 'Blog', href: '#blog' },
-      { name: 'Contact', href: 'mailto:hello@logshield.io' },
+      { name: 'Contact', href: 'mailto:hello@logshield.dev' },
       { name: 'Changelog', href: '#changelog' }
     ],
     legal: [
@@ -31,9 +30,9 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
       <div className="container py-12">
-        <div className="grid md:grid-cols-5 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
                 <Shield className="h-6 w-6 text-white" />
@@ -42,7 +41,7 @@ export default function Footer() {
             </div>
             
             <p className="text-gray-400 mb-4 max-w-sm">
-              The privacy-first log sanitizer built for developers. 
+              Privacy-first log sanitizer for developers. 
               Remove sensitive data from logs securely, right in your browser.
             </p>
 
@@ -57,6 +56,7 @@ export default function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-400 hover:text-white transition-colors"
+                    aria-label={item.name}
                   >
                     <Icon className="h-5 w-5" />
                   </a>
@@ -119,21 +119,25 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-gray-400 text-sm">
-              ? 2024 LogShield. All rights reserved.
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 text-sm">
+            {/* Left: Copyright */}
+            <p className="text-gray-400 text-center lg:text-left order-1">
+              &copy; 2025 LogShield. All rights reserved.
             </p>
             
-            <div className="flex items-center gap-6 text-sm text-gray-400">
-              <span>???? Made in Indonesia & ???? Germany</span>
-              <a
-                href="mailto:hello@logshield.io"
-                className="flex items-center gap-1 hover:text-white transition-colors"
-              >
-                <Mail className="h-4 w-4" />
-                hello@logshield.io
-              </a>
-            </div>
+            {/* Center: Made with love - CENTERED on desktop */}
+            <p className="text-gray-400 text-center order-3 lg:order-2">
+              Made with &#x2764; for developers worldwide
+            </p>
+            
+            {/* Right: Contact */}
+            <a
+              href="mailto:hello@logshield.dev"
+              className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors order-2 lg:order-3"
+            >
+              <Mail className="h-4 w-4" />
+              hello@logshield.dev
+            </a>
           </div>
         </div>
       </div>
