@@ -1,291 +1,107 @@
-````markdown
-# 🔒 LogShield - Secure Log Sanitizer
+# ?? LogShield - Secure Log Sanitizer
 
-**Enterprise-grade log sanitizer that never leaves your browser.**  
-Remove API keys, tokens, credentials, emails, IP addresses, and PII → securely and instantly.
+**Enterprise-grade log sanitizer that processes data 100% in your browser.**
 
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/afria85/LogShield)  
+Remove API keys, tokens, credentials, emails, IP addresses, and PII from your logs ? securely and instantly.
+
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/afria85/LogShield)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-
-⚡ **Live Demo:** [https://logshield.dev](https://logshield.dev)  
-📖 **Documentation:** [https://docs.logshield.dev](https://docs.logshield.dev)
+[![Live Demo](https://img.shields.io/badge/??-Try%20Live-8A2BE2.svg)](https://logshield.dev)
 
 ---
 
-## ⚙️ Features
+## ?? Try It Now
 
-### 🆓 Free Tier
+The fastest way to get started is to use the live web app. No installation needed.
 
-- 3,000 characters/session
-- 5 uses/month
-- 10 basic patterns (AWS, emails, IPs, etc.)
-- 100% client-side (GDPR-friendly)
-- No tracking, no data transfer
-
-### 💎 Pro Tier ($19/mo)
-
-- Unlimited characters & usage
-- 70+ advanced security patterns
-- AI-powered entropy detection
-- Batch file processing
-- Export to PDF/CSV/JSON
-- Custom pattern library
-- Priority support
-
-### 👥 Team Tier ($79/mo)
-
-- Everything in Pro
-- 5 team seats
-- Shared pattern library
-- REST API access
-- Usage analytics
-- SSO (Google/GitHub)
+**?? [Open LogShield Web App](https://logshield.dev)**
 
 ---
 
-## 🚀 Quick Start
+## ? Overview
 
-### Option 1 – Use Online (Recommended)
+LogShield is a **privacy-first developer tool** that helps you safely share logs and debug data by automatically removing sensitive information. All processing happens locally in your browser?**your data never leaves your computer.**
 
-Just visit **[https://logshield.dev](https://logshield.dev)** → no installation required.
+### Why Use LogShield?
 
-### Option 2 – Run Locally
+- **?? Privacy by Design**: 100% client-side processing. We never see, store, or transmit your logs.
+- **? Instant & Powerful**: Sanitize thousands of lines in milliseconds using 70+ built-in security patterns.
+- **??? Comprehensive Detection**: Covers AWS, GCP, Azure, API keys, tokens, emails, PII, and more.
+- **?? Built for Teams**: Supports custom patterns, batch processing, and multiple export formats.
+
+---
+
+## ?? Plans & Pricing
+
+| Plan         | Price         | Best For                | Key Features                                                |
+| :----------- | :------------ | :---------------------- | :---------------------------------------------------------- |
+| **Free**     | $0 forever    | Trying it out           | 3,000 chars/session, 5 uses/month, 10 basic patterns        |
+| **Starter**  | $7/month      | Individual developers   | 10,000 chars/session, 50 uses/month, PDF/CSV export         |
+| **Pro**      | $19/month     | Professional developers | Unlimited use, 70+ patterns, AI detection, batch processing |
+| **Team**     | $79/month     | Teams & organizations   | 5 seats, shared library, REST API, SSO, usage analytics     |
+| **Lifetime** | $199 one-time | Long-term value         | Everything in Team, lifetime access, all future updates     |
+
+**All paid plans include a 14-day money-back guarantee.**
+
+?? **View detailed feature comparison and upgrade: [https://logshield.dev/pricing](https://logshield.dev/pricing)**
+
+---
+
+## ??? For Developers: Run Locally
+
+If you want to run the development version locally:
 
 ```bash
-# Clone repository
-git clone https://github.com/afria85/LogShield.git
+# 1. Clone the repository
+git clone [https://github.com/afria85/LogShield.git](https://github.com/afria85/LogShield.git)
 cd LogShield
 
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Production build
-npm run build
-```
-````
-
----
-
-## 📦 Installation Guide
-
-### Requirements
-
-- Node.js 18+
-- npm or yarn
-
-### Steps
-
-```bash
-# 1. Create new project
-npm create vite@latest logshield -- --template react
-cd logshield
-
 # 2. Install dependencies
-npm install lucide-react clsx tailwind-merge
-
-# 3. Install dev tools
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-
-# 4. Copy all LogShield source files
-
-# 5. Start development
-npm run dev
-```
-
----
-
-## 🗂 Project Structure
-
-```
-LogShield/
-├─ public/
-│  ├─ favicon.ico
-│  └─ robots.txt
-├─ src/
-│  ├─ components/
-│  │  ├─ Header.jsx
-│  │  ├─ Hero.jsx
-│  │  ├─ Sanitizer.jsx
-│  │  ├─ Pricing.jsx
-│  │  ├─ Features.jsx
-│  │  └─ ui/
-│  │     ├─ Button.jsx
-│  │     ├─ Card.jsx
-│  │     ├─ Input.jsx
-│  │     └─ Badge.jsx
-│  ├─ lib/
-│  │  ├─ patterns.js
-│  │  ├─ sanitizer.js
-│  │  ├─ license.js
-│  │  ├─ analytics.js
-│  │  └─ storage.js
-│  ├─ hooks/
-│  │  ├─ useLocalStorage.js
-│  │  └─ useLicense.js
-│  ├─ App.jsx
-│  ├─ main.jsx
-│  └─ index.css
-├─ package.json
-├─ vite.config.js
-├─ tailwind.config.js
-├─ postcss.config.js
-└─ README.md
-```
-
----
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-Create a `.env` file:
-
-```bash
-# Lemon Squeezy Checkout URLs
-VITE_LEMON_STARTER_URL=...
-VITE_LEMON_PRO_URL=...
-VITE_LEMON_TEAM_URL=...
-VITE_LEMON_LIFETIME_URL=...
-
-# Analytics
-VITE_PLAUSIBLE_DOMAIN=logshield.dev
-
-# App
-VITE_APP_URL=https://logshield.dev
-```
-
----
-
-## 🚢 Deployment
-
-### Vercel (Recommended)
-
-```bash
-npm install -g vercel
-vercel login
-vercel --prod
-```
-
-Add `.env` variables in Vercel > Project Settings.
-
-### Netlify
-
-```bash
-npm install -g netlify-cli
-netlify login
-netlify deploy --prod
-```
-
-### GitHub Pages
-
-```bash
-npm run build
-npm install -g gh-pages
-gh-pages -d dist
-```
-
----
-
-### Plans
-
-```
-Starter – $7/mo
-Pro – $19/mo
-Team – $79/mo
-Lifetime – $199 one-time
-```
-
-Include checkout URLs in `.env`.
-
----
-
-## 📊 Analytics (Plausible)
-
-```javascript
-plausible("Sanitize", { props: { tier: "free" } });
-plausible("Upgrade", { props: { plan: "pro" } });
-```
-
-## ⚠️ Troubleshooting
-
-### Build fails
-
-```bash
-rm -rf node_modules package-lock.json
 npm install
+
+# 3. Start the development server
+npm run dev
+
+# 4. Open your browser and navigate to
+# http://localhost:5173
 ```
 
-### CORS
+Project Structure
+LogShield/
+��� src/
+� ��� components/ # React components (UI)
+� ��� lib/ # Core logic (sanitizer, patterns, license)
+� ��� ...
+��� public/ # Static assets & legal pages
+��� ...
+?? Planned Features
+We're actively working on improving LogShield. Here's what's next:
 
-Add to `vercel.json`:
+CLI Tool: Run LogShield directly from your terminal.
 
-```json
-{
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }]
-    }
-  ]
-}
-```
+VS Code Extension: Sanitize logs without leaving your editor.
 
----
+GitHub Action: Automatically sanitize logs in your CI/CD pipelines.
 
-## 📝 License
+Enhanced AI Detection: Improved pattern recognition for unknown secret formats.
 
-- Core sanitizer engine: MIT (open source)
-- Full application: Commercial license
-  Purchase at [https://logshield.dev/pricing](https://logshield.dev/pricing)
+Self-Hosted Version: Deploy LogShield within your private infrastructure.
 
----
+Have a feature request? Open an issue on GitHub!
 
-## 💬 Support
+? Support
+Community & Bugs: GitHub Issues
 
-- GitHub Issues: [https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
-- Discord: [https://discord.gg/logshield](https://discord.gg/logshield)
-- Email (Pro/Team): [support@logshield.dev](mailto:support@logshield.dev) (response <4h)
+Email (General): hello@logshield.dev
 
----
+Email (Paid Plans): support@logshield.dev
 
-## 🙏 Acknowledgments
+?? License
+The core sanitization engine is open-source under the MIT License.
 
-Built with React, Vite, Tailwind CSS, Lucide Icons, Lemon Squeezy.
+The full application, including the web interface and commercial features, requires a commercial license. See logshield.dev/pricing for details.
 
----
+?? Acknowledgments
+Built with modern web technologies: React, Vite, Tailwind CSS, Lucide Icons.
 
-## 🛣 Roadmap
-
-### Q1 2025
-
-- Core sanitizer, 70+ patterns, Licensing, Payments
-- CLI, API docs (pending)
-
-### Q2 2025
-
-- VS Code extension, GitHub Action, Slack integration, Mobile app, Self-hosted
-
-### Q3 2025
-
-- ML-based detection, Monitoring, Team collaboration, Advanced analytics
-
----
-
-## 📧 Contact
-
-- Email: [hello@logshield.dev](mailto:hello@logshield.dev)
-- Website: [https://logshield.dev](https://logshield.dev)
-- GitHub: [@afria85](https://github.com/afria85)
-
----
-
-Made with ❤️ for Developers
-© 2025 LogShield. All rights reserved.
-
-```
-
-```
+? 2025 LogShield. All rights reserved. | Website | Privacy Policy | Terms of Service
