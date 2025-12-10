@@ -15,9 +15,9 @@ export default function Footer() {
       { name: 'Changelog', href: '#changelog' }
     ],
     legal: [
-      { name: 'Privacy Policy', href: '#privacy' },
-      { name: 'Terms of Service', href: '#terms' },
-      { name: 'Cookie Policy', href: '#cookies' },
+      { name: 'Privacy Policy', href: '/privacy.html' },
+      { name: 'Terms of Service', href: '/terms.html' },
+      { name: 'Refund Policy', href: '/refund.html' },
       { name: 'License', href: '#license' }
     ],
     social: [
