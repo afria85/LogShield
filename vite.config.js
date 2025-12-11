@@ -14,7 +14,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
+    minify: 'esbuild',
     
     // Terser options for better compression
     terserOptions: {
