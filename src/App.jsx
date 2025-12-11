@@ -18,6 +18,8 @@ import BlogPage from './pages/Blog';
 import BlogPostPage from './pages/BlogPost';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
+import ScrollToTop from "./components/ScrollToTop";
+
 
 function AppContent() {
   const [license, setLicense] = useState(null);
@@ -80,6 +82,7 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <AppContent />
       </BrowserRouter>
     </ThemeProvider>
