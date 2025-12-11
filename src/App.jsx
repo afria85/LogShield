@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Sanitizer from './components/Sanitizer';
