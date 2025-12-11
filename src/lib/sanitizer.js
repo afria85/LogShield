@@ -1,3 +1,4 @@
+// src/lib/sanitizer.js - FIXED VERSION
 import { detectHighEntropy } from './patterns';
 
 export class Sanitizer {
@@ -24,6 +25,7 @@ export class Sanitizer {
       return {
         sanitized: '',
         stats: this.stats,
+        success: false,
         error: 'Invalid input'
       };
     }
@@ -34,28 +36,42 @@ export class Sanitizer {
 
     // Apply all patterns
     this.patterns.forEach(pattern => {
-      const matches = this.findMatches(sanitized, pattern);
-      if (matches.length > 0) {
-        this.stats.matches.push({
-          pattern: pattern.name,
-          count: matches.length,
-          category: pattern.category
-        });
-        this.stats.totalReplacements += matches.length;
-        sanitized = sanitized.replace(pattern.pattern, pattern.replacement);
+      try {
+        const matches = this.countMatches(sanitized, pattern);
+        if (matches > 0) {
+          this.stats.matches.push({
+            pattern: pattern.name,
+            count: matches,
+            category: pattern.category
+          });
+          this.stats.totalReplacements += matches;
+          
+          // Create new regex to ensure fresh state
+          const regex = new RegExp(pattern.pattern.source, pattern.pattern.flags);
+          sanitized = sanitized.replace(regex, pattern.replacement);
+        }
+      } catch (err) {
+        console.warn(`Pattern ${pattern.name} failed:`, err.message);
       }
     });
 
     // Detect high entropy strings (AI-based detection)
     if (this.options.detectEntropy) {
-      this.stats.entropyDetections = detectHighEntropy(sanitized);
-      this.stats.entropyDetections.forEach(detection => {
-        sanitized = sanitized.replace(
-          detection.text,
-          `[HIGH_ENTROPY_${detection.entropy}_REDACTED]`
-        );
-        this.stats.totalReplacements++;
-      });
+      try {
+        this.stats.entropyDetections = detectHighEntropy(sanitized);
+        this.stats.entropyDetections.forEach(detection => {
+          // Escape special regex characters in the detected text
+          const escapedText = detection.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const entropyRegex = new RegExp(escapedText, 'g');
+          sanitized = sanitized.replace(
+            entropyRegex,
+            `[HIGH_ENTROPY_REDACTED]`
+          );
+          this.stats.totalReplacements++;
+        });
+      } catch (err) {
+        console.warn('Entropy detection failed:', err.message);
+      }
     }
 
     this.stats.processingTime = (performance.now() - startTime).toFixed(2);
@@ -67,20 +83,19 @@ export class Sanitizer {
     };
   }
 
-  findMatches(text, pattern) {
-    const matches = [];
-    let match;
-    const regex = new RegExp(pattern.pattern);
-    
-    while ((match = regex.exec(text)) !== null) {
-      matches.push({
-        text: match[0],
-        index: match.index
-      });
-      if (!regex.global) break;
+  // FIXED: Menggunakan match() instead of exec() untuk menghindari infinite loop
+  countMatches(text, pattern) {
+    try {
+      // Create new regex with global flag for counting
+      const flags = pattern.pattern.flags.includes('g') 
+        ? pattern.pattern.flags 
+        : pattern.pattern.flags + 'g';
+      const regex = new RegExp(pattern.pattern.source, flags);
+      const matches = text.match(regex);
+      return matches ? matches.length : 0;
+    } catch (err) {
+      return 0;
     }
-    
-    return matches;
   }
 
   // Batch processing for multiple files
@@ -110,9 +125,9 @@ export class Sanitizer {
   }
 
   toCsv(sanitized) {
-    let csv = 'Type,Count\n';
+    let csv = 'Type,Count,Category\n';
     this.stats.matches.forEach(match => {
-      csv += `${match.pattern},${match.count}\n`;
+      csv += `"${match.pattern}",${match.count},"${match.category}"\n`;
     });
     csv += '\n--- Sanitized Content ---\n';
     csv += sanitized.replace(/"/g, '""');
@@ -137,10 +152,13 @@ export class Sanitizer {
 
     if (this.stats.entropyDetections && this.stats.entropyDetections.length > 0) {
       md += '## High Entropy Detections\n\n';
-      md += '| String | Entropy Score |\n';
-      md += '|--------|---------------|\n';
+      md += '| String (truncated) | Entropy Score |\n';
+      md += '|-------------------|---------------|\n';
       this.stats.entropyDetections.forEach(detection => {
-        md += `| ${detection.text.substring(0, 20)}... | ${detection.entropy} |\n`;
+        const truncated = detection.text.length > 20 
+          ? detection.text.substring(0, 20) + '...' 
+          : detection.text;
+        md += `| \`${truncated}\` | ${detection.entropy} |\n`;
       });
       md += '\n';
     }
@@ -172,25 +190,35 @@ export function quickSanitize(text, patterns) {
 
 // Check if text contains sensitive data
 export function hasSensitiveData(text, patterns) {
-  return patterns.some(pattern => pattern.pattern.test(text));
+  return patterns.some(pattern => {
+    try {
+      return pattern.pattern.test(text);
+    } catch {
+      return false;
+    }
+  });
 }
 
-// Get sanitization preview (first 100 chars of each match)
+// Get sanitization preview
 export function getPreview(text, patterns, maxLength = 100) {
   const previews = [];
   
   patterns.forEach(pattern => {
-    const matches = text.match(pattern.pattern);
-    if (matches) {
-      matches.forEach(match => {
-        const start = Math.max(0, text.indexOf(match) - 20);
-        const end = Math.min(text.length, text.indexOf(match) + match.length + 20);
-        previews.push({
-          pattern: pattern.name,
-          preview: '...' + text.substring(start, end) + '...',
-          match: match
+    try {
+      const matches = text.match(pattern.pattern);
+      if (matches) {
+        matches.slice(0, 3).forEach(match => { // Limit to 3 previews per pattern
+          const start = Math.max(0, text.indexOf(match) - 20);
+          const end = Math.min(text.length, text.indexOf(match) + match.length + 20);
+          previews.push({
+            pattern: pattern.name,
+            preview: '...' + text.substring(start, end) + '...',
+            match: match.length > 50 ? match.substring(0, 50) + '...' : match
+          });
         });
-      });
+      }
+    } catch {
+      // Skip invalid patterns
     }
   });
 

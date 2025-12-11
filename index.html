@@ -1,124 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- ============================== -->
-  <!-- Favicons & PWA Meta           -->
-  <!-- ============================== -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
-  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
-
-  <!-- ============================== -->
-  <!-- Primary SEO Meta Tags          -->
-  <!-- ============================== -->
-  <title>LogShield ? Secure Log Sanitizer for Developers (100% Client-Side)</title>
-  <meta name="title" content="LogShield ? Secure Log Sanitizer for Developers (100% Client-Side)" />
-  <meta name="description" content="Remove API keys, tokens, emails, IPs, passwords, and PII instantly. LogShield is a privacy-first, browser-only log sanitizer trusted by developers ? fast, secure, and free to start." />
-  <meta name="keywords" content="log sanitizer, sanitize logs, log redaction tool, api key remover, privacy tool, pii cleaner, developer tools, secure logs, client-side sanitization, redaction engine" />
-
-  <!-- SGE (Search Generative Experience) Optimization -->
-  <meta name="google-site-verification" content="85Gk802UJeWAcLxyMkz_fbX5s5HR7hDI2WCxlR0LkPY" />
-  <meta name="google-adsense-account" content="none" />
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-
-  <!-- ============================== -->
-  <!-- Canonical URL                  -->
-  <!-- ============================== -->
+  
+  <!-- Primary Meta Tags -->
+  <title>LogShield - Privacy-First Log Sanitizer for Developers</title>
+  <meta name="title" content="LogShield - Privacy-First Log Sanitizer for Developers" />
+  <meta name="description" content="Remove API keys, tokens, credentials, emails, and PII from your logs instantly. 100% client-side processing - your data never leaves your browser." />
+  <meta name="keywords" content="log sanitizer, privacy log tool, API key remover, sensitive data cleaner, client-side log sanitizer, developer tools, GDPR compliant" />
+  <meta name="author" content="LogShield" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Canonical URL -->
   <link rel="canonical" href="https://logshield.dev/" />
-
-  <!-- ============================== -->
-  <!-- Open Graph (Facebook & Discord) -->
-  <!-- ============================== -->
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#3b82f6" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+  
+  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://logshield.dev/" />
-  <meta property="og:title" content="LogShield ? Secure Log Sanitizer (100% Local)" />
-  <meta property="og:description" content="Automatically remove API keys, tokens, emails, passwords, and sensitive data from logs ? securely and instantly." />
+  <meta property="og:title" content="LogShield - Privacy-First Log Sanitizer" />
+  <meta property="og:description" content="Remove sensitive data from logs instantly. 100% client-side, GDPR compliant. Free to start." />
   <meta property="og:image" content="https://logshield.dev/og-image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="LogShield" />
-
-  <!-- ============================== -->
-  <!-- Twitter Cards                  -->
-  <!-- ============================== -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="LogShield ? Secure Log Sanitizer for Developers" />
-  <meta name="twitter:description" content="Sanitize logs client-side with 70+ patterns and AI entropy detection." />
-  <meta name="twitter:image" content="https://logshield.dev/og-image.png" />
-  <meta name="twitter:creator" content="@logshield" />
-
-  <!-- ============================== -->
-  <!-- Performance                    -->
-  <!-- ============================== -->
-  <link rel="preconnect" href="https://plausible.io" />
-  <link rel="dns-prefetch" href="https://plausible.io" />
+  <meta property="og:locale" content="en_US" />
   
-  <!-- ============================== -->
-  <!-- Analytics (Plausible)          -->
-  <!-- ============================== -->
-  <script async defer data-domain="logshield.dev" src="https://plausible.io/js/pa-O0YPgyO2ZMntP24QuH3Ps.js"></script>
-  <script>
-    window.plausible = window.plausible || function() {
-      (plausible.q = plausible.q || []).push(arguments);
-    };
-  </script>
-
-  <!-- ============================== -->
-  <!-- ORGANIZATION SCHEMA            -->
-  <!-- ============================== -->
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://logshield.dev/" />
+  <meta name="twitter:title" content="LogShield - Privacy Log Sanitizer for Developers" />
+  <meta name="twitter:description" content="Remove API keys, tokens & PII from logs. 100% client-side processing. Start free!" />
+  <meta name="twitter:image" content="https://logshield.dev/og-image.png" />
+  
+  <!-- Google Site Verification -->
+  <meta name="google-site-verification" content="85Gk802UJeWAcLxyMkz_fbX5s5HR7hDI2WCxlR0LkPY" />
+  
+  <!-- Structured Data - Software Application -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "LogShield",
-    "url": "https://logshield.dev",
-    "logo": "https://logshield.dev/icon.png",
-    "description": "Privacy-first log sanitization tool for developers.",
-    "sameAs": [
-      "https://github.com/afria85/LogShield"
-    ]
-  }
-  </script>
-
-  <!-- ============================== -->
-  <!-- SOFTWARE APPLICATION SCHEMA    -->
-  <!-- ============================== -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "SoftwareApplication",
     "name": "LogShield",
     "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Any",
-    "url": "https://logshield.dev",
-    "image": "https://logshield.dev/og-image.png",
-    "description": "Client-side log sanitizer for removing sensitive information like API keys, tokens, and PII.",
+    "operatingSystem": "Web Browser",
     "offers": {
       "@type": "Offer",
       "price": "0",
       "priceCurrency": "USD"
-    }
-  }
-  </script>
-
-  <!-- ============================== -->
-  <!-- PRIVACY SEAL (BARU, PREMIUM)   -->
-  <!-- ============================== -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "DataPrivacy",
-    "name": "LogShield Privacy Guarantee",
-    "description": "All sanitization is performed locally in your browser. No data is uploaded or stored.",
-    "provider": {
+    },
+    "description": "Privacy-first log sanitizer that removes sensitive data from logs. 100% client-side processing.",
+    "url": "https://logshield.dev",
+    "author": {
       "@type": "Organization",
       "name": "LogShield"
     }
   }
   </script>
-
+  
+  <!-- Plausible Analytics (Privacy-friendly, no cookies) -->
+  <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://plausible.io" />
+  
+  <!-- DNS Prefetch -->
+  <link rel="dns-prefetch" href="https://plausible.io" />
 </head>
+<body>
+  <!-- React Root -->
+  <div id="root"></div>
+  
+  <!-- Vite Entry Point - PENTING! Tanpa ini halaman BLANK -->
+  <script type="module" src="/src/main.jsx"></script>
+  
+  <!-- No JavaScript Fallback -->
+  <noscript>
+    <div style="position:fixed;inset:0;background:#f8fafc;z-index:10000;display:flex;align-items:center;justify-content:center;padding:2rem;text-align:center;">
+      <div style="max-width:400px;">
+        <svg style="width:64px;height:64px;margin:0 auto 1rem;color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        <h1 style="color:#1e293b;font-size:1.5rem;font-weight:bold;margin-bottom:0.5rem;">JavaScript Required</h1>
+        <p style="color:#64748b;margin-bottom:1.5rem;">
+          LogShield requires JavaScript to run. Please enable JavaScript in your browser settings.
+        </p>
+        <p style="color:#94a3b8;font-size:0.875rem;">
+          For more information, visit our 
+          <a href="https://github.com/afria85/LogShield" style="color:#3b82f6;text-decoration:none;">GitHub repository</a>.
+        </p>
+      </div>
+    </div>
+  </noscript>
+</body>
+</html>

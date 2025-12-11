@@ -1,5 +1,5 @@
 // src/components/Sanitizer.jsx
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   Wand2, Copy, Download, AlertCircle, Check, 
   FileText, Zap, BarChart3, Settings, X, Upload,
@@ -15,7 +15,7 @@ import { licenseManager } from '../lib/license';
 export default function Sanitizer({ license, onUpgrade, onSanitizeComplete }) {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
-  const [stats, setStats] = useState({ matches: [], totalReplacements: 0, processingTime: 0 });
+  const [stats, setStats] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -25,14 +25,14 @@ export default function Sanitizer({ license, onUpgrade, onSanitizeComplete }) {
 
   const tierInfo = licenseManager.getTierInfo();
   const usageStats = licenseManager.getUsageStats();
-  const patterns = useMemo(() => getPatternsByTier(license?.tier || 'free'), [license?.tier]);
-  const filteredPatterns = useMemo(() => filterPatternsByCategory(patterns, selectedCategory), [patterns, selectedCategory]);
+  const patterns = getPatternsByTier(license?.tier || 'free');
+  const filteredPatterns = filterPatternsByCategory(patterns, selectedCategory);
 
   // Check limits
   const charCount = inputText.length;
-  const charLimit = tierInfo?.charLimit ?? Infinity;
+  const charLimit = tierInfo.charLimit;
   const isOverLimit = charLimit !== Infinity && charCount > charLimit;
-  const isOverUsage = (usageStats.limit !== Infinity && usageStats.used >= usageStats.limit);
+  const isOverUsage = usageStats.used >= usageStats.limit && usageStats.limit !== Infinity;
 
   useEffect(() => {
     // Load sample text for demo
@@ -98,8 +98,7 @@ Server logs:
           setOutputText(result.sanitized);
           setStats(result.stats);
           setShowStats(true);
-          try { licenseManager.trackUsage(); } catch (e) { /* ignore */ }
-          if (typeof onSanitizeComplete === 'function') onSanitizeComplete(result.stats);
+          onSanitizeComplete?.(result.stats);
         } else {
           setError(result.error || 'Sanitization failed');
         }
@@ -193,7 +192,9 @@ Server logs:
     setShowStats(false);
   };
 
-  const usagePercentage = (usageStats.limit === Infinity || !usageStats.limit) ? 0 : Math.min((usageStats.used / usageStats.limit) * 100, 100);
+  const usagePercentage = usageStats.limit === Infinity 
+    ? 0 
+    : Math.min((usageStats.used / usageStats.limit) * 100, 100);
 
   return (
     <div className="container py-8">
@@ -235,7 +236,7 @@ Server logs:
                     Usage This Month
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {(usageStats.used ?? 0)} / {(usageStats.limit === Infinity ? '∞' : (usageStats.limit ?? '—'))}
+                    {usageStats.used} / {usageStats.limit === Infinity ? '∞' : usageStats.limit}
                   </span>
                 </div>
                 {usageStats.limit !== Infinity && (
@@ -253,7 +254,7 @@ Server logs:
             
             <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
               <Timer className="h-4 w-4" />
-              Resets {usageStats.resetDate ? (new Date(usageStats.resetDate)).toLocaleDateString() : '—'}
+              Resets {usageStats.resetDate.toLocaleDateString()}
             </div>
           </div>
         </Card>

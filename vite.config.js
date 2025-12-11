@@ -1,4 +1,4 @@
-// vite.config.js - OPTIMIZED VERSION (Fixed)
+// vite.config.js - FIXED VERSION
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -14,19 +14,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // Gunakan esbuild (lebih cepat) - JANGAN pakai terserOptions dengan esbuild
     minify: 'esbuild',
-    
-    // Terser options for better compression
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info']
-      },
-      format: {
-        comments: false
-      }
-    },
 
     // Rollup options
     rollupOptions: {
@@ -35,13 +24,7 @@ export default defineConfig({
         manualChunks: {
           // Vendor chunks
           'react-vendor': ['react', 'react-dom'],
-          'router': ['react-router-dom'],
-          'icons': ['lucide-react'],
-          
-          // App chunks by feature
-          'analytics': ['./src/lib/analytics.js'],
-          'patterns': ['./src/lib/patterns.js'],
-          'sanitizer': ['./src/lib/sanitizer.js']
+          'icons': ['lucide-react']
         },
         
         // Asset naming
@@ -58,7 +41,7 @@ export default defineConfig({
     cssCodeSplit: true,
 
     // Asset optimization
-    assetsInlineLimit: 4096, // 4kb
+    assetsInlineLimit: 4096 // 4kb
   },
 
   // Server config
@@ -67,16 +50,7 @@ export default defineConfig({
     strictPort: false,
     host: true,
     open: true,
-    cors: true,
-    
-    // Proxy for API calls in dev
-    proxy: {
-      '/api': {
-        target: 'https://api.logshield.dev',
-        changeOrigin: true,
-        secure: true
-      }
-    }
+    cors: true
   },
 
   // Preview config
@@ -93,8 +67,7 @@ export default defineConfig({
       '@': '/src',
       '@components': '/src/components',
       '@lib': '/src/lib',
-      '@hooks': '/src/hooks',
-      '@pages': '/src/pages'
+      '@hooks': '/src/hooks'
     }
   },
 
@@ -103,7 +76,6 @@ export default defineConfig({
     include: [
       'react',
       'react-dom',
-      'react-router-dom',
       'lucide-react'
     ],
     exclude: ['@vite/client', '@vite/env']
@@ -114,15 +86,12 @@ export default defineConfig({
 
   // CSS options
   css: {
-    devSourcemap: true,
-    modules: {
-      localsConvention: 'camelCase'
-    }
+    devSourcemap: true
   },
 
-  // Esbuild options
+  // Esbuild options - drop console in production
   esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' },
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : []
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    legalComments: 'none'
   }
 });

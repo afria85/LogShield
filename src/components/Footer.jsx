@@ -1,66 +1,64 @@
-// src/components/Footer.jsx
-import { Shield, Github, Twitter, Linkedin, Mail, Heart } from 'lucide-react';
+// src/components/Footer.jsx - WITH REACT ROUTER
+import { Link } from 'react-router-dom';
+import { Shield, Heart, Github, Twitter, Mail } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const navigation = {
+  const footerLinks = {
     product: [
-      { name: 'Features', href: '#features' },
-      { name: 'Pricing', href: '#pricing' },
-      { name: 'Documentation', href: '#docs' },
-      { name: 'API', href: '#api' }
+      { name: 'Features', href: '/features' },
+      { name: 'Pricing', href: '/pricing' },
+      { name: 'Documentation', href: '/docs' },
+      { name: 'Open App', href: '/app' },
     ],
     company: [
-      { name: 'About', href: '#about' },
-      { name: 'Blog', href: '#blog' },
-      { name: 'Contact', href: 'mailto:hello@logshield.dev' },
-      { name: 'Changelog', href: '#changelog' }
+      { name: 'About', href: '/about' },
+      { name: 'Blog', href: '/blog' },
+      { name: 'Contact', href: 'mailto:hello@logshield.dev', external: true },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/privacy.html' },
-      { name: 'Terms of Service', href: '/terms.html' },
-      { name: 'Refund Policy', href: '/refund.html' },
-      { name: 'License', href: '#license' }
+      { name: 'Privacy Policy', href: '/privacy' },
+      { name: 'Terms of Service', href: '/terms' },
     ],
-    social: [
-      { name: 'GitHub', icon: Github, href: 'https://github.com/afria85/LogShield' },
-      { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/logshield' },
-      { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/logshield' }
-    ]
   };
 
-  return (
-    <footer className="bg-gray-900 dark:bg-slate-950 text-gray-300 border-t border-gray-800 dark:border-slate-800 transition-colors duration-300">
-      <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-4 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg group-hover:shadow-blue-500/25 transition-shadow duration-300">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white">LogShield</span>
-            </div>
-            
-            <p className="text-gray-400 mb-4 max-w-sm leading-relaxed">
-              Privacy-first log sanitizer for developers. 
-              Remove sensitive data from logs securely, right in your browser.
-              No data leaves your device.
-            </p>
+  const socialLinks = [
+    { name: 'GitHub', href: 'https://github.com/afria85/LogShield', icon: Github },
+    { name: 'Twitter', href: 'https://twitter.com/logshield', icon: Twitter },
+    { name: 'Email', href: 'mailto:hello@logshield.dev', icon: Mail },
+  ];
 
+  return (
+    <footer className="bg-gray-50 dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800">
+      <div className="container py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <Link to="/" className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
+                LogShield
+              </span>
+            </Link>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Privacy-first log sanitizer for developers. 100% client-side processing.
+            </p>
+            
             {/* Social Links */}
-            <div className="flex items-center gap-4">
-              {navigation.social.map((item) => {
-                const Icon = item.icon;
+            <div className="flex gap-3">
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
                 return (
                   <a
-                    key={item.name}
-                    href={item.href}
+                    key={social.name}
+                    href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-lg bg-gray-800 dark:bg-slate-800 hover:bg-gray-700 dark:hover:bg-slate-700 text-gray-400 hover:text-white transition-all duration-200"
-                    aria-label={item.name}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    aria-label={social.name}
                   >
                     <Icon className="h-5 w-5" />
                   </a>
@@ -69,102 +67,92 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Product */}
+          {/* Product Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Product</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+              Product
+            </h3>
             <ul className="space-y-3">
-              {navigation.product.map((item) => (
-                <li key={item.name}>
-                  <a
-                    href={item.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200 text-sm hover:pl-1"
+              {footerLinks.product.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
-                    {item.name}
-                  </a>
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Company Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Company</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+              Company
+            </h3>
             <ul className="space-y-3">
-              {navigation.company.map((item) => (
-                <li key={item.name}>
-                  <a
-                    href={item.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200 text-sm hover:pl-1"
-                  >
-                    {item.name}
-                  </a>
+              {footerLinks.company.map((link) => (
+                <li key={link.name}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      {link.name}
+                    </a>
+                  ) : (
+                    <Link
+                      to={link.href}
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Legal Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Legal</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+              Legal
+            </h3>
             <ul className="space-y-3">
-              {navigation.legal.map((item) => (
-                <li key={item.name}>
-                  <a
-                    href={item.href}
-                    className="text-gray-400 hover:text-white transition-colors duration-200 text-sm hover:pl-1"
+              {footerLinks.legal.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
-                    {item.name}
-                  </a>
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-
-        {/* Newsletter (Optional) */}
-        <div className="py-8 border-t border-gray-800 dark:border-slate-800 mb-8">
-          <div className="max-w-md mx-auto text-center">
-            <h3 className="text-white font-semibold mb-2">Stay Updated</h3>
-            <p className="text-gray-400 text-sm mb-4">
-              Get notified about new features, security updates, and tips.
-            </p>
-            <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                className="flex-1 px-4 py-2 bg-gray-800 dark:bg-slate-800 border border-gray-700 dark:border-slate-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              />
-              <button
-                type="submit"
-                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-              >
-                Subscribe
-              </button>
-            </form>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-800 dark:border-slate-800">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 text-sm">
-            {/* Left: Copyright */}
-            <p className="text-gray-500 text-center lg:text-left order-2 lg:order-1">
+        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-slate-800">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               © {currentYear} LogShield. All rights reserved.
             </p>
             
-            {/* Center: Made with love */}
-            <p className="text-gray-400 text-center order-1 lg:order-2 flex items-center gap-1">
-              Made with <Heart className="h-4 w-4 text-red-500 fill-current animate-pulse" /> for developers worldwide
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              Made with <Heart className="h-4 w-4 text-red-500 animate-pulse" /> for developers worldwide
             </p>
             
-            {/* Right: Contact */}
-            <a
-              href="mailto:hello@logshield.dev"
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200 order-3"
-            >
-              <Mail className="h-4 w-4" />
-              hello@logshield.dev
-            </a>
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <span className="flex items-center gap-1">
+                🔒 100% Client-Side
+              </span>
+              <span className="flex items-center gap-1">
+                🇪🇺 GDPR Compliant
+              </span>
+            </div>
           </div>
         </div>
       </div>
