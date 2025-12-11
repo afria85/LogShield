@@ -1,168 +1,156 @@
 // src/components/Hero.jsx
-import { Shield, Sparkles, Lock, Zap, Github, ArrowRight } from 'lucide-react';
+import { Shield, Zap, Lock, ArrowRight, Check, Sparkles } from 'lucide-react';
 import { Button } from './ui/Button';
-import { Card } from './ui/Card';
 
 export default function Hero({ onGetStarted }) {
   const features = [
-    {
-      icon: Lock,
-      title: '100% Client-Side',
-      description: 'Your data never leaves your browser'
-    },
-    {
-      icon: Zap,
-      title: 'Instant Processing',
-      description: 'Sanitize logs in milliseconds'
-    },
-    {
-      icon: Sparkles,
-      title: 'AI-Powered Detection',
-      description: 'Detects unknown secrets using entropy analysis'
-    }
-  ];
-
-  const stats = [
-    { value: '70+', label: 'Security Patterns' },
-    { value: '100%', label: 'Privacy First' },
-    { value: '<2s', label: 'Load Time' },
-    { value: '0', label: 'Data Transfer' }
+    '100% Client-side Processing',
+    '70+ Detection Patterns',
+    'No Data Leaves Your Browser',
+    'Free to Start'
   ];
 
   return (
-    <div className="relative overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 opacity-70" />
-      
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
-        <div className="absolute top-40 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
+    <section className="relative overflow-hidden py-20 lg:py-32">
+      {/* Background decoration */}
+      <div className="absolute inset-0 -z-10">
+        {/* Gradient orbs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 dark:bg-blue-500/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-float animation-delay-2000" />
+        
+        {/* Grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}
+        />
       </div>
 
-      {/* Content */}
-      <div className="container relative py-20 md:py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column */}
-          <div className="space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm">
-              <Shield className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">
-                Trusted by 10,000+ developers
-              </span>
-            </div>
-
-            {/* Headline */}
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                <span className="bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-                  Remove Secrets
-                </span>
-                <br />
-                <span className="text-gray-900">
-                  From Logs Instantly
-                </span>
-              </h1>
-              
-              <p className="text-xl text-gray-600 max-w-2xl">
-                Privacy-first log sanitizer that strips API keys, tokens, emails, and PII 
-                from your logs before sharing. Works 100% in your browser.
-              </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                size="lg"
-                onClick={onGetStarted}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg shadow-blue-500/50"
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                Start Sanitizing Free
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => window.open('https://github.com/afria85/LogShield', '_blank')}
-                className="border-2"
-              >
-                <Github className="mr-2 h-5 w-5" />
-                View on GitHub
-              </Button>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8">
-              {stats.map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+      <div className="container">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-8 animate-fade-in">
+            <Sparkles className="h-4 w-4" />
+            <span>Privacy-First Log Sanitization</span>
           </div>
 
-          {/* Right Column - Feature Cards */}
-          <div className="space-y-4">
-            {features.map((feature, i) => (
-              <Card
-                key={i}
-                className="p-6 bg-white/80 backdrop-blur-sm border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500">
-                    <feature.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-lg text-gray-900">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+          {/* Main heading */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 animate-slide-up">
+            Protect Your Logs from{' '}
+            <span className="text-gradient-animated">
+              Sensitive Data Leaks
+            </span>
+          </h1>
 
-            {/* Demo Preview */}
-            <Card className="p-6 bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                  </div>
-                  <span>example.log</span>
-                </div>
-                <pre className="text-sm text-gray-300 font-mono leading-relaxed">
-                  <span className="text-gray-500">// Before</span>
-                  <br />
-                  <span className="text-red-400">AWS_KEY=AKIAIOSFODNN7EXAMPLE</span>
-                  <br />
-                  <span className="text-yellow-400">user@email.com logged in</span>
-                  <br />
-                  <br />
-                  <span className="text-gray-500">// After</span>
-                  <br />
-                  <span className="text-green-400">AWS_KEY=[AWS_KEY_REDACTED]</span>
-                  <br />
-                  <span className="text-green-400">[EMAIL_REDACTED] logged in</span>
-                </pre>
+          {/* Description */}
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto animate-slide-up animation-delay-100">
+            Remove API keys, tokens, credentials, emails, and PII from your logs 
+            instantly. Everything runs in your browser — your data never leaves your device.
+          </p>
+
+          {/* Feature pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-10 animate-slide-up animation-delay-200">
+            {features.map((feature, index) => (
+              <div
+                key={feature}
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-gray-200 dark:border-slate-700"
+              >
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
               </div>
-            </Card>
+            ))}
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up animation-delay-300">
+            <Button
+              onClick={onGetStarted}
+              size="lg"
+              className="group w-full sm:w-auto"
+            >
+              <Zap className="h-5 w-5 mr-2" />
+              Start Sanitizing Free
+              <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto"
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              <Lock className="h-5 w-5 mr-2" />
+              See How It Works
+            </Button>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="mt-12 pt-12 border-t border-gray-200 dark:border-slate-700 animate-fade-in animation-delay-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Trusted by developers worldwide
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
+                <Shield className="h-5 w-5" />
+                <span className="text-sm font-medium">SOC 2 Ready</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
+                <Lock className="h-5 w-5" />
+                <span className="text-sm font-medium">GDPR Compliant</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
+                <Zap className="h-5 w-5" />
+                <span className="text-sm font-medium">Zero Server Storage</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Code preview mockup */}
+        <div className="mt-16 max-w-4xl mx-auto animate-slide-up animation-delay-400">
+          <div className="relative">
+            {/* Glow effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-lg opacity-25 dark:opacity-40" />
+            
+            {/* Terminal window */}
+            <div className="relative bg-gray-900 dark:bg-slate-950 rounded-xl overflow-hidden shadow-2xl border border-gray-800 dark:border-slate-800">
+              {/* Terminal header */}
+              <div className="flex items-center gap-2 px-4 py-3 bg-gray-800 dark:bg-slate-900 border-b border-gray-700 dark:border-slate-800">
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span className="ml-4 text-sm text-gray-400">sanitize-logs.js</span>
+              </div>
+              
+              {/* Terminal content */}
+              <div className="p-6 font-mono text-sm">
+                <div className="text-gray-500 mb-2">// Before sanitization</div>
+                <div className="text-red-400 mb-4">
+                  <span className="text-gray-500">API_KEY=</span>
+                  <span className="bg-red-500/20 px-1 rounded">sk_live_4eC39HqLyjWDarjtT1zdp7dc</span>
+                </div>
+                <div className="text-red-400 mb-4">
+                  <span className="text-gray-500">User: </span>
+                  <span className="bg-red-500/20 px-1 rounded">john.doe@company.com</span>
+                </div>
+                
+                <div className="border-t border-gray-700 my-4" />
+                
+                <div className="text-gray-500 mb-2">// After sanitization</div>
+                <div className="text-green-400 mb-2">
+                  <span className="text-gray-500">API_KEY=</span>
+                  <span className="bg-green-500/20 px-1 rounded">[STRIPE_KEY_REDACTED]</span>
+                </div>
+                <div className="text-green-400">
+                  <span className="text-gray-500">User: </span>
+                  <span className="bg-green-500/20 px-1 rounded">[EMAIL_REDACTED]</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

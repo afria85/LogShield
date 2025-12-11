@@ -3,30 +3,52 @@
   "version": "3.0.0",
   "private": true,
   "type": "module",
+  "description": "Privacy-first log sanitizer for developers",
+  "author": "LogShield Team",
+  "license": "MIT",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext js,jsx"
+    "lint": "eslint src --ext js,jsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
+    "analyze": "vite-bundle-visualizer",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "clsx": "^2.1.0",
-    "firebase": "^12.6.0",
-    "lucide-react": "^0.559.0",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-    "react-helmet": "^6.1.0",
+    "lucide-react": "^0.263.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.22.0",
     "tailwind-merge": "^2.2.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "postcss": "^8.4.35",
+    "prettier": "^3.2.5",
     "tailwindcss": "^3.4.1",
-    "terser": "^5.44.1",
-    "vite": "^7.2.7"
+    "vite": "^5.1.0",
+    "vite-bundle-visualizer": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

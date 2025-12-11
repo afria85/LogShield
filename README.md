@@ -35,10 +35,10 @@ LogShield is a **privacy-first developer tool** that helps you safely share logs
 
 | Plan         | Price         | Best For                | Key Features                                                |
 | :----------- | :------------ | :---------------------- | :---------------------------------------------------------- |
-| **Free**     | $0 forever    | Trying it out           | 3,000 chars/session, 5 uses/month, 10 basic patterns        |
-| **Starter**  | $7/month      | Individual developers   | 10,000 chars/session, 50 uses/month, PDF/CSV export         |
+| **Free**     | $0 forever    | Trying it out           | 10,000 chars/session, 10 basic patterns                     |
+| **Starter**  | $7/month      | Individual developers   | 50,000 chars/session, 50 uses/month, PDF/CSV export         |
 | **Pro**      | $19/month     | Professional developers | Unlimited use, 70+ patterns, AI detection, batch processing |
-| **Team**     | $79/month     | Teams & organizations   | 5 seats, shared library, REST API, SSO, usage analytics     |
+| **Team**     | $79/month     | Teams & organizations   | 10 seats, shared library, REST API, SSO, usage analytics    |
 | **Lifetime** | $199 one-time | Long-term value         | Everything in Team, lifetime access, all future updates     |
 
 **All paid plans include a 14-day money-back guarantee.**

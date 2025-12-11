@@ -14,6 +14,7 @@
     <title>LogShield - Secure Log Sanitizer for Developers</title>
     <meta name="title" content="LogShield - Secure Log Sanitizer for Developers" />
     <meta name="description" content="Remove API keys, tokens, emails, and PII from logs instantly. Privacy-first, browser-based tool for developers. No signup required." />
+    <meta name="keywords" content="log sanitizer, secure logs, API key remover, PII removal, developer tools, privacy tool" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -21,28 +22,130 @@
     <meta property="og:title" content="LogShield - Secure Log Sanitizer" />
     <meta property="og:description" content="Remove sensitive data from logs instantly. Privacy-first, 100% client-side processing." />
     <meta property="og:image" content="https://logshield.dev/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="LogShield" />
     
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://logshield.dev/" />
-    <meta property="twitter:title" content="LogShield - Secure Log Sanitizer" />
-    <meta property="twitter:description" content="Remove sensitive data from logs instantly. Privacy-first, 100% client-side processing." />
-    <meta property="twitter:image" content="https://logshield.dev/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://logshield.dev/" />
+    <meta name="twitter:title" content="LogShield - Secure Log Sanitizer" />
+    <meta name="twitter:description" content="Remove sensitive data from logs instantly. Privacy-first, 100% client-side processing." />
+    <meta name="twitter:image" content="https://logshield.dev/og-image.png" />
+    <meta name="twitter:site" content="@logshield" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://logshield.dev/" />
     
     <!-- Theme Color -->
     <meta name="theme-color" content="#3b82f6" />
     
-    <!-- Analytics (Plausible) 
-    <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script> -->
-    <!-- Privacy-friendly analytics by Plausible -->
-    <script async src="https://plausible.io/js/pa-O0YPgyO2ZMntP24QuH3Ps.js"></script>
+    <!-- Preconnect untuk performa -->
+    <link rel="preconnect" href="https://plausible.io" />
+    
+    <!-- Analytics (Plausible) -->
+    <script async defer data-domain="logshield.dev" src="https://plausible.io/js/pa-O0YPgyO2ZMntP24QuH3Ps.js"></script>
     <script>
-      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-      plausible.init()
+      // Fallback untuk plausible
+      window.plausible = window.plausible || function() {
+        (window.plausible.q = window.plausible.q || []).push(arguments);
+      };
+      
+      // Inisialisasi analytics dengan config
+      window.plausible.init = window.plausible.init || function(config) {
+        window.plausible.config = config || {};
+      };
+      
+      // Auto-track pageviews (akan di-override oleh React router)
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.plausible) {
+          window.plausible('pageview');
+        }
+      });
+    </script>
+    
+    <!-- Structured Data untuk Homepage -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "LogShield",
+        "description": "Privacy-first log sanitizer for developers",
+        "url": "https://logshield.dev",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
+        "creator": {
+          "@type": "Organization",
+          "name": "LogShield",
+          "url": "https://logshield.dev"
+        }
+      }
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Loading state untuk SPA -->
+    <div id="root">
+      <div class="loading-fallback" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Loading LogShield...</p>
+      </div>
+    </div>
+    
+    <!-- Scripts -->
     <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
+    
+    <!-- Fallback styling untuk loading state -->
+    <style>
+      .loading-fallback {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+        z-index: 9999;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid #e2e8f0;
+        border-radius: 50%;
+        border-top-color: #3b82f6;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 1rem;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      body:has(#root:not(:empty)) .loading-fallback {
+        display: none !important;
+      }
+    </style>
+    
+    <!-- Noscript fallback -->
+    <noscript>
+      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem; text-align: center;">
+        <div>
+          <h1 style="color: #1e293b; margin-bottom: 1rem;">JavaScript Required</h1>
+          <p style="color: #64748b; margin-bottom: 2rem;">
+            LogShield requires JavaScript to run. Please enable JavaScript in your browser to use the application.
+          </p>
+          <p style="color: #475569; font-size: 0.875rem;">
+            Or visit our <a href="https://github.com/afria85/LogShield" style="color: #3b82f6; text-decoration: none;">GitHub repository</a> for more information.
+          </p>
+        </div>
+      </div>

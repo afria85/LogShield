@@ -1,0 +1,53 @@
+/* src/styles/theme.css */
+:root {
+    /* Light theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --accent: #3b82f6;
+    --border: #e2e8f0;
+    --card: #ffffff;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --accent: #60a5fa;
+    --border: #334155;
+    --card: #1e293b;
+}
+
+/* Back to top button */
+.back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+}

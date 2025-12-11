@@ -1,7 +1,7 @@
 // src/components/Features.jsx
 import { 
-  Lock, Zap, Globe, Code, Shield, Download, 
-  Brain, Layers, GitBranch, FileCode 
+  Shield, Zap, Lock, Eye, Code, Download, 
+  RefreshCw, BarChart3, Globe, Cpu, FileText, Sparkles 
 } from 'lucide-react';
 import { Card } from './ui/Card';
 
@@ -9,101 +9,117 @@ export default function Features() {
   const features = [
     {
       icon: Lock,
-      title: '100% Client-Side Processing',
-      description: 'Your logs never leave your browser. All sanitization happens locally with zero data transfer.',
-      color: 'blue'
+      title: '100% Client-Side',
+      description: 'All processing happens in your browser. Your sensitive data never touches our servers.',
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-100 dark:bg-blue-900/30'
     },
     {
       icon: Zap,
-      title: 'Lightning Fast',
-      description: 'Process thousands of lines in milliseconds with optimized pattern matching algorithms.',
-      color: 'yellow'
-    },
-    {
-      icon: Brain,
-      title: 'AI-Powered Detection',
-      description: 'Advanced entropy analysis detects unknown secrets and high-risk patterns automatically.',
-      color: 'purple'
+      title: 'Instant Processing',
+      description: 'Sanitize logs in milliseconds. No waiting, no queues, no rate limits for paid plans.',
+      color: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-100 dark:bg-amber-900/30'
     },
     {
       icon: Shield,
-      title: '70+ Security Patterns',
-      description: 'Comprehensive coverage for AWS, GCP, Azure, API keys, tokens, emails, PII, and more.',
-      color: 'green'
+      title: '70+ Detection Patterns',
+      description: 'AWS keys, JWT tokens, API secrets, emails, IPs, credit cards, and more.',
+      color: 'text-green-600 dark:text-green-400',
+      bg: 'bg-green-100 dark:bg-green-900/30'
     },
     {
-      icon: Download,
-      title: 'Multiple Export Formats',
-      description: 'Export sanitized logs as plain text, JSON, CSV, or PDF with detailed reports.',
-      color: 'pink'
+      icon: Sparkles,
+      title: 'AI Entropy Detection',
+      description: 'Advanced algorithm detects unknown secrets based on randomness patterns.',
+      color: 'text-purple-600 dark:text-purple-400',
+      bg: 'bg-purple-100 dark:bg-purple-900/30'
     },
     {
-      icon: Layers,
-      title: 'Batch Processing',
-      description: 'Sanitize multiple files at once with drag-and-drop support for efficient workflows.',
-      color: 'indigo'
+      icon: Eye,
+      title: 'Real-time Preview',
+      description: 'See what will be redacted before processing. Full control over categories.',
+      color: 'text-cyan-600 dark:text-cyan-400',
+      bg: 'bg-cyan-100 dark:bg-cyan-900/30'
     },
     {
       icon: Code,
-      title: 'Custom Patterns',
-      description: 'Add your own regex patterns for company-specific secrets or internal conventions.',
-      color: 'orange'
+      title: 'Developer Friendly',
+      description: 'Supports JSON, plain text, and log formats. Export in multiple formats.',
+      color: 'text-rose-600 dark:text-rose-400',
+      bg: 'bg-rose-100 dark:bg-rose-900/30'
+    },
+    {
+      icon: Download,
+      title: 'Export Options',
+      description: 'Download sanitized logs as TXT, JSON, or copy directly to clipboard.',
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bg: 'bg-indigo-100 dark:bg-indigo-900/30'
+    },
+    {
+      icon: BarChart3,
+      title: 'Detailed Statistics',
+      description: 'See exactly what was redacted with comprehensive statistics and breakdowns.',
+      color: 'text-teal-600 dark:text-teal-400',
+      bg: 'bg-teal-100 dark:bg-teal-900/30'
     },
     {
       icon: Globe,
-      title: 'No Installation Required',
-      description: 'Works instantly in any modern browser. No downloads, no setup, no hassle.',
-      color: 'teal'
+      title: 'Works Offline',
+      description: 'No internet required after loading. Perfect for air-gapped environments.',
+      color: 'text-orange-600 dark:text-orange-400',
+      bg: 'bg-orange-100 dark:bg-orange-900/30'
     }
   ];
 
-  const colorSchemes = {
-    blue: 'from-blue-500 to-cyan-500',
-    yellow: 'from-yellow-500 to-orange-500',
-    purple: 'from-purple-500 to-pink-500',
-    green: 'from-green-500 to-emerald-500',
-    pink: 'from-pink-500 to-rose-500',
-    indigo: 'from-indigo-500 to-blue-500',
-    orange: 'from-orange-500 to-red-500',
-    teal: 'from-teal-500 to-cyan-500'
-  };
+  const comparisonData = [
+    { feature: 'Processing Location', logshield: 'Your Browser', others: 'Their Servers' },
+    { feature: 'Data Storage', logshield: 'Never Stored', others: 'Often Stored' },
+    { feature: 'Internet Required', logshield: 'After Load: No', others: 'Always' },
+    { feature: 'Privacy Guarantee', logshield: '100%', others: 'Varies' },
+    { feature: 'GDPR Compliance', logshield: 'Built-in', others: 'Depends' }
+  ];
 
   return (
-    <div className="py-20 bg-white">
+    <section id="features" className="py-20 lg:py-32">
       <div className="container">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Enterprise-Grade Security,
-            <br />
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Developer-Friendly Experience
-            </span>
+        {/* Section header */}
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm font-medium mb-6">
+            <Cpu className="h-4 w-4" />
+            <span>Powerful Features</span>
+          </div>
+          
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            Everything You Need to{' '}
+            <span className="gradient-text">Protect Your Logs</span>
           </h2>
-          <p className="text-xl text-gray-600">
-            Built by developers for developers. LogShield combines powerful security features 
-            with an intuitive interface.
+          
+          <p className="text-lg text-gray-600 dark:text-gray-400">
+            Built by developers, for developers. Secure, fast, and privacy-first.
           </p>
         </div>
 
-        {/* Feature Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, i) => {
+        {/* Features grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
+          {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card
-                key={i}
-                className="p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
+              <Card 
+                key={feature.title} 
+                hover
+                className="p-6 animate-slide-up"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${colorSchemes[feature.color]} mb-4 group-hover:scale-110 transition-transform`}>
-                  <Icon className="h-6 w-6 text-white" />
+                <div className={`w-12 h-12 rounded-xl ${feature.bg} flex items-center justify-center mb-4`}>
+                  <Icon className={`h-6 w-6 ${feature.color}`} />
                 </div>
                 
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   {feature.title}
                 </h3>
                 
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </Card>
@@ -111,46 +127,123 @@ export default function Features() {
           })}
         </div>
 
-        {/* Stats Section */}
-        <div className="mt-20 grid md:grid-cols-4 gap-8 text-center">
-          <div>
-            <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              10K+
-            </div>
-            <div className="text-gray-600">Active Users</div>
+        {/* Comparison section */}
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Why LogShield?
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              See how we compare to other log sanitization tools
+            </p>
           </div>
-          <div>
-            <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
-              1M+
+
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-slate-800/50">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
+                      Feature
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white">
+                      <div className="flex items-center justify-center gap-2">
+                        <Shield className="h-4 w-4 text-blue-600" />
+                        LogShield
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-500 dark:text-gray-400">
+                      Others
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                  {comparisonData.map((row) => (
+                    <tr key={row.feature} className="hover:bg-gray-50 dark:hover:bg-slate-800/30 transition-colors">
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-white font-medium">
+                        {row.feature}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                          {row.logshield}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {row.others}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="text-gray-600">Logs Sanitized</div>
-          </div>
-          <div>
-            <div className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
-              70+
-            </div>
-            <div className="text-gray-600">Security Patterns</div>
-          </div>
-          <div>
-            <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-              99.9%
-            </div>
-            <div className="text-gray-600">Uptime</div>
-          </div>
+          </Card>
         </div>
 
-        {/* Trusted By */}
-        <div className="mt-20 text-center">
-          <p className="text-gray-600 mb-8">Trusted by developers at</p>
-          <div className="flex flex-wrap items-center justify-center gap-8 opacity-50">
-            <div className="text-2xl font-bold text-gray-700">GitHub</div>
-            <div className="text-2xl font-bold text-gray-700">GitLab</div>
-            <div className="text-2xl font-bold text-gray-700">Vercel</div>
-            <div className="text-2xl font-bold text-gray-700">Netlify</div>
-            <div className="text-2xl font-bold text-gray-700">AWS</div>
+        {/* How it works */}
+        <div className="mt-20">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              How It Works
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Three simple steps to secure your logs
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: '01',
+                icon: FileText,
+                title: 'Paste Your Logs',
+                description: 'Paste your logs or upload a file. Supports JSON, plain text, and common log formats.'
+              },
+              {
+                step: '02',
+                icon: RefreshCw,
+                title: 'Auto-Detect & Sanitize',
+                description: 'Our 70+ patterns automatically detect and redact sensitive data in milliseconds.'
+              },
+              {
+                step: '03',
+                icon: Download,
+                title: 'Copy or Export',
+                description: 'Copy the sanitized output or download it. Share safely without exposing secrets.'
+              }
+            ].map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.step} className="relative">
+                  {/* Connector line */}
+                  {index < 2 && (
+                    <div className="hidden md:block absolute top-12 left-[60%] w-full h-0.5 bg-gradient-to-r from-blue-200 to-transparent dark:from-blue-800" />
+                  )}
+                  
+                  <Card className="p-6 text-center relative">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg mb-4">
+                      {item.step}
+                    </div>
+                    
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                      <Icon className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                    </div>
+                    
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {item.title}
+                    </h4>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {item.description}
+                    </p>
+                  </Card>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
