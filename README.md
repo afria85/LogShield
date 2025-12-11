@@ -88,6 +88,7 @@ LogShield/
 ³  ÃÄ hooks/        # React hooks
 ³  ÀÄ pages/        # App pages
 ÀÄ public/          # Static assets and legal pages
+
 ```
 
 ---
@@ -152,16 +153,4 @@ Built with care using React, Vite, Tailwind CSS, and Lucide Icons.
 
 ---
 
-### Cara pakai
 
-1. Buat atau buka `README.md` di repo.
-2. Ganti isinya dengan teks di atas (copy?paste).
-3. Simpan dan commit:
-
-```bash
-git add README.md
-git commit -m "chore: upgrade README to PREMIUM SVG emoji version"
-git push origin main
-```
-
----
