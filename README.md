@@ -1,107 +1,199 @@
-# ?? LogShield - Secure Log Sanitizer
-
-**Enterprise-grade log sanitizer that processes data 100% in your browser.**
-
-Remove API keys, tokens, credentials, emails, IP addresses, and PII from your logs ? securely and instantly.
-
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/afria85/LogShield)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Live Demo](https://img.shields.io/badge/??-Try%20Live-8A2BE2.svg)](https://logshield.dev)
 
 ---
 
-## ?? Try It Now
+# ?? **LogShield ? Secure, Local-First Log Sanitizer**
 
-The fastest way to get started is to use the live web app. No installation needed.
+<p align="center">
+  <img src="https://dummyimage.com/1200x250/0f172a/ffffff&text=LogShield+-+Secure+Log+Sanitizer" />
+</p>
 
-**?? [Open LogShield Web App](https://logshield.dev)**
+<p align="center">
+  <b>Enterprise-grade log sanitization.</b>  
+  100% client-side. Zero data leaves your device.
+</p>
 
----
-
-## ? Overview
-
-LogShield is a **privacy-first developer tool** that helps you safely share logs and debug data by automatically removing sensitive information. All processing happens locally in your browser?**your data never leaves your computer.**
-
-### Why Use LogShield?
-
-- **?? Privacy by Design**: 100% client-side processing. We never see, store, or transmit your logs.
-- **? Instant & Powerful**: Sanitize thousands of lines in milliseconds using 70+ built-in security patterns.
-- **??? Comprehensive Detection**: Covers AWS, GCP, Azure, API keys, tokens, emails, PII, and more.
-- **?? Built for Teams**: Supports custom patterns, batch processing, and multiple export formats.
+<p align="center">
+  <a href="https://logshield.dev/app">
+    <img src="https://img.shields.io/badge/Launch_App-000?style=for-the-badge&logo=vercel&logoColor=white" />
+  </a>
+</p>
 
 ---
 
-## ?? Plans & Pricing
-
-| Plan         | Price         | Best For                | Key Features                                                |
-| :----------- | :------------ | :---------------------- | :---------------------------------------------------------- |
-| **Free**     | $0 forever    | Trying it out           | 10,000 chars/session, 10 basic patterns                     |
-| **Starter**  | $7/month      | Individual developers   | 50,000 chars/session, 50 uses/month, PDF/CSV export         |
-| **Pro**      | $19/month     | Professional developers | Unlimited use, 70+ patterns, AI detection, batch processing |
-| **Team**     | $79/month     | Teams & organizations   | 10 seats, shared library, REST API, SSO, usage analytics    |
-| **Lifetime** | $199 one-time | Long-term value         | Everything in Team, lifetime access, all future updates     |
-
-**All paid plans include a 14-day money-back guarantee.**
-
-?? **View detailed feature comparison and upgrade: [https://logshield.dev/pricing](https://logshield.dev/pricing)**
+<p align="center">
+  <img src="https://img.shields.io/github/stars/afria85/LogShield?style=flat&logo=github" />
+  <img src="https://img.shields.io/github/last-commit/afria85/LogShield?style=flat&color=blue" />
+  <img src="https://img.shields.io/badge/security-privacy%20first-6b7280?style=flat&logo=shield" />
+  <img src="https://img.shields.io/badge/license-MIT-green?style=flat" />
+</p>
 
 ---
 
-## ??? For Developers: Run Locally
+# ?? **Try LogShield Instantly**
 
-If you want to run the development version locally:
+Launch the live web app (no installation, no signup):
+
+?? **[https://logshield.dev/app](https://logshield.dev/app)**
+
+All sanitization happens *locally in your browser* ? logs never leave your device.
+
+---
+
+# ?? **Why LogShield?**
+
+### ??? **Security**
+
+* 100% local processing
+* No servers
+* No telemetry
+* No data ever uploaded
+
+### ? **Speed**
+
+* Processes thousands of log lines in milliseconds
+* Uses a highly optimized pattern-matching engine
+
+### ?? **Detection Power**
+
+* 70+ built-in patterns:
+  AWS, GCP, Azure keys
+  Passwords, tokens, secrets
+  Emails, IP addresses, PII
+* AI entropy detection (Pro tier)
+
+### ?? **Team Ready**
+
+* Usage analytics
+* Team dashboard
+* SSO (coming soon)
+* Audit logs
+* Custom branding
+
+---
+
+# ?? **Plans & Pricing (Updated)**
+
+Here are the latest features for each tier:
+
+| Tier        | Price      | Best For            | Features                                                                                                                                                                                                    |
+| ----------- | ---------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Free**    | $0 forever | Trying LogShield    | ? 10 sanitizations/month<br>? 10,000 chars per run<br>? 10 basic patterns<br>? Copy to clipboard<br>? Community support                                                                                     |
+| **Starter** | $7/month   | Individual devs     | ? 100 sanitizations/month<br>? 50,000 chars per run<br>? 40+ patterns<br>? TXT/JSON export<br>? Email support<br>? Usage analytics                                                                          |
+| **Pro**     | $19/month  | Power users & teams | ? **Unlimited** sanitizations<br>? 500,000 chars per run<br>? 70+ patterns<br>? AI entropy detection<br>? All export formats<br>? Priority email support<br>? Custom patterns (soon)<br>? API access (soon) |
+| **Team**    | $79/month  | Organizations       | ? Everything in Pro<br>? Up to 10 team members<br>? Team dashboard<br>? SSO integration (soon)<br>? Audit logs<br>? Custom branding<br>? Dedicated support<br>? SLA guarantee                               |
+
+> ?? All paid tiers include a **14-day money-back guarantee**.
+
+---
+
+# ?? **Screenshots (Dark Mode Preview)**
+
+> Jika kamu ingin saya buatkan screenshot versi premium, tinggal bilang.
+
+<p align="center">
+  <img src="https://dummyimage.com/1000x520/0f172a/475569&text=Dark+Mode+Sanitizer+UI+Preview" />
+</p>
+
+---
+
+# ????? **Run Locally (Development)**
 
 ```bash
-# 1. Clone the repository
-git clone [https://github.com/afria85/LogShield.git](https://github.com/afria85/LogShield.git)
+git clone https://github.com/afria85/LogShield.git
 cd LogShield
-
-# 2. Install dependencies
 npm install
-
-# 3. Start the development server
 npm run dev
-
-# 4. Open your browser and navigate to
-# http://localhost:5173
 ```
 
-Project Structure
+Visit:
+
+```
+http://localhost:5173
+```
+
+---
+
+# ?? Project Structure
+
+```
 LogShield/
-ÃÄÄ src/
-³ ÃÄÄ components/ # React components (UI)
-³ ÃÄÄ lib/ # Core logic (sanitizer, patterns, license)
-³ ÀÄÄ ...
-ÃÄÄ public/ # Static assets & legal pages
-ÀÄÄ ...
-?? Planned Features
-We're actively working on improving LogShield. Here's what's next:
+³ÄÄ src/
+³   ÃÄÄ components/   # UI components
+³   ÃÄÄ lib/          # Sanitizer engine, patterns, licensing
+³   ÃÄÄ hooks/        # Custom React hooks
+³   ÃÄÄ pages/        # Static pages
+³   ÀÄÄ ...
+³
+ÀÄÄ public/           # static assets
+```
 
-CLI Tool: Run LogShield directly from your terminal.
+---
 
-VS Code Extension: Sanitize logs without leaving your editor.
+# ?? Roadmap
 
-GitHub Action: Automatically sanitize logs in your CI/CD pipelines.
+* ?? VS Code Extension
+* ??? CLI Tool
+* ?? GitHub Action (CI integration)
+* ?? Enhanced AI detection engine
+* ?? Self-Hosted Enterprise Edition
+* ?? Custom Pattern Editor
+* ?? REST API for automated sanitization
 
-Enhanced AI Detection: Improved pattern recognition for unknown secret formats.
+Have a feature request?
+Open an issue ? [https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
 
-Self-Hosted Version: Deploy LogShield within your private infrastructure.
+---
 
-Have a feature request? Open an issue on GitHub!
+# ?? Support
 
-? Support
-Community & Bugs: GitHub Issues
+| Tier    | Support Level           |
+| ------- | ----------------------- |
+| Free    | Community (GitHub)      |
+| Starter | Standard Email Support  |
+| Pro     | Priority Support        |
+| Team    | Dedicated Support + SLA |
 
-Email (General): hello@logshield.dev
+?? Email: **[hello@logshield.dev](mailto:hello@logshield.dev)**
 
-Email (Paid Plans): support@logshield.dev
+---
 
-?? License
-The core sanitization engine is open-source under the MIT License.
+# ??? Tech Stack
 
-The full application, including the web interface and commercial features, requires a commercial license. See logshield.dev/pricing for details.
+* **React + Vite**
+* **Tailwind CSS**
+* **Lucide Icons**
+* **Plausible (GDPR-compliant, cookieless)**
+* **Custom Sanitization Engine (MIT-licensed)**
 
-?? Acknowledgments
-Built with modern web technologies: React, Vite, Tailwind CSS, Lucide Icons.
+---
 
-? 2025 LogShield. All rights reserved. | Website | Privacy Policy | Terms of Service
+# ?? License
+
+* Sanitization engine: **MIT License**
+* Full application (UI + commercial modules): **Commercial License**
+
+See pricing for details:
+[https://logshield.dev/pricing](https://logshield.dev/pricing)
+
+---
+
+# ?? Acknowledgments
+
+Built with ?? using:
+
+* React
+* Tailwind CSS
+* Vite
+* Lucide Icons
+
+---
+
+<p align="center">
+  ? 2025 LogShield ? All rights reserved.<br />
+  <a href="https://logshield.dev">Website</a> ú
+  <a href="https://logshield.dev/privacy">Privacy</a> ú
+  <a href="https://logshield.dev/terms">Terms</a>
+</p>
+
+---
+
