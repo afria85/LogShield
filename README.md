@@ -1,68 +1,67 @@
 
 ---
 
-````md
-# ?? LogShield ? Secure, Local-First Log Sanitizer
+# <img src="https://twemoji.maxcdn.com/v/latest/svg/1f31f.svg" width="28" height="28" style="vertical-align:middle;margin-right:8px"/> LogShield ? Secure, Local-First Log Sanitizer
 
 **Enterprise-grade log sanitization. 100% client-side. Zero data leaves your device.**
 
 <p align="center">
-  <a href="https://logshield.dev/app">
-    <img src="https://img.shields.io/badge/?? Launch_App-000?style=for-the-badge&logo=vercel&logoColor=white" />
+  <a href="https://logshield.dev/app" title="Launch LogShield">
+    <img src="https://img.shields.io/badge/Launch_App-Open-000?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch App" />
   </a>
 </p>
 
 ---
 
-# ? Try LogShield Instantly
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f680.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Try LogShield Instantly
 
 Launch the live web app (no installation, no signup):
 
-?? https://logshield.dev/app
+**https://logshield.dev/app**
 
-All sanitization happens *locally in your browser* ? logs never leave your device.
+All sanitization happens *locally in your browser* ? your logs never leave your device.
 
 ---
 
-# ??? Why LogShield?
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f6e1.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Why LogShield?
 
-## ?? Security
+### <img src="https://twemoji.maxcdn.com/v/latest/svg/1f512.svg" width="16" style="vertical-align:middle;margin-right:6px"/> Security
 - 100% local processing  
 - No servers  
 - No telemetry  
 - No external data transfer  
 
-## ? Speed
+### <img src="https://twemoji.maxcdn.com/v/latest/svg/26a1.svg" width="16" style="vertical-align:middle;margin-right:6px"/> Speed
 - Processes thousands of log lines in milliseconds  
-- Highly optimized pattern-matching engine  
+- Optimized pattern-matching engine
 
-## ?? Detection Power
-- 70+ built-in patterns: AWS, GCP, Azure, passwords, tokens, emails, IPs, PII  
-- AI entropy detection (Pro tier)
+### <img src="https://twemoji.maxcdn.com/v/latest/svg/1f4a1.svg" width="16" style="vertical-align:middle;margin-right:6px"/> Detection Power
+- 70+ built-in patterns: cloud keys, tokens, passwords, emails, IPs, PII  
+- AI entropy detection available in Pro
 
-## ?? Team Ready
+### <img src="https://twemoji.maxcdn.com/v/latest/svg/1f465.svg" width="16" style="vertical-align:middle;margin-right:6px"/> Team Ready
 - Usage analytics  
 - Team dashboard  
 - SSO (coming soon)  
 - Audit logs  
-- Custom branding  
+- Custom branding
 
 ---
 
-# ?? Plans & Pricing (Updated)
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f4b0.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Plans & Pricing (Updated)
 
 | Tier | Price | Best For | Features |
-|------|--------|----------|----------|
-| **Free** | $0 forever | Trying LogShield | ? 10 sanitizations/month<br>? 10,000 chars/run<br>? 10 basic patterns<br>? Copy to clipboard<br>? Community support |
-| **Starter** | $7/month | Individual devs | ? 100 sanitizations/month<br>? 50,000 chars/run<br>? 40+ patterns<br>? TXT/JSON export<br>? Email support<br>? Usage analytics |
-| **Pro** | $19/month | Power users & teams | ? Unlimited sanitizations<br>? 500,000 chars/run<br>? 70+ patterns<br>? AI entropy detection<br>? All export formats<br>? Priority support<br>? Custom patterns (soon)<br>? API Access (soon) |
-| **Team** | $79/month | Organizations | ? Everything in Pro<br>? Up to 10 team members<br>? Team dashboard<br>? SSO (soon)<br>? Audit logs<br>? Custom branding<br>? Dedicated support<br>? SLA guarantee |
+|------|-------:|----------|----------|
+| **Free**    | $0 / forever  | Trying LogShield | ? 10 sanitizations / month<br>? 10,000 characters / run<br>? 10 basic patterns<br>? Copy to clipboard<br>? Community support |
+| **Starter** | $7 / month    | Individual devs  | ? 100 sanitizations / month<br>? 50,000 characters / run<br>? 40+ patterns<br>? TXT/JSON export<br>? Email support<br>? Usage analytics |
+| **Pro**     | $19 / month   | Power users & teams | ? Unlimited sanitizations<br>? 500,000 characters / run<br>? 70+ patterns<br>? AI entropy detection<br>? All export formats<br>? Priority support<br>? Custom patterns (coming soon)<br>? API access (coming soon) |
+| **Team**    | $79 / month   | Organizations     | ? Everything in Pro<br>? Up to 10 team members<br>? Team dashboard<br>? SSO integration (coming soon)<br>? Audit logs<br>? Custom branding<br>? Dedicated support<br>? SLA guarantee |
 
-?? **All paid tiers include a 14-day money-back guarantee.**
+**All paid tiers include a 14-day money-back guarantee.**
 
 ---
 
-# ????? Run Locally (Development)
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f4bb.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Run Locally (Development)
 
 ```bash
 git clone https://github.com/afria85/LogShield.git
@@ -71,7 +70,7 @@ npm install
 npm run dev
 ````
 
-Visit:
+Open in your browser:
 
 ```
 http://localhost:5173
@@ -79,87 +78,90 @@ http://localhost:5173
 
 ---
 
-# ?? Project Structure
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f4c1.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Project Structure
 
 ```
 LogShield/
-³ÄÄ src/
-³   ÃÄÄ components/   # UI components
-³   ÃÄÄ lib/          # Sanitizer engine, patterns, licensing
-³   ÃÄÄ hooks/        # Custom React hooks
-³   ÃÄÄ pages/        # Static pages
-³   ÀÄÄ ...
-³
-ÀÄÄ public/           # static assets
+ÃÄ src/
+³  ÃÄ components/   # UI components
+³  ÃÄ lib/          # Sanitizer engine, patterns, licensing
+³  ÃÄ hooks/        # React hooks
+³  ÀÄ pages/        # App pages
+ÀÄ public/          # Static assets and legal pages
 ```
 
 ---
 
-# ?? Roadmap
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f6e0.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Roadmap
 
-* ?? VS Code Extension
-* ??? CLI Tool
-* ?? GitHub Action (CI integration)
-* ?? Enhanced AI detection engine
-* ?? Self-Hosted Enterprise Edition
-* ??? Custom Pattern Editor
-* ?? REST API Integration
+* VS Code extension
+* CLI tool
+* GitHub Action (CI integration)
+* Enhanced AI detection
+* Self-hosted enterprise edition
+* Custom pattern editor
+* REST API integration
 
-Have a feature request?
-?? [https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
+Have a feature request? Open an issue:
+[https://github.com/afria85/LogShield/issues](https://github.com/afria85/LogShield/issues)
 
 ---
 
-# ?? Support
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f4e9.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Support
 
 | Tier    | Support Level           |
 | ------- | ----------------------- |
 | Free    | Community (GitHub)      |
-| Starter | Standard Email Support  |
-| Pro     | Priority Support        |
-| Team    | Dedicated Support + SLA |
+| Starter | Standard email support  |
+| Pro     | Priority support        |
+| Team    | Dedicated support + SLA |
 
-?? Email: **[hello@logshield.dev](mailto:hello@logshield.dev)**
+Contact: **[hello@logshield.dev](mailto:hello@logshield.dev)**
 
 ---
 
-# ??? Tech Stack
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f5a5.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Tech Stack
 
 * React + Vite
 * Tailwind CSS
 * Lucide Icons
-* Plausible (GDPR-compliant, cookieless)
-* Custom Sanitization Engine (MIT)
+* Plausible (cookieless analytics)
+* Custom sanitization engine (MIT-licensed)
 
 ---
 
-# ?? License
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/1f4d1.svg" width="18" style="vertical-align:middle;margin-right:6px"/> License
 
-* Sanitization engine: **MIT License**
+* Core sanitization engine: **MIT License**
 * Full application (UI + commercial modules): **Commercial License**
-
-See pricing for details: [https://logshield.dev/pricing](https://logshield.dev/pricing)
-
----
-
-# ?? Acknowledgments
-
-Built with ?? using:
-
-* React
-* Tailwind CSS
-* Vite
-* Lucide Icons
+  See pricing & licensing details: [https://logshield.dev/pricing](https://logshield.dev/pricing)
 
 ---
 
-<p align="center">
-  ? 2025 LogShield ? All rights reserved.<br>
-  <a href="https://logshield.dev">Website</a> ú
-  <a href="https://logshield.dev/privacy">Privacy</a> ú
-  <a href="https://logshield.dev/terms">Terms</a>
+## <img src="https://twemoji.maxcdn.com/v/latest/svg/2764.svg" width="18" style="vertical-align:middle;margin-right:6px"/> Acknowledgments
+
+Built with care using React, Vite, Tailwind CSS, and Lucide Icons.
+
+<p align="center" style="margin-top:18px">
+  <small>? 2025 LogShield ? All rights reserved. &nbsp; ? &nbsp;
+  <a href="https://logshield.dev">Website</a> &nbsp; ? &nbsp;
+  <a href="https://logshield.dev/privacy">Privacy</a> &nbsp; ? &nbsp;
+  <a href="https://logshield.dev/terms">Terms</a></small>
 </p>
 ```
 
 ---
 
+### Cara pakai
+
+1. Buat atau buka `README.md` di repo.
+2. Ganti isinya dengan teks di atas (copy?paste).
+3. Simpan dan commit:
+
+```bash
+git add README.md
+git commit -m "chore: upgrade README to PREMIUM SVG emoji version"
+git push origin main
+```
+
+---
