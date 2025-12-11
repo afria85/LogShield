@@ -1,7 +1,7 @@
 
 ---
 
-# <img src="https://twemoji.maxcdn.com/v/latest/svg/1f31f.svg" width="28" height="28" style="vertical-align:middle;margin-right:8px"/> LogShield ? Secure, Local-First Log Sanitizer
+# <img src="https://twemoji.maxcdn.com/v/latest/svg/1f31f.svg" width="28" height="28" style="vertical-align:middle;margin-right:8px"/> LogShield --- Secure, Local-First Log Sanitizer
 
 **Enterprise-grade log sanitization. 100% client-side. Zero data leaves your device.**
 
@@ -82,12 +82,12 @@ http://localhost:5173
 
 ```
 LogShield/
-ÃÄ src/
-³  ÃÄ components/   # UI components
-³  ÃÄ lib/          # Sanitizer engine, patterns, licensing
-³  ÃÄ hooks/        # React hooks
-³  ÀÄ pages/        # App pages
-ÀÄ public/          # Static assets and legal pages
+|-- src/
+|   |-- components/   # UI components
+|   |-- lib/          # Sanitizer engine, patterns, licensing
+|   |-- hooks/        # React hooks
+|   `-- pages/        # App pages
+`-- public/           # Static assets and legal pages
 
 ```
 
@@ -144,9 +144,9 @@ Contact: **[hello@logshield.dev](mailto:hello@logshield.dev)**
 Built with care using React, Vite, Tailwind CSS, and Lucide Icons.
 
 <p align="center" style="margin-top:18px">
-  <small>? 2025 LogShield ? All rights reserved. &nbsp; ? &nbsp;
-  <a href="https://logshield.dev">Website</a> &nbsp; ? &nbsp;
-  <a href="https://logshield.dev/privacy">Privacy</a> &nbsp; ? &nbsp;
+  <small>&copy; 2025 LogShield --- All rights reserved. &nbsp; &bull; &nbsp;
+  <a href="https://logshield.dev">Website</a> &nbsp; &bull; &nbsp;
+  <a href="https://logshield.dev/privacy">Privacy</a> &nbsp; &bull; &nbsp;
   <a href="https://logshield.dev/terms">Terms</a></small>
 </p>
 ```
