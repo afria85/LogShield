@@ -1,12 +1,6 @@
 
 ---
 
-# ? **README Final (UTF-8 Perfect Version)**
-
-**Copy?paste saja, langsung berfungsi.**
-
----
-
 ````md
 # ?? LogShield ? Secure, Local-First Log Sanitizer
 
@@ -65,14 +59,6 @@ All sanitization happens *locally in your browser* ? logs never leave your devic
 | **Team** | $79/month | Organizations | ? Everything in Pro<br>? Up to 10 team members<br>? Team dashboard<br>? SSO (soon)<br>? Audit logs<br>? Custom branding<br>? Dedicated support<br>? SLA guarantee |
 
 ?? **All paid tiers include a 14-day money-back guarantee.**
-
----
-
-# ??? Screenshots (Dark Mode Preview)
-
-<p align="center">
-  <img src="https://dummyimage.com/1000x520/0f172a/475569&text=LogShield+Dark+Mode+Preview" />
-</p>
 
 ---
 
