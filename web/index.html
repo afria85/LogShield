@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LogShield — Privacy-first Log Sanitizer</title>
+<style>
+body{margin:0;font-family:system-ui;background:#0b0d10;color:#e6e8eb}
+header{padding:24px;border-bottom:1px solid #222}
+main{max-width:1100px;margin:auto;padding:24px}
+h1{font-size:28px}
+p{color:#9aa3b2}
+.panel{background:#131720;border:1px solid #222;border-radius:8px;padding:16px;margin-top:16px}
+textarea{width:100%;height:200px;background:#0b0d10;color:#e6e8eb;border:1px solid #222;border-radius:6px;padding:12px;font-family:monospace}
+button{margin-top:12px;padding:8px 16px;border:none;border-radius:6px;background:#4da3ff;color:#000;font-weight:600}
+footer{margin-top:48px;color:#777;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>LogShield</h1>
+<p>Privacy-first log sanitizer. Runs 100% locally in your browser.</p>
+</header>
+<main>
+<div class="panel">
+<h2>Paste your logs</h2>
+<textarea placeholder="Paste logs here..."></textarea>
+<button disabled>Scan locally (WASM coming)</button>
+<p style="font-size:13px">No logs are sent to any server.</p>
+</div>
+<footer>
+Same deterministic engine as LogShield CLI.<br/>
+Open & free. Built for developers.
+</footer>
+</main>
+</body>
+</html>
