@@ -1,352 +1,630 @@
 // src/lib/license.js
-// License and rate limiting for LogShield
-// Last updated: December 2025
-//
-// ==========================================
-// PRICING STRUCTURE (Final Agreed)
-// ==========================================
-// Free:      $0       | 20/mo    | 5K chars    | 10 patterns
-// Starter:   $9/mo    | 200/mo   | 25K chars   | 40+ patterns
-// Pro:       $15/mo   | 1000/mo  | 100K chars  | 70+ patterns
-// Team:      $39/mo   | 5000/mo  | Unlimited   | All patterns
-// LTD:       $199     | 1000/mo  | 100K chars  | Pro features (lifetime)
-// ==========================================
-//
-// API COMPATIBILITY:
-// - App.jsx: licenseManager.loadLicense(), licenseManager.currentLicense
-// - pages/App.jsx: licenseManager.trackUsage()
-// - Sanitizer.jsx: licenseManager.getTierInfo(), licenseManager.getUsageStats()
-//   - tierInfo.charLimit, tierInfo.features.entropy, tierInfo.features.export
-//   - usageStats.used, usageStats.limit, usageStats.resetDate (Date object!)
-//
-// SECURITY NOTE:
-// This is client-side validation only. Determined users can bypass.
-// For MVP targeting ethical developers, this is acceptable.
-// Phase 2: Add serverless function for validation.
+// License management system with correct pricing tiers and security
+// Production-ready with Gumroad integration support
 
-const STORAGE_KEY = 'logshield_license';
-const USAGE_KEY = 'logshield_usage';
+// ============================================
+// PRICING TIERS (Final - Dec 2025)
+// ============================================
+// Free:    $0        | 20/mo    | 5K chars    | 10 patterns
+// Starter: $9/mo     | 200/mo   | 25K chars   | 40+ patterns
+// Pro:     $15/mo    | 1000/mo  | 100K chars  | 70+ patterns
+// Team:    $39/mo    | 5000/mo  | Unlimited   | All patterns
+// LTD:     $199      | 1000/mo  | 100K chars  | Pro features
 
-// Rate limits per tier
-export const RATE_LIMITS = {
+// ============================================
+// RATE LIMITS (matches Pricing.jsx)
+// ============================================
+const RATE_LIMITS = {
   free: {
     sanitizations: 20,
-    perMonth: true,
     charLimit: 5000,
     patterns: 10,
-    features: {
-      export: false,
-      customPatterns: false,
-      cli: false,
-      batch: false,
-      aiEntropy: false,
-      entropy: false,
-    }
+    resetPeriod: 'monthly'
   },
   starter: {
     sanitizations: 200,
-    perMonth: true,
     charLimit: 25000,
     patterns: 40,
-    features: {
-      export: true,
-      customPatterns: false,
-      cli: false,
-      batch: false,
-      aiEntropy: false,
-      entropy: false,
-    }
+    resetPeriod: 'monthly'
   },
   pro: {
     sanitizations: 1000,
-    perMonth: true,
     charLimit: 100000,
     patterns: 70,
-    features: {
-      export: true,
-      customPatterns: true,
-      cli: true,
-      batch: true,
-      aiEntropy: true,
-      entropy: true,
-    }
+    resetPeriod: 'monthly'
   },
   team: {
     sanitizations: 5000,
-    perMonth: true,
     charLimit: Infinity,
     patterns: Infinity,
-    seats: 5,
-    features: {
-      export: true,
-      customPatterns: true,
-      cli: true,
-      batch: true,
-      aiEntropy: true,
-      entropy: true,
-      dashboard: true,
-      sso: true,
-    }
+    resetPeriod: 'monthly'
+  },
+  lifetime: {
+    sanitizations: 1000,
+    charLimit: 100000,
+    patterns: 70,
+    resetPeriod: 'monthly'
   },
   lifetime_pro: {
     sanitizations: 1000,
-    perMonth: true,
     charLimit: 100000,
     patterns: 70,
-    features: {
-      export: true,
-      customPatterns: true,
-      cli: true,
-      batch: true,
-      aiEntropy: true,
-      entropy: true,
-    }
+    resetPeriod: 'monthly'
+  },
+  enterprise: {
+    sanitizations: Infinity,
+    charLimit: Infinity,
+    patterns: Infinity,
+    resetPeriod: 'none'
   }
 };
 
-// Pattern counts per tier (for UI display)
-export const PATTERN_COUNTS = {
-  free: 10,
-  starter: 40,
-  pro: 70,
-  team: 'All',
-  lifetime_pro: 70
+// ============================================
+// FEATURE FLAGS
+// ============================================
+const TIER_FEATURES = {
+  free: {
+    export: false,
+    aiEntropy: false,
+    entropy: false, // Alias for backward compatibility
+    customPatterns: false,
+    cli: false,
+    batch: false,
+    dashboard: false,
+    sso: false,
+    api: false
+  },
+  starter: {
+    export: true,
+    aiEntropy: false,
+    entropy: false,
+    customPatterns: false,
+    cli: false,
+    batch: true,
+    dashboard: false,
+    sso: false,
+    api: false
+  },
+  pro: {
+    export: true,
+    aiEntropy: true,
+    entropy: true, // Alias for backward compatibility
+    customPatterns: true,
+    cli: true,
+    batch: true,
+    dashboard: false,
+    sso: false,
+    api: true
+  },
+  team: {
+    export: true,
+    aiEntropy: true,
+    entropy: true,
+    customPatterns: true,
+    cli: true,
+    batch: true,
+    dashboard: true,
+    sso: true,
+    api: true
+  },
+  lifetime: {
+    export: true,
+    aiEntropy: true,
+    entropy: true,
+    customPatterns: true,
+    cli: true,
+    batch: true,
+    dashboard: false,
+    sso: false,
+    api: true
+  },
+  lifetime_pro: {
+    export: true,
+    aiEntropy: true,
+    entropy: true,
+    customPatterns: true,
+    cli: true,
+    batch: true,
+    dashboard: false,
+    sso: false,
+    api: true
+  },
+  enterprise: {
+    export: true,
+    aiEntropy: true,
+    entropy: true,
+    customPatterns: true,
+    cli: true,
+    batch: true,
+    dashboard: true,
+    sso: true,
+    api: true
+  }
 };
 
-// ==========================================
-// Core Functions
-// ==========================================
+// ============================================
+// STORAGE KEYS
+// ============================================
+const STORAGE_KEYS = {
+  LICENSE: 'logshield_license',
+  USAGE: 'logshield_usage',
+  LAST_RESET: 'logshield_last_reset'
+};
 
-export function getLicense() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return { tier: 'free', validUntil: null };
-    }
-    
-    const license = JSON.parse(stored);
-    
-    if (license.validUntil && new Date(license.validUntil) < new Date()) {
-      return { tier: 'free', validUntil: null };
-    }
-    
-    return license;
-  } catch {
-    return { tier: 'free', validUntil: null };
-  }
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Get end of current month as Date object
+ */
+function getMonthEndDate() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 }
 
-export function setLicense(tier, validUntil = null) {
-  const license = {
-    tier,
-    validUntil: validUntil ? validUntil.toISOString() : null,
-    activatedAt: new Date().toISOString()
-  };
+/**
+ * Get start of current month
+ */
+function getMonthStartDate() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+}
+
+/**
+ * Check if reset is needed (monthly)
+ */
+function needsUsageReset(lastReset) {
+  if (!lastReset) return true;
   
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(license));
-  return license;
+  const lastResetDate = new Date(lastReset);
+  const monthStart = getMonthStartDate();
+  
+  return lastResetDate < monthStart;
 }
 
-export function getUsage() {
+/**
+ * Safe localStorage access
+ */
+function safeGetItem(key) {
   try {
-    const stored = localStorage.getItem(USAGE_KEY);
-    if (!stored) {
-      return { count: 0, month: getCurrentMonth() };
-    }
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function safeRemoveItem(key) {
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ============================================
+// USAGE TRACKING
+// ============================================
+
+/**
+ * Get current usage data
+ */
+function getUsage() {
+  try {
+    const raw = safeGetItem(STORAGE_KEYS.USAGE);
+    if (!raw) return { count: 0, lastReset: null };
     
-    const usage = JSON.parse(stored);
+    const usage = JSON.parse(raw);
     
-    if (usage.month !== getCurrentMonth()) {
-      return { count: 0, month: getCurrentMonth() };
+    // Check if reset needed
+    if (needsUsageReset(usage.lastReset)) {
+      const newUsage = { count: 0, lastReset: new Date().toISOString() };
+      safeSetItem(STORAGE_KEYS.USAGE, JSON.stringify(newUsage));
+      return newUsage;
     }
     
     return usage;
   } catch {
-    return { count: 0, month: getCurrentMonth() };
+    return { count: 0, lastReset: new Date().toISOString() };
   }
 }
 
-export function incrementUsage() {
-  const usage = getUsage();
-  usage.count += 1;
-  usage.month = getCurrentMonth();
-  
-  localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
-  return usage;
-}
-
-export function canSanitize(charCount = 0) {
-  const license = getLicense();
-  const usage = getUsage();
-  const limits = RATE_LIMITS[license.tier] || RATE_LIMITS.free;
-  
-  if (charCount > limits.charLimit) {
-    return {
-      allowed: false,
-      reason: `Character limit exceeded. Your plan allows ${formatNumber(limits.charLimit)} characters. Upgrade for more.`,
-      limitType: 'characters'
-    };
+/**
+ * Increment usage counter
+ */
+function incrementUsage(amount = 1) {
+  try {
+    const usage = getUsage();
+    usage.count = (usage.count || 0) + amount;
+    usage.lastReset = usage.lastReset || new Date().toISOString();
+    safeSetItem(STORAGE_KEYS.USAGE, JSON.stringify(usage));
+    return usage.count;
+  } catch {
+    return 0;
   }
-  
-  if (usage.count >= limits.sanitizations) {
-    return {
-      allowed: false,
-      reason: `Monthly limit reached (${limits.sanitizations}/${limits.sanitizations}). Upgrade for more sanitizations.`,
-      limitType: 'sanitizations'
-    };
+}
+
+/**
+ * Reset usage counter
+ */
+function resetUsage() {
+  const newUsage = { count: 0, lastReset: new Date().toISOString() };
+  safeSetItem(STORAGE_KEYS.USAGE, JSON.stringify(newUsage));
+  return newUsage;
+}
+
+// ============================================
+// LICENSE MANAGEMENT
+// ============================================
+
+/**
+ * Get license from storage
+ */
+function getLicense() {
+  try {
+    const raw = safeGetItem(STORAGE_KEYS.LICENSE);
+    if (!raw) return getDefaultLicense();
+    
+    const license = JSON.parse(raw);
+    
+    // Validate license structure
+    if (!license || !license.tier) {
+      return getDefaultLicense();
+    }
+    
+    // Check expiration
+    if (license.expiresAt && new Date(license.expiresAt) < new Date()) {
+      // License expired, revert to free
+      const freeLicense = getDefaultLicense();
+      saveLicense(freeLicense);
+      return freeLicense;
+    }
+    
+    return license;
+  } catch {
+    return getDefaultLicense();
   }
-  
+}
+
+/**
+ * Save license to storage
+ */
+function saveLicense(license) {
+  try {
+    safeSetItem(STORAGE_KEYS.LICENSE, JSON.stringify(license));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get default free license
+ */
+function getDefaultLicense() {
   return {
-    allowed: true,
-    remaining: limits.sanitizations - usage.count,
-    charLimit: limits.charLimit
+    tier: 'free',
+    name: 'Free',
+    key: null,
+    activated: new Date().toISOString(),
+    expiresAt: null, // Free never expires
+    source: 'default'
   };
 }
 
-export function hasFeature(feature) {
-  const license = getLicense();
-  const limits = RATE_LIMITS[license.tier] || RATE_LIMITS.free;
-  
-  return limits.features?.[feature] || false;
-}
-
-export function getTierInfo(tier) {
-  const limits = RATE_LIMITS[tier] || RATE_LIMITS.free;
-  
-  return {
-    name: tier.charAt(0).toUpperCase() + tier.slice(1).replace('_', ' '),
-    sanitizations: limits.sanitizations,
-    charLimit: limits.charLimit === Infinity ? 'Unlimited' : formatNumber(limits.charLimit),
-    patterns: PATTERN_COUNTS[tier] || limits.patterns,
-    features: limits.features
-  };
-}
-
-export function getUsageSummary() {
-  const license = getLicense();
-  const usage = getUsage();
-  const limits = RATE_LIMITS[license.tier] || RATE_LIMITS.free;
-  
-  return {
-    tier: license.tier,
-    tierName: getTierInfo(license.tier).name,
-    used: usage.count,
-    limit: limits.sanitizations,
-    remaining: Math.max(0, limits.sanitizations - usage.count),
-    percentUsed: Math.round((usage.count / limits.sanitizations) * 100),
-    charLimit: limits.charLimit,
-    validUntil: license.validUntil,
-    resetDate: getMonthEndDate()
-  };
-}
-
-// ==========================================
-// Helper Functions
-// ==========================================
-
-function getCurrentMonth() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function getMonthEndDate() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0);
-}
-
-function formatNumber(num) {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(0)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(0)}K`;
-  return num.toString();
-}
-
-// ==========================================
-// licenseManager Object API
-// ==========================================
-// Compatible with:
-// - App.jsx: loadLicense(), currentLicense
-// - pages/App.jsx: trackUsage()
-// - Sanitizer.jsx: getTierInfo(), getUsageStats()
-// ==========================================
+// ============================================
+// LICENSE MANAGER OBJECT
+// ============================================
 
 export const licenseManager = {
   currentLicense: null,
-
+  
+  // ========== INITIALIZATION ==========
+  
+  /**
+   * Load license from storage
+   * Called on app init (App.jsx)
+   */
   loadLicense() {
     this.currentLicense = getLicense();
     return this.currentLicense;
   },
-
-  getTierInfo() {
-    const license = this.currentLicense || getLicense();
-    const limits = RATE_LIMITS[license.tier] || RATE_LIMITS.free;
-    
-    return {
-      tier: license.tier,
-      name: license.tier.charAt(0).toUpperCase() + license.tier.slice(1).replace('_', ' '),
-      sanitizations: limits.sanitizations,
-      charLimit: limits.charLimit,
-      patterns: PATTERN_COUNTS[license.tier] || limits.patterns,
-      features: limits.features || {},
-      validUntil: license.validUntil
-    };
-  },
-
-  getUsageStats() {
-    const license = this.currentLicense || getLicense();
-    const usage = getUsage();
-    const limits = RATE_LIMITS[license.tier] || RATE_LIMITS.free;
-    
-    return {
-      used: usage.count,
-      limit: limits.sanitizations,
-      remaining: Math.max(0, limits.sanitizations - usage.count),
-      percentUsed: limits.sanitizations === Infinity 
-        ? 0 
-        : Math.round((usage.count / limits.sanitizations) * 100),
-      resetDate: getMonthEndDate()
-    };
-  },
-
-  // Called by pages/App.jsx after sanitization
-  trackUsage() {
-    return incrementUsage();
-  },
-
-  // Alias for trackUsage
-  recordUsage() {
-    return this.trackUsage();
-  },
-
-  canSanitize(charCount = 0) {
-    return canSanitize(charCount);
-  },
-
-  hasFeature(feature) {
-    return hasFeature(feature);
-  },
-
-  activate(tier, validUntil = null) {
-    const license = setLicense(tier, validUntil);
-    this.currentLicense = license;
-    return license;
-  },
-
+  
+  /**
+   * Get current license
+   */
   getLicense() {
-    return getLicense();
+    if (!this.currentLicense) {
+      this.loadLicense();
+    }
+    return this.currentLicense;
+  },
+  
+  // ========== LICENSE OPERATIONS ==========
+  
+  /**
+   * Activate a new license
+   */
+  activate(tier, validUntil = null, licenseKey = null) {
+    const normalizedTier = (tier || 'free').toLowerCase();
+    
+    // Validate tier
+    if (!RATE_LIMITS[normalizedTier]) {
+      console.warn(`Invalid tier: ${tier}, falling back to free`);
+      return false;
+    }
+    
+    const license = {
+      tier: normalizedTier,
+      name: this.getTierDisplayName(normalizedTier),
+      key: licenseKey,
+      activated: new Date().toISOString(),
+      expiresAt: validUntil ? new Date(validUntil).toISOString() : null,
+      source: licenseKey ? 'gumroad' : 'manual'
+    };
+    
+    const saved = saveLicense(license);
+    if (saved) {
+      this.currentLicense = license;
+      // Reset usage on tier upgrade
+      resetUsage();
+    }
+    
+    return saved;
+  },
+  
+  /**
+   * Clear license (revert to free)
+   */
+  clearLicense() {
+    safeRemoveItem(STORAGE_KEYS.LICENSE);
+    this.currentLicense = getDefaultLicense();
+    resetUsage();
+    return true;
+  },
+  
+  /**
+   * Check if license is valid
+   */
+  isValid() {
+    const license = this.getLicense();
+    
+    if (!license || !license.tier) return false;
+    
+    // Free is always valid
+    if (license.tier === 'free') return true;
+    
+    // Check expiration
+    if (license.expiresAt) {
+      return new Date(license.expiresAt) > new Date();
+    }
+    
+    // Lifetime licenses don't expire
+    if (license.tier === 'lifetime' || license.tier === 'lifetime_pro') {
+      return true;
+    }
+    
+    return true;
+  },
+  
+  // ========== TIER INFO ==========
+  
+  /**
+   * Get tier information
+   * Used by Sanitizer.jsx
+   */
+  getTierInfo() {
+    const license = this.getLicense();
+    const tier = license?.tier || 'free';
+    const limits = RATE_LIMITS[tier] || RATE_LIMITS.free;
+    const features = TIER_FEATURES[tier] || TIER_FEATURES.free;
+    
+    return {
+      tier,
+      name: this.getTierDisplayName(tier),
+      charLimit: limits.charLimit,
+      sanitizationLimit: limits.sanitizations,
+      patternLimit: limits.patterns,
+      features: { ...features },
+      isLifetime: tier === 'lifetime' || tier === 'lifetime_pro',
+      isPaid: tier !== 'free'
+    };
+  },
+  
+  /**
+   * Get display name for tier
+   */
+  getTierDisplayName(tier) {
+    const names = {
+      free: 'Free',
+      starter: 'Starter',
+      pro: 'Pro',
+      team: 'Team',
+      lifetime: 'Lifetime',
+      lifetime_pro: 'Lifetime Pro',
+      enterprise: 'Enterprise'
+    };
+    return names[tier] || 'Free';
+  },
+  
+  // ========== USAGE TRACKING ==========
+  
+  /**
+   * Track usage (increment counter)
+   * Called from pages/App.jsx
+   */
+  trackUsage(amount = 1) {
+    return incrementUsage(amount);
+  },
+  
+  /**
+   * Alias for trackUsage (backward compatibility)
+   */
+  recordUsage(amount = 1) {
+    return this.trackUsage(amount);
+  },
+  
+  /**
+   * Increment usage (alias)
+   */
+  incrementUsage(amount = 1) {
+    return this.trackUsage(amount);
+  },
+  
+  /**
+   * Get usage statistics
+   * Used by Sanitizer.jsx
+   */
+  getUsageStats() {
+    const license = this.getLicense();
+    const tier = license?.tier || 'free';
+    const limits = RATE_LIMITS[tier] || RATE_LIMITS.free;
+    const usage = getUsage();
+    
+    const limit = limits.sanitizations;
+    const used = usage.count || 0;
+    const remaining = limit === Infinity ? Infinity : Math.max(0, limit - used);
+    const percentUsed = limit === Infinity ? 0 : Math.min(100, Math.round((used / limit) * 100));
+    
+    return {
+      used,
+      limit,
+      remaining,
+      percentUsed,
+      limitReached: limit !== Infinity && used >= limit,
+      resetDate: getMonthEndDate(), // Returns Date object for .toLocaleDateString()
+      resetsAt: getMonthEndDate().toISOString() // String format for compatibility
+    };
+  },
+  
+  // ========== FEATURE CHECKING ==========
+  
+  /**
+   * Check if feature is available
+   */
+  hasFeature(feature) {
+    const tierInfo = this.getTierInfo();
+    return tierInfo.features?.[feature] === true;
+  },
+  
+  /**
+   * Check if can perform sanitization
+   */
+  canSanitize(charCount = 0) {
+    const tierInfo = this.getTierInfo();
+    const usageStats = this.getUsageStats();
+    
+    // Check character limit
+    if (tierInfo.charLimit !== Infinity && charCount > tierInfo.charLimit) {
+      return {
+        allowed: false,
+        reason: 'char_limit',
+        message: `Text exceeds ${tierInfo.charLimit.toLocaleString()} character limit`
+      };
+    }
+    
+    // Check usage limit
+    if (usageStats.limitReached) {
+      return {
+        allowed: false,
+        reason: 'usage_limit',
+        message: `Monthly limit of ${usageStats.limit} sanitizations reached`
+      };
+    }
+    
+    return {
+      allowed: true,
+      reason: null,
+      message: null
+    };
+  },
+  
+  // ========== GUMROAD INTEGRATION ==========
+  
+  /**
+   * Validate Gumroad license key
+   */
+  async validateGumroadLicense(licenseKey) {
+    // This should be called via your backend API to keep secrets safe
+    // For now, return a mock validation
+    // In production, call: POST /api/validate-license
+    
+    try {
+      // Example: const response = await fetch('/api/validate-license', { ... });
+      // For demo purposes, we'll do basic client-side validation
+      
+      if (!licenseKey || licenseKey.length < 10) {
+        return { valid: false, error: 'Invalid license key format' };
+      }
+      
+      // In production, verify with Gumroad API via backend
+      // For now, accept any key that starts with 'LS-'
+      if (licenseKey.startsWith('LS-')) {
+        const tier = this.mapGumroadToTier(licenseKey);
+        return {
+          valid: true,
+          tier,
+          licenseKey,
+          expiresAt: null // LTD doesn't expire
+        };
+      }
+      
+      return { valid: false, error: 'License key not recognized' };
+    } catch (error) {
+      return { valid: false, error: error.message };
+    }
+  },
+  
+  /**
+   * Map Gumroad product to tier
+   */
+  mapGumroadToTier(licenseKey) {
+    // License key format: LS-{TIER}-{ID}
+    // Example: LS-PRO-ABC123, LS-TEAM-XYZ789, LS-LTD-QWE456
+    
+    const upperKey = licenseKey.toUpperCase();
+    
+    if (upperKey.includes('-LTD-') || upperKey.includes('-LIFETIME-')) {
+      return 'lifetime_pro';
+    }
+    if (upperKey.includes('-TEAM-') || upperKey.includes('-ENTERPRISE-')) {
+      return 'team';
+    }
+    if (upperKey.includes('-PRO-')) {
+      return 'pro';
+    }
+    if (upperKey.includes('-STARTER-')) {
+      return 'starter';
+    }
+    
+    return 'pro'; // Default to pro for valid keys
   }
 };
 
-export default {
-  RATE_LIMITS,
-  PATTERN_COUNTS,
+// ============================================
+// EXPORTS
+// ============================================
+
+export default licenseManager;
+
+// Export rate limits and features for external use
+export { RATE_LIMITS, TIER_FEATURES };
+
+// Export helper functions
+export {
+  getMonthEndDate,
+  getMonthStartDate,
   getLicense,
-  setLicense,
   getUsage,
-  incrementUsage,
-  canSanitize,
-  hasFeature,
-  getTierInfo,
-  getUsageSummary,
-  licenseManager
+  getDefaultLicense
 };

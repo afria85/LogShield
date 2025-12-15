@@ -1,510 +1,480 @@
 // src/components/Sanitizer.jsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { 
-  Wand2, Copy, Download, AlertCircle, Check, 
-  FileText, Zap, BarChart3, Settings, X, Upload,
-  Sparkles, Timer, Shield, RefreshCw
+  Shield, 
+  Copy, 
+  Check, 
+  Download, 
+  Upload, 
+  Trash2, 
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  Zap,
+  Eye,
+  EyeOff,
+  Settings,
+  FileText
 } from 'lucide-react';
-import { Button } from './ui/Button';
-import { Card } from './ui/Card';
-import { Badge } from './ui/Badge';
-import { Sanitizer as SanitizerLib } from '../lib/sanitizer';
-import { getPatternsByTier, PATTERN_CATEGORIES, filterPatternsByCategory } from '../lib/patterns';
+import { quickSanitize, getSanitizationStats } from '../lib/sanitizer';
+import { PATTERN_CATEGORIES } from '../lib/patterns';
 import { licenseManager } from '../lib/license';
+import { analytics } from '../lib/analytics';
+import { useLicense } from '../contexts/LicenseContext';
 
-export default function Sanitizer({ license, onUpgrade, onSanitizeComplete }) {
-  const [inputText, setInputText] = useState('');
-  const [outputText, setOutputText] = useState('');
+
+export default function Sanitizer() {
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
   const [stats, setStats] = useState(null);
-  const [processing, setProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [showStats, setShowStats] = useState(false);
-  const [error, setError] = useState('');
-  const [dragOver, setDragOver] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState(['all']);
+  const [error, setError] = useState(null);
 
-  const tierInfo = licenseManager.getTierInfo();
-  const usageStats = licenseManager.getUsageStats();
-  const patterns = getPatternsByTier(license?.tier || 'free');
-  const filteredPatterns = filterPatternsByCategory(patterns, selectedCategory);
+  const licenseManager = useLicense(); // NEW
 
-  // Check limits
-  const charCount = inputText.length;
-  const charLimit = tierInfo.charLimit;
-  const isOverLimit = charLimit !== Infinity && charCount > charLimit;
-  const isOverUsage = usageStats.used >= usageStats.limit && usageStats.limit !== Infinity;
+  // Get tier info
+  const tierInfo = useMemo(() => licenseManager.getTierInfo(), []);
 
-  useEffect(() => {
-    // Load sample text for demo
-    const sampleText = `API Response:
-{
-  "user": "john.doe@company.com",
-  "api_key": "AKIAIOSFODNN7EXAMPLE",
-  "database": "mongodb://admin:password123@localhost:27017",
-  "stripe_key": "sk_live_4eC39HqLyjWDarjtT1zdp7dc"
-}
+  // Get usage stats
+  const usageStats = useMemo(() => licenseManager.getUsageStats(), []);
 
-Server logs:
-[2024-01-15] User 192.168.1.100 accessed dashboard
-[2024-01-15] JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`;
-    
-    setInputText(sampleText);
-  }, []);
+  // Check if can sanitize
+  const canSanitize = useMemo(() => {
+    return usageStats.remaining > 0;
+  }, [usageStats]);
 
-  // Keyboard shortcut: Ctrl/Cmd + Enter to sanitize
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        handleSanitize();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [inputText, isOverLimit, isOverUsage]);
-
-  const handleSanitize = useCallback(() => {
-    // Validation
-    if (!inputText.trim()) {
+  // Handle sanitization
+  const handleSanitize = useCallback(async () => {
+    if (!input.trim()) {
       setError('Please enter some text to sanitize');
       return;
     }
 
-    if (isOverLimit) {
-      setError(`Text exceeds ${charLimit.toLocaleString()} character limit. Please upgrade or reduce text.`);
+    if (!canSanitize) {
+      setError('Monthly limit reached. Upgrade for more sanitizations.');
       return;
     }
 
-    if (isOverUsage) {
-      setError('Monthly usage limit reached. Please upgrade to continue.');
-      return;
-    }
+    setIsProcessing(true);
+    setError(null);
 
-    setError('');
-    setProcessing(true);
-
-    // Use requestAnimationFrame for smoother UI
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        const sanitizer = new SanitizerLib(filteredPatterns, {
-          detectEntropy: tierInfo.features?.entropy || false,
-          showStats: true
-        });
-
-        const result = sanitizer.sanitize(inputText);
-        
-        if (result.success) {
-          setOutputText(result.sanitized);
-          setStats(result.stats);
-          setShowStats(true);
-          onSanitizeComplete?.(result.stats);
-        } else {
-          setError(result.error || 'Sanitization failed');
-        }
-
-        setProcessing(false);
-      }, 300); // Small delay for UX feedback
-    });
-  }, [inputText, filteredPatterns, tierInfo, charLimit, isOverLimit, isOverUsage, onSanitizeComplete]);
-
-  const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(outputText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Simulate slight delay for UX
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const startTime = performance.now();
       
-      if (window.plausible) {
-        window.plausible('Copy Output');
-      }
+      // Perform sanitization
+      const result = quickSanitize(input, patterns, {
+        detectEntropy: tierInfo.features?.entropy || false,
+      });
+      
+      const endTime = performance.now();
+
+      // Get stats
+      const sanitizationStats = getSanitizationStats(input, result.text);
+      sanitizationStats.processingTime = Math.round(endTime - startTime);
+
+      setOutput(result.text);
+      setStats(sanitizationStats);
+
+      // Track usage
+      licenseManager.trackUsage();
+
+      // Track analytics
+      analytics.trackSanitize(tierInfo.tier, sanitizationStats);
+    } catch (err) {
+      setError(err.message || 'An error occurred during sanitization');
+      analytics.trackError('sanitization', err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [input, canSanitize, selectedCategories, tierInfo]);
+
+  // Handle copy
+  const handleCopy = useCallback(async () => {
+    if (!output) return;
+
+    try {
+      await navigator.clipboard.writeText(output);
+      setCopied(true);
+      analytics.trackCopy(tierInfo.tier);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       setError('Failed to copy to clipboard');
     }
-  };
+  }, [output, tierInfo.tier]);
 
-  const handleDownload = (format = 'txt') => {
-    const blob = new Blob([outputText], { type: 'text/plain' });
+  // Handle file upload
+  const handleFileUpload = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB for free, 10MB for paid)
+    const maxSize = tierInfo.tier === 'free' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError(`File too large. Maximum size: ${maxSize / 1024 / 1024}MB`);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setInput(event.target.result);
+      setOutput('');
+      setStats(null);
+      setError(null);
+      analytics.trackFileUpload(file.type, file.size);
+    };
+    reader.onerror = () => {
+      setError('Failed to read file');
+    };
+    reader.readAsText(file);
+
+    // Reset input
+    e.target.value = '';
+  }, [tierInfo.tier]);
+
+  // Handle download
+  const handleDownload = useCallback(() => {
+    if (!output) return;
+
+    const blob = new Blob([output], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `sanitized-log-${Date.now()}.${format}`;
+    a.download = `sanitized-log-${Date.now()}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    if (window.plausible) {
-      window.plausible('Download', { props: { format } });
-    }
-  };
+    analytics.trackExport('txt', tierInfo.tier);
+  }, [output, tierInfo.tier]);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result;
-      if (typeof text === 'string') {
-        setInputText(text);
-        setOutputText('');
-        setStats(null);
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  // Drag and drop handlers
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    
-    const file = e.dataTransfer.files?.[0];
-    if (file && (file.type === 'text/plain' || file.name.endsWith('.log') || file.name.endsWith('.txt') || file.name.endsWith('.json'))) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result;
-        if (typeof text === 'string') {
-          setInputText(text);
-          setOutputText('');
-          setStats(null);
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const handleClear = () => {
-    setInputText('');
-    setOutputText('');
+  // Handle clear
+  const handleClear = useCallback(() => {
+    setInput('');
+    setOutput('');
     setStats(null);
-    setError('');
-    setShowStats(false);
-  };
+    setError(null);
+  }, []);
 
-  const usagePercentage = usageStats.limit === Infinity 
-    ? 0 
-    : Math.min((usageStats.used / usageStats.limit) * 100, 100);
+  // Toggle category
+  const toggleCategory = useCallback((category) => {
+    setSelectedCategories(prev => {
+      if (category === 'all') {
+        return ['all'];
+      }
+      
+      const newCategories = prev.filter(c => c !== 'all');
+      
+      if (newCategories.includes(category)) {
+        const filtered = newCategories.filter(c => c !== category);
+        return filtered.length === 0 ? ['all'] : filtered;
+      } else {
+        return [...newCategories, category];
+      }
+    });
+  }, []);
 
   return (
-    <div className="container py-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Shield className="h-8 w-8 text-blue-600" />
-              Log Sanitizer
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Remove sensitive data from your logs securely • 100% client-side
+    <div className="w-full max-w-6xl mx-auto animate-fade-in-up">
+      {/* Usage indicator */}
+      <div className="mb-6 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${
+              usageStats.percentUsed >= 90 
+                ? 'bg-red-100 dark:bg-red-900/30' 
+                : 'bg-blue-100 dark:bg-blue-900/30'
+            }`}>
+              <Shield className={`w-5 h-5 ${
+                usageStats.percentUsed >= 90 
+                  ? 'text-red-600 dark:text-red-400' 
+                  : 'text-blue-600 dark:text-blue-400'
+              }`} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">
+                {tierInfo.name} Plan
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {usageStats.remaining} of {usageStats.limit} sanitizations remaining
+              </p>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="flex-1 max-w-xs">
+            <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${
+                  usageStats.percentUsed >= 90 
+                    ? 'bg-red-500' 
+                    : usageStats.percentUsed >= 70 
+                      ? 'bg-amber-500' 
+                      : 'bg-blue-500'
+                }`}
+                style={{ width: `${Math.min(usageStats.percentUsed, 100)}%` }}
+              />
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-right">
+              Resets {usageStats.resetDate?.toLocaleDateString()}
             </p>
           </div>
+        </div>
+      </div>
 
-          <div className="flex items-center gap-3">
-            <Badge className="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-              <Zap className="h-3 w-3 mr-1" />
-              {(license?.tier || 'free').toUpperCase()}
-            </Badge>
-            
-            {license?.tier === 'free' && (
-              <Button onClick={onUpgrade} size="sm" variant="outline">
-                Upgrade for More
-              </Button>
+      {/* Error message */}
+      {error && (
+        <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-3 animate-fade-in-up">
+          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
+            {!canSanitize && (
+              <a 
+                href="/pricing" 
+                className="text-sm text-red-600 dark:text-red-400 hover:underline mt-1 inline-block"
+              >
+                Upgrade your plan &rarr;
+              </a>
             )}
           </div>
         </div>
+      )}
 
-        {/* Usage Stats */}
-        <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800 animate-slide-up animation-delay-100">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
-              <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    Usage This Month
-                  </span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {usageStats.used} / {usageStats.limit === Infinity ? '∞' : usageStats.limit}
-                  </span>
-                </div>
-                {usageStats.limit !== Infinity && (
-                  <div className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        usagePercentage > 80 ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-purple-500'
-                      }`}
-                      style={{ width: `${usagePercentage}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-              <Timer className="h-4 w-4" />
-              Resets {usageStats.resetDate.toLocaleDateString()}
-            </div>
-          </div>
-        </Card>
-
-        {/* Error Alert */}
-        {error && (
-          <Card className="p-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 animate-fade-in">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
-              </div>
-              <button 
-                onClick={() => setError('')} 
-                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          </Card>
-        )}
-
-        {/* Pattern Category Selector */}
-        <Card className="p-4 animate-slide-up animation-delay-200">
-          <div className="flex items-center gap-2 mb-3">
-            <Settings className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            <span className="font-medium text-gray-900 dark:text-white">Detection Categories</span>
-            <Badge className="ml-2">{filteredPatterns.length} patterns</Badge>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {PATTERN_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${selectedCategory === cat.id
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                    : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-                  }
-                `}
-              >
-                <span className="mr-1.5">{cat.icon}</span>
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        </Card>
-
-        {/* Main Editor Grid */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Input */}
-          <Card 
-            className={`p-6 space-y-4 animate-slide-up animation-delay-300 transition-all duration-200 ${
-              dragOver ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900' : ''
+      {/* Category filter */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Settings className="w-4 h-4 text-slate-500" />
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Pattern Categories</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => toggleCategory('all')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+              selectedCategories.includes('all')
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                <h2 className="font-semibold text-gray-900 dark:text-white">Input</h2>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".txt,.log,.json"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button size="sm" variant="outline" as="span">
-                    <Upload className="h-4 w-4 mr-1" />
-                    Upload
-                  </Button>
-                </label>
-                
-                <Button onClick={handleClear} size="sm" variant="outline">
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  Clear
-                </Button>
-              </div>
-            </div>
+            All Patterns
+          </button>
+          {Object.entries(PATTERN_CATEGORIES).map(([key, category]) => (
+            <button
+              key={key}
+              onClick={() => toggleCategory(key)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                selectedCategories.includes(key) && !selectedCategories.includes('all')
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              {category.icon && <category.icon className="w-4 h-4" />}
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
 
-            <div className="relative">
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Paste your logs here or drag & drop a file..."
-                className="textarea h-96"
-              />
-              {dragOver && (
-                <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 rounded-lg flex items-center justify-center border-2 border-dashed border-blue-500">
-                  <p className="text-blue-600 dark:text-blue-400 font-medium">Drop file here</p>
-                </div>
+      {/* Main editor area */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Input */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Input Log
+            </label>
+            <div className="flex items-center gap-2">
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept=".txt,.log,.json,.xml,.csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-200">
+                  <Upload className="w-4 h-4" />
+                  Upload
+                </span>
+              </label>
+              {input && (
+                <button
+                  onClick={handleClear}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
+                  title="Clear"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               )}
             </div>
+          </div>
+          <textarea
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setError(null);
+            }}
+            placeholder="Paste your log content here...
 
-            <div className="flex items-center justify-between text-sm">
-              <span className={`${isOverLimit ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-gray-400'}`}>
-                {charCount.toLocaleString()} / {charLimit === Infinity ? '∞' : charLimit.toLocaleString()} characters
-              </span>
-              
-              <Button
-                onClick={handleSanitize}
-                disabled={processing || isOverLimit || isOverUsage || !inputText.trim()}
-                className="btn-primary px-6"
-              >
-                {processing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="h-4 w-4 mr-2" />
-                    Sanitize Now
-                    <span className="hidden sm:inline ml-2 text-xs opacity-70">⌘↵</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          </Card>
-
-          {/* Output */}
-          <Card className="p-6 space-y-4 animate-slide-up animation-delay-400">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <h2 className="font-semibold text-gray-900 dark:text-white">Output</h2>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleCopy}
-                  disabled={!outputText}
-                  size="sm"
-                  variant="outline"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4 mr-1 text-green-600 dark:text-green-400" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4 mr-1" />
-                      Copy
-                    </>
-                  )}
-                </Button>
-                
-                {tierInfo.features?.export && (
-                  <Button
-                    onClick={() => handleDownload('txt')}
-                    disabled={!outputText}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Download className="h-4 w-4 mr-1" />
-                    Download
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <textarea
-              value={outputText}
-              readOnly
-              placeholder="Sanitized output will appear here..."
-              className="textarea h-96 bg-gray-50 dark:bg-slate-800/50"
-            />
-
-            {stats && showStats && (
-              <Card className="p-4 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-800/50 rounded-lg">
-                    <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <p className="font-medium text-green-900 dark:text-green-300">
-                      Sanitization Complete!
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 text-sm text-green-800 dark:text-green-400">
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4" />
-                        <span><strong>{stats.totalReplacements}</strong> items redacted</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Timer className="h-4 w-4" />
-                        <span><strong>{stats.processingTime}ms</strong> processing</span>
-                      </div>
-                    </div>
-                    
-                    {stats.matches.length > 0 && (
-                      <details className="mt-3">
-                        <summary className="cursor-pointer text-sm font-medium text-green-900 dark:text-green-300 hover:text-green-700 dark:hover:text-green-400">
-                          View detailed breakdown
-                        </summary>
-                        <div className="mt-2 space-y-1 text-sm text-green-700 dark:text-green-400">
-                          {stats.matches.map((match, i) => (
-                            <div key={i} className="flex justify-between items-center py-1 border-b border-green-200 dark:border-green-800 last:border-0">
-                              <span>{match.pattern}</span>
-                              <Badge className="bg-green-100 dark:bg-green-800/50 text-green-800 dark:text-green-300">
-                                {match.count}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </details>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            )}
-          </Card>
+Example:
+{
+  &quot;api_key&quot;: &quot;sk_live_abc123xyz&quot;,
+  &quot;email&quot;: &quot;john@example.com&quot;,
+  &quot;password&quot;: &quot;secret123&quot;
+}"
+            className="w-full h-80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          />
+          <div className="flex items-center justify-between text-xs text-slate-500">
+            <span>{input.length.toLocaleString()} characters</span>
+            <span>Max: {(tierInfo.charLimit || 5000).toLocaleString()} chars</span>
+          </div>
         </div>
 
-        {/* Upgrade CTA */}
-        {license?.tier === 'free' && (
-          <Card className="p-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white overflow-hidden relative animate-slide-up animation-delay-500">
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-            
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl font-bold mb-2 flex items-center justify-center md:justify-start gap-2">
-                  <Sparkles className="h-6 w-6" />
-                  Unlock Advanced Features
-                </h3>
-                <p className="text-blue-100">
-                  Get unlimited sanitization, 70+ patterns, AI entropy detection, and more
-                </p>
+        {/* Output */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-emerald-500" />
+              Sanitized Output
+            </label>
+            {output && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-200"
+                >
+                  {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPreview ? 'Raw' : 'Preview'}
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
+                  title="Download"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleCopy}
+                  className={`p-1.5 rounded-lg transition-colors duration-200 ${
+                    copied 
+                      ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' 
+                      : 'text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                  }`}
+                  title={copied ? 'Copied!' : 'Copy'}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
               </div>
-              
-              <Button
-                onClick={onUpgrade}
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 font-bold shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                View Plans
-              </Button>
+            )}
+          </div>
+          <div className="relative">
+            <textarea
+              value={output}
+              readOnly
+              placeholder="Sanitized output will appear here..."
+              className="w-full h-80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 font-mono text-sm resize-none focus:outline-none"
+            />
+            {!output && !isProcessing && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center text-slate-400">
+                  <Shield className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Your sanitized log will appear here</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Sanitize button */}
+      <div className="mt-6 flex justify-center">
+        <button
+          onClick={handleSanitize}
+          disabled={!input.trim() || isProcessing || !canSanitize}
+          className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:-translate-y-0.5 disabled:hover:translate-y-0"
+        >
+          {isProcessing ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <Zap className="w-5 h-5" />
+              Sanitize Now
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Stats */}
+      {stats && (
+        <div className="mt-8 p-6 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 animate-fade-in-up">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-emerald-500" />
+            Sanitization Complete
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-900">
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {stats.totalReplacements}
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Secrets Found</p>
             </div>
-          </Card>
-        )}
+            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-900">
+              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {stats.patternsMatched}
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Patterns Matched</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-900">
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {stats.processingTime}ms
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Processing Time</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-900">
+              <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {stats.sensitivityScore}%
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Sensitivity Score</p>
+            </div>
+          </div>
+
+          {/* Pattern breakdown */}
+          {stats.patternBreakdown && Object.keys(stats.patternBreakdown).length > 0 && (
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Detected patterns:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(stats.patternBreakdown).map(([pattern, count]) => (
+                  <span 
+                    key={pattern}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium"
+                  >
+                    {pattern}: {count}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Pro tip */}
+      <div className="mt-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 flex items-start gap-3">
+        <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            <strong>Pro tip:</strong> Your data never leaves your browser. All sanitization happens locally on your device.
+          </p>
+        </div>
       </div>
     </div>
   );

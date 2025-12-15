@@ -1,286 +1,235 @@
 // src/components/Pricing.jsx
-// Last updated: December 2025
-//
-// ==========================================
-// PRICING STRUCTURE (Final)
-// ==========================================
-// Free:      $0       | 20/mo    | 5K chars    | 10 patterns
-// Starter:   $9/mo    | 200/mo   | 25K chars   | 40+ patterns
-// Pro:       $15/mo   | 1000/mo  | 100K chars  | 70+ patterns
-// Team:      $39/mo   | 5000/mo  | Unlimited   | All patterns
-// LTD:       $199     | 1000/mo  | 100K chars  | Pro features
-//
-// Annual: Starter $79, Pro $129, Team $349
-// LTD Incremental: $199 → $249 → $279 → $299 (500 cap)
-// ==========================================
+// Pricing page with correct pricing, smooth animations, and consistent UI
 
-import React, { useState } from 'react'
+import { useState } from 'react';
 import { 
-  Check, X, Sparkles, Star, Zap, Crown, Users, Building2, 
-  Clock, Terminal, Code2, FileJson, Gift, Lock, CreditCard, 
-  MessageCircle, ArrowRight, Infinity
-} from 'lucide-react'
+  Check, X, Sparkles, Star, Crown, Users, Building2, 
+  Gift, Lock, CreditCard, MessageCircle, Zap, ArrowRight,
+  Clock, Terminal, Code2
+} from 'lucide-react';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { Badge } from './ui/Badge';
 
-// ==========================================
-// Animation Styles (CSS-in-JS)
-// ==========================================
-const animationStyles = `
-  /* Breathing glow for Pro card */
-  @keyframes breathing-glow {
-    0%, 100% {
-      box-shadow: 
-        0 0 20px rgba(139, 92, 246, 0.2),
-        0 0 40px rgba(59, 130, 246, 0.1),
-        0 25px 50px -12px rgba(0, 0, 0, 0.15);
-    }
-    50% {
-      box-shadow: 
-        0 0 30px rgba(139, 92, 246, 0.3),
-        0 0 60px rgba(59, 130, 246, 0.2),
-        0 25px 50px -12px rgba(0, 0, 0, 0.2);
-    }
+// ============================================
+// PRICING STRUCTURE (Final - Dec 2025)
+// ============================================
+// Free:    $0        | 20/mo    | 5K chars    | 10 patterns
+// Starter: $9/mo     | 200/mo   | 25K chars   | 40+ patterns
+// Pro:     $15/mo    | 1000/mo  | 100K chars  | 70+ patterns
+// Team:    $39/mo    | 5000/mo  | Unlimited   | All patterns
+// LTD:     $199      | Pro features forever
+
+const PLANS = [
+  {
+    name: 'Free',
+    price: 0,
+    period: 'forever',
+    description: 'Perfect for trying out LogShield',
+    icon: Sparkles,
+    color: 'slate',
+    features: [
+      '20 sanitizations/month',
+      '5,000 characters/sanitization',
+      '10 basic patterns',
+      'Copy to clipboard'
+    ],
+    limitations: [
+      'No export options',
+      'No AI entropy detection'
+    ],
+    cta: 'Get Started',
+    tier: 'free',
+    popular: false
+  },
+  {
+    name: 'Starter',
+    price: 9,
+    annualPrice: 79,
+    period: '/month',
+    description: 'For individual developers',
+    icon: Star,
+    color: 'blue',
+    features: [
+      '200 sanitizations/month',
+      '25,000 characters/sanitization',
+      '40+ detection patterns',
+      'Export as TXT/CSV',
+      'Batch upload support',
+      'Email support'
+    ],
+    limitations: [],
+    cta: 'Start Free Trial',
+    tier: 'starter',
+    popular: false
+  },
+  {
+    name: 'Pro',
+    price: 15,
+    annualPrice: 129,
+    period: '/month',
+    description: 'For power users & teams',
+    icon: Crown,
+    color: 'purple',
+    features: [
+      '1,000 sanitizations/month',
+      '100,000 characters/sanitization',
+      '70+ detection patterns',
+      'AI entropy detection',
+      'All export formats',
+      'Custom patterns (soon)',
+      'CLI tool access (soon)',
+      'Priority support'
+    ],
+    limitations: [],
+    cta: 'Go Pro',
+    tier: 'pro',
+    popular: true
+  },
+  {
+    name: 'Team',
+    price: 39,
+    annualPrice: 349,
+    period: '/month',
+    description: 'For organizations',
+    icon: Users,
+    color: 'emerald',
+    features: [
+      '5,000 sanitizations/month',
+      'Unlimited characters',
+      'All 70+ patterns',
+      'Team dashboard',
+      'SSO integration (soon)',
+      'Audit logs',
+      'Dedicated support',
+      'SLA guarantee'
+    ],
+    limitations: [],
+    cta: 'Contact Sales',
+    tier: 'team',
+    popular: false
   }
+];
 
-  /* Rotating border gradient */
+// ============================================
+// ANIMATIONS (CSS-in-JS)
+// ============================================
+const styles = `
+  @keyframes breathing-glow {
+    0%, 100% { box-shadow: 0 0 20px 0 rgba(139, 92, 246, 0.3); }
+    50% { box-shadow: 0 0 40px 5px rgba(139, 92, 246, 0.4); }
+  }
+  
+  @keyframes rotate-border {
+    0% { --angle: 0deg; }
+    100% { --angle: 360deg; }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .pro-card {
+    animation: breathing-glow 3s ease-in-out infinite;
+    position: relative;
+  }
+  
+  .pro-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: conic-gradient(from var(--angle, 0deg), #8b5cf6, #3b82f6, #8b5cf6);
+    border-radius: 1rem;
+    z-index: -1;
+    animation: rotate-border 4s linear infinite;
+  }
+  
   @property --angle {
     syntax: '<angle>';
     initial-value: 0deg;
     inherits: false;
   }
-
-  @keyframes rotate-border {
-    0% { --angle: 0deg; }
-    100% { --angle: 360deg; }
-  }
-
-  /* Shimmer effect for LTD badge */
-  @keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-
-  /* Fade in up */
-  @keyframes fade-in-up {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Scale in */
-  @keyframes scale-in {
-    0% {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  /* Pro card special styling */
-  .pro-card {
-    position: relative;
-    animation: breathing-glow 3s ease-in-out infinite;
-  }
-
-  .pro-card::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 1.1rem;
-    padding: 2px;
-    background: conic-gradient(
-      from var(--angle),
-      #3b82f6,
-      #8b5cf6,
-      #ec4899,
-      #8b5cf6,
-      #3b82f6
-    );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    animation: rotate-border 4s linear infinite;
-  }
-
-  /* LTD shimmer badge */
+  
   .ltd-shimmer {
-    background: linear-gradient(
-      90deg,
-      #f59e0b 0%,
-      #fbbf24 25%,
-      #f59e0b 50%,
-      #fbbf24 75%,
-      #f59e0b 100%
-    );
-    background-size: 200% auto;
-    animation: shimmer 3s linear infinite;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
   }
-
-  /* Staggered animations */
-  .animate-fade-in-up {
-    animation: fade-in-up 0.5s ease-out forwards;
-  }
-
-  .animation-delay-100 { animation-delay: 0.1s; opacity: 0; }
-  .animation-delay-200 { animation-delay: 0.2s; opacity: 0; }
-  .animation-delay-300 { animation-delay: 0.3s; opacity: 0; }
-  .animation-delay-400 { animation-delay: 0.4s; opacity: 0; }
-
-  /* Smooth hover transitions */
+  
   .card-hover {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-
+  
   .card-hover:hover {
     transform: translateY(-4px);
   }
-
-  /* Button hover effect */
+  
   .btn-glow:hover {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
   }
-`
+  
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  
+  .animation-delay-100 { animation-delay: 0.1s; }
+  .animation-delay-200 { animation-delay: 0.2s; }
+  .animation-delay-300 { animation-delay: 0.3s; }
+  .animation-delay-400 { animation-delay: 0.4s; }
+`;
 
-const Pricing = ({ onUpgrade }) => {
-  const [isAnnual, setIsAnnual] = useState(true)
+export default function Pricing({ onUpgrade, license }) {
+  const [billingPeriod, setBillingPeriod] = useState('monthly');
+  const currentTier = license?.tier || 'free';
 
-  const plans = [
-    {
-      name: 'Free',
-      description: 'Perfect for trying out LogShield',
-      icon: Sparkles,
-      iconColor: 'text-slate-500 dark:text-slate-400',
-      iconBg: 'bg-slate-100 dark:bg-slate-700',
-      price: { monthly: 0, annual: 0 },
-      highlight: false,
-      cta: 'Get Started Free',
-      ctaStyle: 'secondary',
-      tier: 'free',
-      features: [
-        { text: '20 sanitizations/month', included: true },
-        { text: '5,000 characters/sanitization', included: true },
-        { text: '10 basic patterns', included: true },
-        { text: 'Copy to clipboard', included: true },
-        { text: 'Single file upload', included: true },
-        { text: '100% client-side processing', included: true },
-        { text: 'Export options', included: false },
-        { text: 'Custom patterns', included: false },
-      ],
-      limits: { sanitizations: '20/mo', characters: '5K', patterns: '10' }
-    },
-    {
-      name: 'Starter',
-      description: 'For individual developers',
-      icon: Star,
-      iconColor: 'text-blue-500 dark:text-blue-400',
-      iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-      price: { monthly: 9, annual: 79 },
-      highlight: false,
-      cta: 'Start with Starter',
-      ctaStyle: 'secondary',
-      tier: 'starter',
-      features: [
-        { text: '200 sanitizations/month', included: true },
-        { text: '25,000 characters/sanitization', included: true },
-        { text: '40+ detection patterns', included: true },
-        { text: 'Export as TXT/JSON', included: true },
-        { text: 'Email support', included: true },
-        { text: 'Usage analytics', included: true },
-        { text: 'Custom patterns', included: false },
-        { text: 'CLI tool', included: false },
-      ],
-      limits: { sanitizations: '200/mo', characters: '25K', patterns: '40+' }
-    },
-    {
-      name: 'Pro',
-      description: 'For power users & freelancers',
-      icon: Crown,
-      iconColor: 'text-purple-400',
-      iconBg: 'bg-purple-500/20',
-      price: { monthly: 15, annual: 129 },
-      highlight: true,
-      badge: 'Most Popular',
-      cta: 'Go Pro',
-      ctaStyle: 'primary',
-      tier: 'pro',
-      features: [
-        { text: '1,000 sanitizations/month', included: true },
-        { text: '100,000 characters/sanitization', included: true },
-        { text: '70+ detection patterns', included: true },
-        { text: 'AI entropy detection', included: true },
-        { text: 'All export formats', included: true },
-        { text: 'Priority email support', included: true },
-        { text: 'Custom patterns', included: true, comingSoon: true },
-        { text: 'CLI tool', included: true, comingSoon: true },
-      ],
-      limits: { sanitizations: '1K/mo', characters: '100K', patterns: '70+' }
-    },
-    {
-      name: 'Team',
-      description: 'For teams & organizations',
-      icon: Users,
-      iconColor: 'text-emerald-500 dark:text-emerald-400',
-      iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
-      price: { monthly: 39, annual: 349 },
-      highlight: false,
-      cta: 'Start Team Trial',
-      ctaStyle: 'secondary',
-      tier: 'team',
-      features: [
-        { text: '5,000 sanitizations/month', included: true },
-        { text: 'Unlimited characters', included: true },
-        { text: 'All detection patterns', included: true },
-        { text: 'Everything in Pro', included: true },
-        { text: 'Up to 5 team seats', included: true },
-        { text: 'Dedicated support', included: true },
-        { text: 'Team dashboard', included: true, comingSoon: true },
-        { text: 'SSO integration', included: true, comingSoon: true },
-      ],
-      limits: { sanitizations: '5K/mo', characters: 'Unlimited', patterns: 'All' }
-    },
-  ]
+  const handleUpgrade = (tier) => {
+    if (onUpgrade) {
+      onUpgrade(tier);
+    } else {
+      // Default: open Gumroad checkout
+      window.open(`https://logshield.gumroad.com/l/${tier}`, '_blank');
+    }
+  };
 
   const getPrice = (plan) => {
-    if (plan.price.monthly === 0) return 'Free'
-    const price = isAnnual ? plan.price.annual : plan.price.monthly
-    return `$${price}`
-  }
+    if (plan.price === 0) return '$0';
+    if (billingPeriod === 'annual' && plan.annualPrice) {
+      return `$${plan.annualPrice}`;
+    }
+    return `$${plan.price}`;
+  };
 
   const getPeriod = (plan) => {
-    if (plan.price.monthly === 0) return 'forever'
-    return isAnnual ? '/year' : '/month'
-  }
+    if (plan.price === 0) return 'forever';
+    return billingPeriod === 'annual' ? '/year' : '/month';
+  };
 
   const getSavings = (plan) => {
-    if (plan.price.monthly === 0) return null
-    const annualMonthly = plan.price.annual / 12
-    return Math.round((1 - annualMonthly / plan.price.monthly) * 100)
-  }
-
-  const getMonthlyEquivalent = (plan) => {
-    if (plan.price.monthly === 0 || !isAnnual) return null
-    return Math.round(plan.price.annual / 12)
-  }
+    if (!plan.annualPrice || plan.price === 0) return null;
+    const monthlyTotal = plan.price * 12;
+    const savings = Math.round((1 - plan.annualPrice / monthlyTotal) * 100);
+    return savings > 0 ? `Save ${savings}%` : null;
+  };
 
   return (
-    <section id="pricing" className="py-20 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
-      <style>{animationStyles}</style>
+    <section id="pricing" className="py-16 lg:py-24 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
+      {/* Inject animations */}
+      <style dangerouslySetInnerHTML={{ __html: styles }} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-6">
-            <Sparkles className="w-4 h-4" />
+        <div className="max-w-3xl mx-auto text-center mb-12 animate-fade-in-up">
+          <Badge className="mb-4 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+            <Star className="h-3 w-3 mr-1" />
             Simple Pricing
-          </div>
+          </Badge>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
             Choose Your{' '}
@@ -289,346 +238,268 @@ const Pricing = ({ onUpgrade }) => {
             </span>
           </h2>
           
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
-            Start free, upgrade when you need more. No hidden fees, cancel anytime.
+          <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
+            Start free, upgrade when you need more. No hidden fees.
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full transition-colors duration-300">
+          <div className="inline-flex items-center gap-4 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl">
             <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                !isAnnual
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md'
+              onClick={() => setBillingPeriod('monthly')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                billingPeriod === 'monthly'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Monthly
             </button>
             <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                isAnnual
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md'
+              onClick={() => setBillingPeriod('annual')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+                billingPeriod === 'annual'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Annual
-              <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                Save 20%+
+              <span className="px-1.5 py-0.5 text-xs bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded">
+                Save 25%+
               </span>
             </button>
           </div>
         </div>
 
-        {/* Pricing Cards */}
+        {/* Pricing Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {plans.map((plan, index) => {
-            const Icon = plan.icon
-            const savings = getSavings(plan)
-            const monthlyEquiv = getMonthlyEquivalent(plan)
-
+          {PLANS.map((plan, index) => {
+            const Icon = plan.icon;
+            const isCurrentPlan = currentTier === plan.tier;
+            const isPro = plan.tier === 'pro';
+            const savings = billingPeriod === 'annual' ? getSavings(plan) : null;
+            
             return (
-              <div
+              <Card 
                 key={plan.name}
-                className={`
-                  animate-fade-in-up animation-delay-${(index + 1) * 100}
-                  ${plan.highlight ? 'pro-card' : ''}
-                `}
+                className={`relative p-6 flex flex-col card-hover animate-fade-in-up animation-delay-${(index + 1) * 100} ${
+                  isPro 
+                    ? 'pro-card bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 text-white border-0' 
+                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                }`}
               >
-                <div
-                  className={`
-                    relative h-full rounded-2xl p-6 transition-all duration-300 card-hover
-                    ${plan.highlight
-                      ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 text-white'
-                      : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-xl'
-                    }
-                  `}
-                >
-                  {/* Popular Badge */}
-                  {plan.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
-                        <Zap className="w-3 h-3" />
-                        {plan.badge}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Plan Header */}
-                  <div className="mb-4">
-                    <div className={`inline-flex p-2.5 rounded-xl mb-3 ${plan.iconBg} transition-colors duration-300`}>
-                      <Icon className={`w-6 h-6 ${plan.iconColor}`} />
-                    </div>
-                    <h3 className={`text-xl font-bold mb-1 ${plan.highlight ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                      {plan.name}
-                    </h3>
-                    <p className={`text-sm ${plan.highlight ? 'text-slate-300' : 'text-slate-500 dark:text-slate-400'}`}>
-                      {plan.description}
-                    </p>
+                {/* Popular Badge */}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg px-3 py-1">
+                      Most Popular
+                    </Badge>
                   </div>
+                )}
 
-                  {/* Price */}
-                  <div className="mb-4">
-                    <div className="flex items-baseline gap-1">
-                      <span className={`text-3xl font-bold ${plan.highlight ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                        {getPrice(plan)}
-                      </span>
-                      <span className={`text-sm ${plan.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                        {getPeriod(plan)}
-                      </span>
-                    </div>
-                    {isAnnual && savings && (
-                      <p className={`text-sm mt-1 ${plan.highlight ? 'text-emerald-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        ${monthlyEquiv}/mo &middot; Save {savings}%
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Quick Limits */}
-                  <div className={`
-                    grid grid-cols-3 gap-1 mb-4 p-2.5 rounded-lg transition-colors duration-300
-                    ${plan.highlight ? 'bg-white/5' : 'bg-slate-50 dark:bg-slate-700/50'}
-                  `}>
-                    <div className="text-center">
-                      <div className={`text-xs ${plan.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>Uses</div>
-                      <div className={`text-xs font-bold ${plan.highlight ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                        {plan.limits.sanitizations}
-                      </div>
-                    </div>
-                    <div className="text-center border-x border-slate-200/20 dark:border-slate-600/30">
-                      <div className={`text-xs ${plan.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>Chars</div>
-                      <div className={`text-xs font-bold ${plan.highlight ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                        {plan.limits.characters}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className={`text-xs ${plan.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>Patterns</div>
-                      <div className={`text-xs font-bold ${plan.highlight ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-                        {plan.limits.patterns}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CTA Button */}
-                  <button
-                    onClick={() => onUpgrade?.(plan.tier)}
-                    className={`
-                      w-full py-2.5 px-4 rounded-xl font-semibold text-sm mb-4 
-                      transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
-                      ${plan.ctaStyle === 'primary'
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-purple-500/25 btn-glow'
-                        : plan.highlight
-                          ? 'bg-white text-slate-900 hover:bg-slate-100'
-                          : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100'
-                      }
-                    `}
-                  >
-                    {plan.cta}
-                  </button>
-
-                  {/* Features List */}
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        {feature.included ? (
-                          <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.highlight ? 'text-emerald-400' : 'text-emerald-500'}`} />
-                        ) : (
-                          <X className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.highlight ? 'text-slate-600' : 'text-slate-300 dark:text-slate-600'}`} />
-                        )}
-                        <span className={`text-xs ${
-                          feature.included
-                            ? plan.highlight ? 'text-slate-200' : 'text-slate-700 dark:text-slate-300'
-                            : plan.highlight ? 'text-slate-500' : 'text-slate-400 dark:text-slate-500'
-                        }`}>
-                          {feature.text}
-                          {feature.comingSoon && (
-                            <span className={`
-                              ml-1.5 inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded
-                              ${plan.highlight 
-                                ? 'bg-amber-500/20 text-amber-300' 
-                                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'}
-                            `}>
-                              <Clock className="w-2.5 h-2.5" />
-                              Soon
-                            </span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Plan Icon */}
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
+                  isPro 
+                    ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
+                    : plan.color === 'slate' ? 'bg-slate-100 dark:bg-slate-700'
+                    : plan.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/50'
+                    : plan.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/50'
+                    : 'bg-purple-100 dark:bg-purple-900/50'
+                }`}>
+                  <Icon className={`h-6 w-6 ${
+                    isPro 
+                      ? 'text-white' 
+                      : plan.color === 'slate' ? 'text-slate-600 dark:text-slate-400'
+                      : plan.color === 'blue' ? 'text-blue-600 dark:text-blue-400'
+                      : plan.color === 'emerald' ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-purple-600 dark:text-purple-400'
+                  }`} />
                 </div>
-              </div>
-            )
+
+                {/* Plan Name & Price */}
+                <h3 className={`text-xl font-bold mb-1 ${isPro ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                  {plan.name}
+                </h3>
+                
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className={`text-4xl font-bold ${isPro ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                    {getPrice(plan)}
+                  </span>
+                  <span className={`text-sm ${isPro ? 'text-slate-300' : 'text-slate-500 dark:text-slate-400'}`}>
+                    {getPeriod(plan)}
+                  </span>
+                </div>
+
+                {/* Savings Badge */}
+                {savings && (
+                  <Badge className="w-fit mb-3 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400">
+                    {savings}
+                  </Badge>
+                )}
+                
+                <p className={`text-sm mb-6 ${isPro ? 'text-slate-300' : 'text-slate-600 dark:text-slate-400'}`}>
+                  {plan.description}
+                </p>
+
+                {/* Features List */}
+                <ul className="space-y-3 mb-6 flex-1">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2">
+                      <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+                        isPro ? 'text-purple-400' : 'text-emerald-500 dark:text-emerald-400'
+                      }`} />
+                      <span className={`text-sm ${isPro ? 'text-slate-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                  {plan.limitations?.map((limitation) => (
+                    <li key={limitation} className="flex items-start gap-2">
+                      <X className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+                        isPro ? 'text-slate-500' : 'text-slate-400 dark:text-slate-500'
+                      }`} />
+                      <span className={`text-sm ${isPro ? 'text-slate-400' : 'text-slate-500 dark:text-slate-500'}`}>
+                        {limitation}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA Button */}
+                <Button
+                  onClick={() => !isCurrentPlan && handleUpgrade(plan.tier)}
+                  disabled={isCurrentPlan}
+                  className={`w-full transition-all duration-300 ${
+                    isPro 
+                      ? 'bg-white text-slate-900 hover:bg-slate-100 btn-glow' 
+                      : isCurrentPlan
+                        ? 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                        : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
+                  }`}
+                >
+                  {isCurrentPlan ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Current Plan
+                    </>
+                  ) : (
+                    <>
+                      {plan.cta}
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </Card>
+            );
           })}
         </div>
 
-        {/* Coming Soon Features */}
-        <div className="mb-8 animate-fade-in-up animation-delay-400">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 lg:p-8 border border-blue-100 dark:border-blue-800 transition-colors duration-300">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <h3 className="font-semibold text-slate-900 dark:text-white">Coming Soon to Pro & Team</h3>
-                </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                  We're actively building these features. Pro & Team subscribers will get them automatically when released.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <FeatureBadge icon={Terminal} text="CLI Tool" eta="Q1 2026" />
-                  <FeatureBadge icon={FileJson} text="Batch Processing" eta="Q1 2026" />
-                  <FeatureBadge icon={Code2} text="Custom Patterns" eta="Q1 2026" />
-                </div>
-              </div>
-              <div className="lg:text-right">
-                <a 
-                  href="#roadmap" 
-                  className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-300"
-                >
-                  View full roadmap
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lifetime Deal */}
-        <div className="mb-12 animate-fade-in-up animation-delay-400">
-          <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-6 lg:p-8 border border-amber-200 dark:border-amber-800 transition-colors duration-300">
+        {/* Lifetime Deal Section */}
+        <div className="max-w-4xl mx-auto mb-12 animate-fade-in-up animation-delay-500">
+          <Card className="relative overflow-hidden p-8 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-amber-900/20 border-amber-200 dark:border-amber-800">
             {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-amber-200/30 to-orange-200/30 dark:from-amber-500/10 dark:to-orange-500/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-amber-200/30 to-yellow-200/30 dark:from-amber-500/10 dark:to-yellow-500/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-amber-200/30 to-orange-200/30 dark:from-amber-500/10 dark:to-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-br from-orange-200/30 to-amber-200/30 dark:from-orange-500/10 dark:to-amber-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
             
-            <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                  <Gift className="w-7 h-7 text-white" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
+                  <Gift className="h-8 w-8 text-white" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Lifetime Deal</h3>
-                    <span className="ltd-shimmer inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold text-white">
-                      <Sparkles className="w-3 h-3" />
-                      Limited
-                    </span>
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                      Lifetime Deal
+                    </h3>
+                    <Badge className="ltd-shimmer bg-gradient-to-r from-amber-400 to-orange-500 text-white">
+                      Early Bird
+                    </Badge>
                   </div>
                   <p className="text-slate-600 dark:text-slate-400">
-                    One-time payment, lifetime access to Pro features. Only 500 slots available.
+                    One-time payment, lifetime access to Pro features
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-6">
                 <div className="text-right">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-slate-900 dark:text-white">$199</span>
-                    <span className="text-sm text-slate-500 dark:text-slate-400 line-through">$299</span>
+                  <div className="text-4xl font-bold text-slate-900 dark:text-white">
+                    $199
                   </div>
-                  <div className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                    Early bird price
+                  <div className="text-sm text-slate-500 dark:text-slate-400">
+                    <span className="line-through">$228/year</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 ml-2">Save forever</span>
                   </div>
                 </div>
                 
-                <button
-                  onClick={() => onUpgrade?.('lifetime')}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/25 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                <Button
+                  onClick={() => handleUpgrade('lifetime')}
+                  size="lg"
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Get Lifetime Access
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
               </div>
             </div>
-            
+
             {/* LTD Benefits */}
-            <div className="relative mt-6 pt-6 border-t border-amber-200 dark:border-amber-800 grid sm:grid-cols-4 gap-4">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">1,000 sanitizations/mo</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">100K characters</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">All Pro features</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">Lifetime updates</span>
-              </div>
+            <div className="relative z-10 mt-6 pt-6 border-t border-amber-200 dark:border-amber-800 grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { icon: Check, text: 'All Pro features' },
+                { icon: Clock, text: 'Lifetime updates' },
+                { icon: Zap, text: 'Priority support' },
+                { icon: Lock, text: 'No recurring fees' }
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                  <Icon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  {text}
+                </div>
+              ))}
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Trust Signals */}
-        <div className="grid sm:grid-cols-3 gap-6 mb-12">
-          <TrustSignal 
-            icon={Lock}
-            iconBg="bg-blue-100 dark:bg-blue-900/30"
-            iconColor="text-blue-600 dark:text-blue-400"
-            title="100% Private"
-            description="All processing happens in your browser. Your logs never leave your device."
-          />
-          <TrustSignal 
-            icon={CreditCard}
-            iconBg="bg-emerald-100 dark:bg-emerald-900/30"
-            iconColor="text-emerald-600 dark:text-emerald-400"
-            title="Cancel Anytime"
-            description="No contracts, no commitments. Cancel your subscription whenever you want."
-          />
-          <TrustSignal 
-            icon={MessageCircle}
-            iconBg="bg-purple-100 dark:bg-purple-900/30"
-            iconColor="text-purple-600 dark:text-purple-400"
-            title="Real Support"
-            description="Get help from a real human developer, not a chatbot."
-          />
+        <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
+          {[
+            { icon: Lock, title: '100% Private', description: 'All processing happens in your browser. Your logs never leave your device.', color: 'blue' },
+            { icon: CreditCard, title: 'Cancel Anytime', description: 'No contracts, no commitments. Cancel your subscription whenever you want.', color: 'emerald' },
+            { icon: MessageCircle, title: 'Real Support', description: 'Get help from a real human developer, not a chatbot.', color: 'purple' }
+          ].map((signal) => (
+            <Card key={signal.title} className="p-6 text-center card-hover bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <div className={`w-12 h-12 mx-auto rounded-xl flex items-center justify-center mb-4 ${
+                signal.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/50'
+                : signal.color === 'emerald' ? 'bg-emerald-100 dark:bg-emerald-900/50'
+                : 'bg-purple-100 dark:bg-purple-900/50'
+              }`}>
+                <signal.icon className={`h-6 w-6 ${
+                  signal.color === 'blue' ? 'text-blue-600 dark:text-blue-400'
+                  : signal.color === 'emerald' ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-purple-600 dark:text-purple-400'
+                }`} />
+              </div>
+              <h4 className="font-semibold text-slate-900 dark:text-white mb-2">{signal.title}</h4>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {signal.description}
+              </p>
+            </Card>
+          ))}
         </div>
 
-        {/* Enterprise Callout */}
+        {/* Enterprise CTA */}
         <div className="text-center">
-          <p className="text-slate-600 dark:text-slate-400 mb-3">
+          <p className="text-slate-600 dark:text-slate-400 mb-2">
             Need more volume or custom deployment?
           </p>
           <a 
-            href="mailto:enterprise@logshield.dev?subject=Enterprise Inquiry" 
-            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-300"
+            href="mailto:hello@logshield.dev?subject=Enterprise%20Inquiry" 
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
           >
             <Building2 className="w-4 h-4" />
             Contact us for Enterprise pricing
-            <ArrowRight className="w-4 h-4" />
           </a>
         </div>
       </div>
     </section>
-  )
+  );
 }
-
-// ==========================================
-// Helper Components
-// ==========================================
-
-const FeatureBadge = ({ icon: Icon, text, eta }) => (
-  <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors duration-300">
-    <Icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{text}</span>
-    <span className="text-xs text-slate-400 dark:text-slate-500">{eta}</span>
-  </div>
-)
-
-const TrustSignal = ({ icon: Icon, iconBg, iconColor, title, description }) => (
-  <div className="text-center p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600">
-    <div className="flex justify-center mb-4">
-      <div className={`w-14 h-14 rounded-2xl ${iconBg} flex items-center justify-center transition-colors duration-300`}>
-        <Icon className={`w-7 h-7 ${iconColor}`} />
-      </div>
-    </div>
-    <h4 className="font-semibold text-slate-900 dark:text-white mb-2">{title}</h4>
-    <p className="text-sm text-slate-600 dark:text-slate-400">{description}</p>
-  </div>
-)
-
-export default Pricing

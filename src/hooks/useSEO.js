@@ -1,115 +1,71 @@
-// src/hooks/useSEO.js - FIXED VERSION
+// src/hooks/useSEO.js
 import { useEffect } from 'react';
 
+const DEFAULT_TITLE = 'LogShield - Privacy-First Log Sanitizer';
+const DEFAULT_DESCRIPTION = 'Remove API keys, tokens, credentials, and PII from logs instantly. 100% client-side processing.';
+
 /**
- * Custom hook for dynamic SEO meta tags management
- * @param {Object} options - SEO configuration
+ * Hook to manage SEO meta tags
+ * @param {Object} options - SEO options
+ * @param {string} options.title - Page title
+ * @param {string} options.description - Meta description
+ * @param {string} options.image - OG image URL
+ * @param {string} options.url - Canonical URL
+ * @param {string} options.type - OG type (default: website)
  */
-export const useSEO = ({ 
-  title, 
-  description, 
-  keywords, 
-  image, 
+export function useSEO({
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
+  image = '/og-image.png',
   url,
-  type = 'website'
-}) => {
+  type = 'website',
+} = {}) {
   useEffect(() => {
     // Update document title
-    if (title) {
-      document.title = title.includes('LogShield') ? title : `${title} | LogShield`;
-    }
+    document.title = title;
 
-    // Helper function to update meta tags
-    const updateMetaTag = (name, content) => {
-      if (!content) return;
-
-      let meta = document.querySelector(`meta[name="${name}"]`) || 
-                  document.querySelector(`meta[property="${name}"]`);
-
+    // Update meta tags
+    const updateMeta = (property, content) => {
+      let meta = document.querySelector(`meta[property="${property}"]`) ||
+                 document.querySelector(`meta[name="${property}"]`);
+      
       if (!meta) {
         meta = document.createElement('meta');
-        if (name.startsWith('og:') || name.startsWith('twitter:')) {
-          meta.setAttribute('property', name);
+        if (property.startsWith('og:') || property.startsWith('twitter:')) {
+          meta.setAttribute('property', property);
         } else {
-          meta.setAttribute('name', name);
+          meta.setAttribute('name', property);
         }
         document.head.appendChild(meta);
       }
-
+      
       meta.setAttribute('content', content);
     };
 
-    // Update description
-    updateMetaTag('description', description || 'Remove API keys, tokens, emails, and PII from logs instantly. Privacy-first, browser-based tool.');
-
-    // Update keywords
-    if (keywords) {
-      updateMetaTag('keywords', keywords);
-    }
+    // Standard meta tags
+    updateMeta('description', description);
 
     // Open Graph tags
-    updateMetaTag('og:title', title || 'LogShield - Secure Log Sanitizer');
-    updateMetaTag('og:description', description || 'Remove sensitive data from logs instantly. Privacy-first, 100% client-side processing.');
-    updateMetaTag('og:type', type);
-    updateMetaTag('og:image', image || 'https://logshield.dev/og-image.png');
-    updateMetaTag('og:url', url || window.location.href);
-    updateMetaTag('og:site_name', 'LogShield');
+    updateMeta('og:title', title);
+    updateMeta('og:description', description);
+    updateMeta('og:image', image);
+    updateMeta('og:type', type);
+    if (url) {
+      updateMeta('og:url', url);
+    }
 
     // Twitter Card tags
-    updateMetaTag('twitter:card', 'summary_large_image');
-    updateMetaTag('twitter:title', title || 'LogShield - Secure Log Sanitizer');
-    updateMetaTag('twitter:description', description || 'Remove sensitive data from logs instantly.');
-    updateMetaTag('twitter:image', image || 'https://logshield.dev/og-image.png');
-    updateMetaTag('twitter:site', '@logshield');
+    updateMeta('twitter:card', 'summary_large_image');
+    updateMeta('twitter:title', title);
+    updateMeta('twitter:description', description);
+    updateMeta('twitter:image', image);
 
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', url || window.location.href);
-
-    // Structured data (JSON-LD)
-    let structuredDataScript = document.querySelector('script[type="application/ld+json"]#dynamic-seo');
-    if (!structuredDataScript) {
-      structuredDataScript = document.createElement('script');
-      structuredDataScript.type = 'application/ld+json';
-      structuredDataScript.id = 'dynamic-seo';
-      document.head.appendChild(structuredDataScript);
-    }
-
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      'name': title || 'LogShield',
-      'description': description || 'Privacy-first log sanitizer',
-      'url': url || window.location.href,
-      'applicationCategory': 'DeveloperApplication',
-      'operatingSystem': 'Any',
-      'browserRequirements': 'Requires JavaScript',
-      'offers': {
-        '@type': 'Offer',
-        'price': '0',
-        'priceCurrency': 'USD'
-      }
+    // Cleanup function
+    return () => {
+      // Reset to defaults when component unmounts
+      document.title = DEFAULT_TITLE;
     };
-
-    structuredDataScript.textContent = JSON.stringify(structuredData);
-
-  }, [title, description, keywords, image, url, type]);
-};
-
-/**
- * Simpler hook for title only
- */
-export const usePageTitle = (title) => {
-  useEffect(() => {
-    if (title) {
-      document.title = title.includes('LogShield') ? title : `${title} | LogShield`;
-    }
-  }, [title]);
-};
+  }, [title, description, image, url, type]);
+}
 
 export default useSEO;
