@@ -1,4 +1,8 @@
+# LogShield
 
-# LogShield Core v1.1
+Open-core log sanitization tool.
 
-Deterministic, privacy-first log sanitization engine.
+## Structure
+- core: OSS sanitization engine (MIT)
+- web: Free web app (production)
+- web-pro: PRO features (paid)
