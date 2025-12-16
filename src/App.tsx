@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sanitizeLog, SanitizeMatch } from "./engine/sanitize";
+import { sanitizeLog, SanitizeMatch } from "./engine/sanitizeLog";
 
 type RuleStat = {
   rule: string;

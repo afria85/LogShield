@@ -24,6 +24,9 @@
     "terser": "^5.31.3",
     "vite": "^5.4.0",
     "vitest": "^4.0.15"
+  },
+    "bin": {
+    "logshield": "dist/cli/index.js"
   }
 }
 
