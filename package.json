@@ -1,0 +1,28 @@
+{
+  "name": "logshield",
+  "private": true,
+  "version": "4.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "jsdom": "^27.3.0",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "terser": "^5.31.3",
+    "vite": "^5.4.0",
+    "vitest": "^4.0.15"
+  }
+}
+
