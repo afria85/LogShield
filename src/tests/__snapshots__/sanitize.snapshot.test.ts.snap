@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LogShield sanitizeLog ? SNAPSHOT > default mode snapshot 1`] = `
+"
+token=<REDACTED_JWT>
+password=<REDACTED_PASSWORD>
+aws_key=AKIA1234567890TEST
+cc=4242424242424242
+"
+`;
+
+exports[`LogShield sanitizeLog ? SNAPSHOT > default mode snapshot 2`] = `
+[
+  {
+    "rule": "JWT",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.TEST.TEST",
+  },
+  {
+    "rule": "PASSWORD",
+    "value": "password=supersecret",
+  },
+]
+`;
+
+exports[`LogShield sanitizeLog ? SNAPSHOT > strict mode snapshot 1`] = `
+"
+<REDACTED_STRIPE_KEY>
+AKIA1234567890TEST
+<REDACTED_CC>
+"
+`;
+
+exports[`LogShield sanitizeLog ? SNAPSHOT > strict mode snapshot 2`] = `
+[
+  {
+    "rule": "STRIPE_SECRET_KEY",
+    "value": "sk_test_1234567890abcdefghijklmnopqrstuvwxyz",
+  },
+  {
+    "rule": "CREDIT_CARD",
+    "value": "4242424242424242",
+  },
+]
+`;
