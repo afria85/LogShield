@@ -1,44 +1,25 @@
+import { applyRules } from "./applyRules";
+import { guardInput } from "./guard";
 import { allRules } from "../rules";
-import { SanitizeRule, SanitizeMatch } from "../rules/types";
-
-const MAX_SIZE = 200 * 1024;
+import type { RuleContext } from "../rules/types";
 
 export function sanitizeLog(
   input: string,
-  options: { strict?: boolean } = {}
-): { output: string; matches: SanitizeMatch[] } {
-  if (!input) return { output: "", matches: [] };
+  options?: { strict?: boolean }
+) {
+  guardInput(input);
 
-  if (input.length > MAX_SIZE) {
-    throw new Error("Log size exceeds 200KB limit");
+  if (!input) {
+    return { output: "", matches: [] };
   }
 
-  let output = input;
-  const matches: SanitizeMatch[] = [];
+  const ctx: RuleContext = {
+    strict: Boolean(options?.strict),
+  };
 
-  for (const rule of allRules as SanitizeRule[]) {
-    if (rule.strictOnly && !options.strict) continue;
+  const matches: { rule: string; match: string }[] = [];
 
-    output = output.replace(rule.regex, (...args: any[]) => {
-      const match = args[0];
-      const groups = args.slice(1);
-
-      const replaced =
-        typeof rule.replace === "function"
-          ? rule.replace(match, ...groups)
-          : rule.replace;
-
-      // ?? RECORD MATCH ONLY IF ACTUALLY REDACTED
-      if (replaced !== match) {
-        matches.push({
-          rule: rule.name,
-          value: match,
-        });
-      }
-
-      return replaced;
-    });
-  }
+  const output = applyRules(input, allRules, ctx, matches);
 
   return { output, matches };
 }

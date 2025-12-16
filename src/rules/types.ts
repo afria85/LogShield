@@ -1,11 +1,13 @@
-export interface SanitizeRule {
-  name: string;
-  regex: RegExp;
-  replace: string | ((match: string, ...groups: any[]) => string);
-  strictOnly?: boolean;
-}
+export type RuleContext = {
+  strict: boolean;
+};
 
-export interface SanitizeMatch {
-  rule: string;
-  value: string;
-}
+export type RuleReplace =
+  | string
+  | ((match: string, ctx: RuleContext, groups: string[]) => string);
+
+export type Rule = {
+  name: string;
+  pattern: RegExp;
+  replace: RuleReplace;
+};

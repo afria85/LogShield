@@ -1,9 +1,9 @@
-import { SanitizeRule } from "./types";
+import type { Rule } from "../types/rule";
 
-export const urlRules: SanitizeRule[] = [
+export const urlRules: Rule[] = [
   {
     name: "EMAIL",
-    regex: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
-    replace: "<REDACTED_EMAIL>",
+    pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
+    replace: () => "<REDACTED_EMAIL>",
   },
 ];
