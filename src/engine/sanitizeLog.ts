@@ -3,6 +3,12 @@ import { guardInput } from "./guard";
 import { allRules } from "../rules";
 import type { RuleContext } from "../rules/types";
 
+export type SanitizeMatch = {
+  rule: string;
+  index: number;
+  length: number;
+};
+
 export function sanitizeLog(
   input: string,
   options?: { strict?: boolean }
@@ -10,14 +16,14 @@ export function sanitizeLog(
   guardInput(input);
 
   if (!input) {
-    return { output: "", matches: [] };
+    return { output: "", matches: [] as SanitizeMatch[] };
   }
 
   const ctx: RuleContext = {
     strict: Boolean(options?.strict),
   };
 
-  const matches: { rule: string; match: string }[] = [];
+  const matches: SanitizeMatch[] = [];
 
   const output = applyRules(input, allRules, ctx, matches);
 
