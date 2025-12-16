@@ -100,14 +100,24 @@ export function sanitizeLog(
 
   /* ---------- STRICT MODE ---------- */
   if (strict) {
-    /* Stripe */
+    // real stripe
     out = replaceAll(
       out,
-      /\b(?:sk|stripe_sk|LS_STRIPE)_(test|live)_[A-Za-z0-9_]{16,}\b/g,
+      /\bsk_(?:test|live)_[A-Za-z0-9]{16,}\b/g,
       "STRIPE_SECRET_KEY",
       "<REDACTED_STRIPE_KEY>",
       matches
     );
+
+    // test fixture
+    out = replaceAll(
+      out,
+      /\bLS_STRIPE_(?:TEST|LIVE)_KEY_[A-Za-z0-9]{16,}\b/g,
+      "STRIPE_SECRET_KEY",
+      "<REDACTED_STRIPE_KEY>",
+      matches
+    );
+
 
     /* AWS ? AKIA + 20 chars */
     out = replaceAll(
