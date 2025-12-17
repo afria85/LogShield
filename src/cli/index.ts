@@ -1,12 +1,14 @@
 #!/usr/bin/env node
-import { readInput } from "./readInput";
-import { writeOutput } from "./writeOutput";
-import { printSummary } from "./summary";
-import { sanitizeLog } from "../engine/sanitizeLog";
+"use strict";
+
+const { readInput } = require("./readInput");
+const { writeOutput } = require("./writeOutput");
+const { printSummary } = require("./summary");
+const { sanitizeLog } = require("../engine/sanitizeLog");
 
 const args = process.argv.slice(2);
 
-function hasFlag(flag: string) {
+function hasFlag(flag) {
   return args.includes(flag);
 }
 
@@ -17,8 +19,8 @@ function getFileArg() {
 }
 
 async function main() {
-  if (hasFlag("--help")) {
-    console.log(`Usage: logshield scan [file]
+  if (hasFlag("--help") || args.length === 0) {
+    process.stdout.write(`Usage: logshield scan [file]
 
 Options:
   --strict
@@ -31,13 +33,13 @@ Options:
   }
 
   if (hasFlag("--version")) {
-    console.log("logshield v0.1.0");
+    process.stdout.write("logshield v0.2.0\n");
     process.exit(0);
   }
 
   const command = args[0];
   if (command !== "scan") {
-    console.error("Unknown command");
+    process.stderr.write("Unknown command\n");
     process.exit(1);
   }
 
@@ -49,14 +51,14 @@ Options:
   try {
     const input = await readInput(file);
     const result = sanitizeLog(input, { strict });
-
     writeOutput(result, { json });
 
     if (summary) {
       printSummary(result.matches);
     }
-  } catch (err: any) {
-    console.error(err.message || "Unexpected error");
+  } catch (err) {
+    process.stderr.write((err && err.message) || "Unexpected error");
+    process.stderr.write("\n");
     process.exit(2);
   }
 }

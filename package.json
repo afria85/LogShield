@@ -1,25 +1,21 @@
 {
   "name": "logshield-cli",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "commonjs",
   "bin": {
-    "logshield": "dist/cli/cli/index.js"
+    "logshield": "dist/cli/index.cjs"
   },
   "files": [
-    "dist/cli",
-    "dist/engine",
-    "dist/rules",
+    "dist",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "node scripts/build-cli.cjs",
     "test": "vitest"
   },
-  "dependencies": {},
   "devDependencies": {
-    "vite": "^5.4.0",
-    "vitest": "^4.0.15",
-    "terser": "^5.31.3"
+    "esbuild": "^0.25.0",
+    "vitest": "^4.0.0"
   }
 }
