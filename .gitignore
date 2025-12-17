@@ -30,3 +30,4 @@ BLOG_PROMPT.md
 node_modules
 dist
 .env
+*.tgz
