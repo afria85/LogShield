@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 "use strict";
 
+/**
+ * NOTE:
+ * Versi CLI DI-INJECT saat build via esbuild:
+ * define: { __LOGSHIELD_VERSION__: JSON.stringify(pkg.version) }
+ */
+declare const __LOGSHIELD_VERSION__: string;
+
 const { readInput } = require("./readInput");
 const { writeOutput } = require("./writeOutput");
 const { printSummary } = require("./summary");
@@ -8,11 +15,17 @@ const { sanitizeLog } = require("../engine/sanitizeLog");
 
 const args = process.argv.slice(2);
 
-function hasFlag(flag) {
+function hasFlag(flag: string): boolean {
   return args.includes(flag);
 }
 
-function getFileArg() {
+function getVersion(): string {
+  return typeof __LOGSHIELD_VERSION__ === "string"
+    ? __LOGSHIELD_VERSION__
+    : "unknown";
+}
+
+function getFileArg(): string | undefined {
   const file = args[1];
   if (!file || file.startsWith("--")) return undefined;
   return file;
@@ -23,17 +36,17 @@ async function main() {
     process.stdout.write(`Usage: logshield scan [file]
 
 Options:
-  --strict
-  --json
-  --summary
-  --version
-  --help
+  --strict     Aggressive redaction
+  --json       JSON output
+  --summary    Print summary
+  --version    Print version
+  --help       Show help
 `);
     process.exit(0);
   }
 
   if (hasFlag("--version")) {
-    process.stdout.write("logshield v0.2.0\n");
+    console.log(`logshield v${getVersion()}`);
     process.exit(0);
   }
 
@@ -56,8 +69,8 @@ Options:
     if (summary) {
       printSummary(result.matches);
     }
-  } catch (err) {
-    process.stderr.write((err && err.message) || "Unexpected error");
+  } catch (err: any) {
+    process.stderr.write(err?.message || "Unexpected error");
     process.stderr.write("\n");
     process.exit(2);
   }
