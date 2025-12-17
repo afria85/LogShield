@@ -11,7 +11,7 @@ function hasFlag(flag: string) {
 }
 
 function getFileArg() {
-  return args.find((a) => !a.startsWith("--"));
+  return args.find((a: string) => !a.startsWith("--"));
 }
 
 async function main() {
