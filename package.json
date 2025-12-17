@@ -26,7 +26,7 @@
     "vitest": "^4.0.15"
   },
     "bin": {
-    "logshield": "dist/cli/index.js"
+    "logshield": "dist/cli/cli/index.js"
   }
 }
 
