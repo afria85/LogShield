@@ -12,6 +12,7 @@
         }
       ]
     }
-  ]
+  ],
+  "rootDirectory": "web"
 }
 
