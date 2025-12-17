@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sanitizeLog } from "./sanitizelog";
+import { sanitizeLog } from "./sanitizeLog";
 
 describe("LogShield sanitizeLog ? CONTRACT TEST", () => {
   // =========================

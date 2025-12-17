@@ -1,9 +1,9 @@
-import type { Rule } from "../types/rule";
+import type { Rule } from "./types";
 
 export const urlRules: Rule[] = [
   {
-    name: "EMAIL",
-    pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
-    replace: () => "<REDACTED_EMAIL>",
+    name: "URL",
+    pattern: /\bhttps?:\/\/[^\s/$.?#].[^\s]*\b/gi,
+    replace: () => "<REDACTED_URL>",
   },
 ];

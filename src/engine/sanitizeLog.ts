@@ -5,8 +5,7 @@ import type { RuleContext } from "../rules/types";
 
 export type SanitizeMatch = {
   rule: string;
-  index: number;
-  length: number;
+  value: string;
 };
 
 export function sanitizeLog(
