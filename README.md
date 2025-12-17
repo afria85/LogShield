@@ -1,119 +1,101 @@
+---
 # LogShield
 
-**Safe log sanitization for developers.**
+LogShield is a CLI tool to **redact sensitive data from logs** before sharing them with others, AI tools, or public channels.
 
-LogShield is a lightweight, developer-focused utility to automatically redact secrets, tokens, credentials, and sensitive data from logs before they are stored, shared, or shipped.
-
-It is designed to be:
-- **Deterministic** – predictable behavior, no AI, no guesswork
-- **Safe by default** – minimal false positives in default mode
-- **Strict when needed** – aggressive redaction via `strict` mode
-- **Composable** – rule-based engine, easy to extend
-
+Designed to be safe by default, deterministic, and free of runtime dependencies.
 ---
 
-## Why LogShield?
-
-Logs are copied everywhere: CI output, bug reports, Slack, tickets, LLM prompts.
-
-One leaked key is enough to:
-- Compromise production systems
-- Invalidate compliance (GDPR, SOC2)
-- Burn trust instantly
-
-LogShield exists to solve one problem extremely well:
-
-> **Make logs safe to share.**
-
----
-
-## Features
-
-- Redacts common secrets:
-  - API keys
-  - Passwords
-  - JWT tokens
-  - Bearer tokens
-  - Stripe keys
-  - Cloud credentials (AWS, etc.)
-  - Credit cards (Luhn-validated)
-- Two modes:
-  - **Default**: conservative, low false positives
-  - **Strict**: aggressive, security-first
-- Snapshot-tested, contract-tested
-- Zero runtime dependencies
-
----
-
-## Installation
+## Install
 
 ```bash
-npm install logshield
+npm install -g logshield-cli
 ```
 
 ---
 
 ## Usage
 
-### Basic
+Scan a log file:
 
-```ts
-import { sanitizeLog } from "logshield";
-
-const result = sanitizeLog("password=supersecret");
-console.log(result.output);
-// password=<REDACTED_PASSWORD>
+```bash
+logshield scan app.log
 ```
 
-### Strict mode
+Scan from stdin:
 
-```ts
-sanitizeLog(input, { strict: true });
+```bash
+cat app.log | logshield scan
+```
+
+Strict mode (more aggressive):
+
+```bash
+logshield scan app.log --strict
+```
+
+JSON output:
+
+```bash
+logshield scan app.log --json
+```
+
+Summary only (printed to stderr):
+
+```bash
+logshield scan app.log --summary
 ```
 
 ---
 
-## API
+## What Gets Redacted
 
-### `sanitizeLog(input: string, options?)`
+- API keys
+- Passwords
+- JWT tokens
+- `Bearer <TOKEN>` (always redacted)
+- Stripe keys
+- Cloud credentials (AWS, etc.)
+- Credit cards (Luhn-validated)
 
-Returns:
+---
 
-```ts
-{
-  output: string;
-  matches: {
-    rule: string;
-    match: string;
-  }[];
-}
+## Modes
+
+### Default (recommended)
+
+- Conservative
+- Low false positives
+- Safe for sharing logs publicly
+
+### Strict
+
+- Aggressive
+- Security-first
+- May redact more than necessary
+
+---
+
+## Design Guarantees
+
+- Deterministic output
+- Zero runtime dependencies
+- Snapshot-tested & contract-tested
+- No network calls
+- No telemetry
+
+---
+
+## Example
+
+```bash
+cat server.log | logshield scan --strict --summary
 ```
-
-- `output` – sanitized log string
-- `matches` – what was redacted and why (for auditing/debugging)
-
----
-
-## Design Principles
-
-- **No heuristics** – explicit rules only
-- **No mutation magic** – transparent replacements
-- **Locked behavior** – breaking changes require intent
-
-This is a boring utility by design.
-
----
-
-## Roadmap
-
-- CLI (`logshield scan file.log`)
-- GitHub Action
-- Pre-commit hook
-- Pro ruleset (enterprise patterns)
 
 ---
 
 ## License
 
-MIT
+ISC
 
+---
