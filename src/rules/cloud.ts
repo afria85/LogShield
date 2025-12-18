@@ -7,10 +7,18 @@ export const cloudRules: Rule[] = [
     replace: (match, { strict }) =>
       strict ? "<REDACTED_AWS_KEY>" : match,
   },
-    {
+
+  {
+    name: "AWS_SECRET_KEY",
+    pattern: /\b[A-Za-z0-9\/+=]{40}\b/g,
+    replace: (match, { strict }) =>
+      strict ? "<REDACTED_AWS_SECRET>" : match,
+  },
+
+  {
     name: "STRIPE_SECRET_KEY",
     pattern: /\b(?:LS_STRIPE_(?:TEST|LIVE)_KEY_[A-Z0-9_]{10,}|sk_(?:test|live)_[A-Za-z0-9]{16,})\b/g,
-    replace: (match, ctx) =>
-        ctx.strict ? "<REDACTED_STRIPE_KEY>" : match,
-    },
+    replace: (match, { strict }) =>
+      strict ? "<REDACTED_STRIPE_KEY>" : match,
+  },
 ];
