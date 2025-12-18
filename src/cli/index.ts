@@ -2,7 +2,7 @@
 
 /**
  * NOTE:
- * Versi CLI DI-INJECT saat build via esbuild:
+ * CLI version is injected at build time via esbuild:
  * define: { __LOGSHIELD_VERSION__: JSON.stringify(pkg.version) }
  */
 declare const __LOGSHIELD_VERSION__: string;
@@ -23,9 +23,14 @@ function getVersion(): string {
 function printHelp() {
   process.stdout.write(`Usage: logshield scan [file]
 
+Behavior:
+  - If a file is provided, LogShield reads from that file
+  - If input is piped, LogShield reads from STDIN automatically
+  - --stdin is optional and only needed for explicitness
+
 Options:
   --strict            Aggressive redaction
-  --stdin             Read input from STDIN explicitly
+  --stdin             Force read from STDIN
   --fail-on-detect    Exit with code 1 if any redaction occurs
   --json              JSON output
   --summary           Print summary
@@ -47,6 +52,10 @@ function parseArgs(args: string[]) {
   }
 
   return { flags, positionals };
+}
+
+function isStdinPiped(): boolean {
+  return !process.stdin.isTTY;
 }
 
 async function main() {
@@ -72,16 +81,19 @@ async function main() {
   const strict = flags.has("--strict");
   const json = flags.has("--json");
   const summary = flags.has("--summary");
-  const stdin = flags.has("--stdin");
+  const stdinFlag = flags.has("--stdin");
   const failOnDetect = flags.has("--fail-on-detect");
 
-  if (stdin && file) {
-    process.stderr.write("Cannot use --stdin with file argument\n");
+  const stdinAuto = isStdinPiped();
+  const useStdin = stdinFlag || stdinAuto;
+
+  if (useStdin && file) {
+    process.stderr.write("Cannot read from both STDIN and file\n");
     process.exit(1);
   }
 
   try {
-    const input = await readInput(stdin ? undefined : file);
+    const input = await readInput(useStdin ? undefined : file);
     const result = sanitizeLog(input, { strict });
 
     writeOutput(result, { json });
