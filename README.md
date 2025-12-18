@@ -170,9 +170,9 @@ cat app.log | logshield scan --strict --fail-on-detect
 
 Exit codes:
 
-- `0` ? no secrets detected
-- `1` ? secrets detected
-- `2` ? runtime error
+- `0` : no secrets detected
+- `1` : secrets detected
+- `2` : runtime error
 
 ---
 
