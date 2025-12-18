@@ -35,6 +35,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    /* Fallback fonts if Google Fonts blocked */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-style: normal;
+      font-weight: 400 700;
+      src: local('Instrument Sans'), local('Inter'), local('SF Pro Display'), local('Segoe UI');
+    }
+    
+    @font-face {
+      font-family: 'Geist Mono';
+      font-style: normal;
+      font-weight: 400 600;
+      src: local('Geist Mono'), local('SF Mono'), local('Consolas'), local('Monaco');
+    }
+
     :root {
       --bg-primary: #000000;
       --bg-elevated: #0a0a0a;
@@ -957,60 +972,7 @@
   </div>
 </footer>
 
-<script>
-// Back to top
-const backToTop = document.getElementById('backToTop');
-window.addEventListener('scroll', () => {
-  backToTop.classList.toggle('visible', window.scrollY > 300);
-});
-
-backToTop.addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-// Sidebar active state
-const sidebarLinks = document.querySelectorAll('.sidebar-link');
-const sections = document.querySelectorAll('h2[id]');
-
-function updateActiveLink() {
-  let current = '';
-  sections.forEach(section => {
-    const sectionTop = section.offsetTop - 100;
-    if (window.scrollY >= sectionTop) {
-      current = section.getAttribute('id');
-    }
-  });
-
-  sidebarLinks.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('href') === '#' + current) {
-      link.classList.add('active');
-    }
-  });
-}
-
-window.addEventListener('scroll', updateActiveLink);
-
-// Smooth scroll for sidebar links
-sidebarLinks.forEach(link => {
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
-    const target = document.querySelector(link.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-});
-
-// Copy code
-function copyCode(btn, text) {
-  navigator.clipboard.writeText(text);
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-  setTimeout(() => {
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
-  }, 2000);
-}
-</script>
+<script src="docs.js"></script>
 
 </body>
 </html>
