@@ -1,157 +1,237 @@
-# ?? LogShield
+# &#x1F512; LogShield
 
 Deterministic log sanitization for developers.
 
-LogShield is a CLI tool that scans logs and redacts **real secrets** (API keys, tokens, credentials) without breaking log usefulness. It is designed to be predictable, conservative, and safe for production pipelines.
+LogShield is a CLI tool that scans logs and redacts **real secrets** (API keys, tokens, credentials) before logs are shared with others, AI tools, CI systems, or public channels.
+
+It is designed to be **predictable, conservative, and safe for production pipelines**.
 
 ---
 
-## ? Why LogShield exists
+## &#x1F4CC; Why LogShield exists
 
-Logs are often copied into:
+Logs are frequently copied into:
 
-- CI logs
+- CI/CD logs
 - Error reports
 - Issue trackers
 - Chat tools
+- AI assistants
 
-Once a secret leaks there, it is already too late.
+Once a secret appears there, it is already leaked.
 
-Most existing tools try to be "smart" and end up being dangerous:
+Most existing tools fail because they:
 
-- They redact too much (false positives)
-- They behave differently across runs
-- They hide _what_ was redacted and _why_
+- Redact too aggressively (false positives)
+- Behave differently across runs
+- Hide what was redacted and why
 
 LogShield intentionally avoids those failures.
 
 ---
 
-## ?? Core principles
-
-These principles are **non-negotiable** and define all behavior.
+## &#x1F512; Core principles (non-negotiable)
 
 ### 1. Deterministic output
 
-The same input will always produce the same output.
+The same input always produces the same output.
 
 - No randomness
 - No environment-dependent behavior
-- Safe for CI/CD and audits
+- Safe for CI, audits, and reproducibility
+
+---
 
 ### 2. Zero false-positive fatal
 
-LogShield must **not** redact data that is not a real secret.
+LogShield must **not** redact non-secrets.
 
-- IDs, hashes, order numbers, and references must survive
+- IDs, hashes, order numbers, references must survive
 - Losing debugging context is worse than missing a secret
 
 When in doubt, LogShield prefers **not** to redact.
 
-### 3. Predictable flags
+---
+
+### 3. Predictable redaction flags
 
 Every redaction is explicit and consistent.
 
-Example:
+Examples:
 
 ```
-[REDACTED:STRIPE_SECRET]
-[REDACTED:JWT]
-[REDACTED:EMAIL]
+<REDACTED_PASSWORD>
+<REDACTED_API_KEY>
+<REDACTED_JWT>
+<REDACTED_STRIPE_KEY>
+<REDACTED_CC>
 ```
 
 No generic `[REDACTED]` placeholders.
 
 ---
 
-## ? What LogShield does
+## &#x1F50D; What LogShield does
 
 - Scans plain text logs
-- Applies a fixed set of deterministic rules
-- Replaces matched secrets with explicit flags
+- Applies a fixed, deterministic rule set
+- Replaces matched secrets with explicit markers
 
 It does **not** learn, guess, or infer intent.
 
 ---
 
-## ?? What LogShield deliberately does NOT do
+## &#x1F6AB; What LogShield deliberately does NOT do
 
-- ? No AI / LLM inference
-- ? No probabilistic entropy guessing
-- ? No automatic "smart" detection
-- ? No silent behavior changes
+- No AI / LLM inference
+- No entropy or probabilistic guessing
+- No silent behavior changes
+- No telemetry
+- No network calls
 
 These are intentional design decisions.
 
 ---
 
-## ??? CLI usage
+## &#x1F4E6; Installation
 
-Basic usage:
-
-```
-logshield sanitize app.log
-```
-
-From stdin:
-
-```
-cat app.log | logshield sanitize
-```
-
-Strict mode (more aggressive rules, still conservative):
-
-```
-logshield sanitize app.log --strict
+```bash
+npm install -g logshield-cli
 ```
 
 ---
 
-## ?? Example
+## &#x1F5A5; CLI Usage
 
-Input:
+Scan a log file:
 
-```
-POST /charge
-Authorization: Bearer sk_test_51Nxxxx
-userId=usr_839201
+```bash
+logshield scan app.log
 ```
 
-Output:
+Read from stdin:
 
-```
-POST /charge
-Authorization: Bearer [REDACTED:STRIPE_SECRET]
-userId=usr_839201
+```bash
+cat app.log | logshield scan
 ```
 
-Note that `userId` is preserved.
+Strict mode (more aggressive):
+
+```bash
+logshield scan app.log --strict
+```
+
+JSON output (machine-readable):
+
+```bash
+logshield scan app.log --json
+```
+
+Print redaction summary to stderr:
+
+```bash
+logshield scan app.log --summary
+```
 
 ---
 
-## ?? Guarantees
+## &#x2699; CLI Flags
+
+- `--strict`  
+  Aggressive, security-first redaction
+
+- `--stdin`  
+  Explicitly read from STDIN
+
+- `--fail-on-detect`  
+  Exit with code `1` if any secret is detected (CI-friendly)
+
+- `--json`  
+  JSON output instead of plain text
+
+- `--summary`  
+  Print redaction summary to stderr
+
+- `--version`  
+  Print CLI version
+
+- `--help`  
+  Show help
+
+---
+
+## &#x1F527; CI / Pipeline Example
+
+Fail the build if any secret appears in logs:
+
+```bash
+cat app.log | logshield scan --strict --fail-on-detect
+```
+
+Exit codes:
+
+- `0` ? no secrets detected
+- `1` ? secrets detected
+- `2` ? runtime error
+
+---
+
+## &#x1F4DD; What gets redacted
+
+- Passwords
+- API keys
+- JWT tokens
+- `Authorization: Bearer <TOKEN>`
+- Stripe secret keys
+- Cloud credentials (AWS, etc.)
+- Credit card numbers (Luhn-validated)
+- Emails
+- URLs
+
+---
+
+## &#x1F4CA; Modes
+
+### Default mode (recommended)
+
+- Conservative
+- Low false positives
+- Safe for sharing logs publicly
+
+### Strict mode
+
+- Aggressive
+- Security-first
+- May redact more than necessary
+
+---
+
+## &#x1F6E1; Guarantees
 
 LogShield guarantees:
 
-- Stable behavior across versions (unless explicitly documented)
-- No hidden network calls
+- Deterministic output
+- Stable behavior within v0.3.x
+- No runtime dependencies
+- Snapshot-tested and contract-tested
 - No telemetry
+- No network access
 
 ---
 
-## ?? Non-goals
+## &#x26A0; Non-goals
 
 LogShield is **not**:
 
 - A DLP system
 - A runtime security monitor
-- A replacement for secret rotation
+- A secret rotation solution
 
 It is a **last-line safety net**, not a primary defense.
 
 ---
 
-## ?? Status
+## &#x1F4E3; Status
 
 - Engine behavior locked
 - Rule set evolving conservatively
@@ -159,6 +239,6 @@ It is a **last-line safety net**, not a primary defense.
 
 ---
 
-## ?? License
+## &#x1F4DC; License
 
-MIT
+ISC
