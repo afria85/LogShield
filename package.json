@@ -12,10 +12,16 @@
   ],
   "scripts": {
     "build": "node scripts/build-cli.cjs",
+    "build:web": "vite build --outDir dist-web",
+    "dev:web": "vite",
     "test": "vitest"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.2",
     "esbuild": "^0.25.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "vite": "^7.3.0",
     "vitest": "^4.0.0"
   }
 }
