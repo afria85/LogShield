@@ -24,11 +24,13 @@ function printHelp() {
   process.stdout.write(`Usage: logshield scan [file]
 
 Options:
-  --strict     Aggressive redaction
-  --json       JSON output
-  --summary    Print summary
-  --version    Print version
-  --help       Show help
+  --strict            Aggressive redaction
+  --stdin             Read input from STDIN explicitly
+  --fail-on-detect    Exit with code 1 if any redaction occurs
+  --json              JSON output
+  --summary           Print summary
+  --version           Print version
+  --help              Show help
 `);
 }
 
@@ -70,15 +72,26 @@ async function main() {
   const strict = flags.has("--strict");
   const json = flags.has("--json");
   const summary = flags.has("--summary");
+  const stdin = flags.has("--stdin");
+  const failOnDetect = flags.has("--fail-on-detect");
+
+  if (stdin && file) {
+    process.stderr.write("Cannot use --stdin with file argument\n");
+    process.exit(1);
+  }
 
   try {
-    const input = await readInput(file);
+    const input = await readInput(stdin ? undefined : file);
     const result = sanitizeLog(input, { strict });
 
     writeOutput(result, { json });
 
     if (summary) {
       printSummary(result.matches);
+    }
+
+    if (failOnDetect && result.matches.length > 0) {
+      process.exit(1);
     }
 
     process.exit(0);
