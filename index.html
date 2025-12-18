@@ -3,13 +3,2037 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description"
-    content="Privacy-first log sanitizer. Remove API keys, tokens, and PII instantly. 100% client-side." />
-  <title>LogShield</title>
+  <meta name="description" content="Deterministic log sanitization. Remove API keys, tokens, and secrets from logs safely." />
+  <title>LogShield — Deterministic Log Sanitization</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://logshield.dev/">
+  <meta property="og:title" content="LogShield — Deterministic Log Sanitization">
+  <meta property="og:description" content="Strip API keys, tokens, and credentials from your logs. No AI. No cloud. No config. Just pipe in logs and get safe output.">
+  <meta property="og:image" content="https://logshield.dev/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://logshield.dev/">
+  <meta name="twitter:title" content="LogShield — Deterministic Log Sanitization">
+  <meta name="twitter:description" content="Strip API keys, tokens, and credentials from your logs. No AI. No cloud. No config.">
+  <meta name="twitter:image" content="https://logshield.dev/og-image.png">
+  
+  <!-- Additional SEO -->
+  <meta name="keywords" content="log sanitization, secret detection, API key protection, CLI tool, DevOps security, CI/CD">
+  <meta name="author" content="LogShield">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/">
+
   <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #000000;
+      --bg-elevated: #0a0a0a;
+      --bg-card: #111111;
+      --bg-code: #0d0d0d;
+      --text-primary: #fafafa;
+      --text-secondary: #a1a1a1;
+      --text-muted: #666666;
+      --accent-primary: #00E5A0;
+      --accent-secondary: #00D4FF;
+      --accent-warning: #FF6B6B;
+      --accent-purple: #A855F7;
+      --border-subtle: #1a1a1a;
+      --border-default: #262626;
+      --glow-primary: rgba(0, 229, 160, 0.15);
+      --glow-secondary: rgba(0, 212, 255, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    code, pre, .mono {
+      font-family: 'Geist Mono', 'SF Mono', Consolas, monospace;
+    }
+
+    /* Scroll-triggered animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border-subtle);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    header.scrolled::before {
+      opacity: 1;
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 17px;
+      text-decoration: none;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-mark svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-cta {
+      padding: 8px 16px;
+      background: var(--text-primary);
+      color: var(--bg-primary) !important;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .nav-cta:hover {
+      background: #e5e5e5;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated gradient mesh background */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .gradient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
+      top: -200px;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--accent-secondary) 0%, transparent 70%);
+      top: 20%;
+      right: -100px;
+      animation-delay: -5s;
+    }
+
+    .orb-3 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+      bottom: 10%;
+      left: 20%;
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -30px) scale(1.05); }
+      50% { transform: translate(-20px, 20px) scale(0.95); }
+      75% { transform: translate(20px, 30px) scale(1.02); }
+    }
+
+    /* Grid pattern */
+    .grid-pattern {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black 20%, transparent 70%);
+    }
+
+    .hero-content {
+      max-width: 1280px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-text {
+      max-width: 560px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(0, 229, 160, 0.1);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent-primary);
+      margin-bottom: 24px;
+      animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+
+    .badge-pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .badge-pulse::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border: 2px solid var(--accent-primary);
+      border-radius: 50%;
+      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
+    }
+
+    .hero-title {
+      font-size: clamp(48px, 6vw, 72px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+    }
+
+    .hero-title .line {
+      display: block;
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-purple) 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 8s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: #000;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+
+    .btn-primary:hover::before {
+      transform: translateX(100%);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px var(--glow-primary), 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card);
+      border-color: var(--text-muted);
+    }
+
+    /* Interactive Demo */
+    .hero-demo {
+      position: relative;
+      animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+    }
+
+    .demo-container {
+      position: relative;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 
+        0 0 0 1px rgba(255,255,255,0.05) inset,
+        0 40px 80px -20px rgba(0,0,0,0.8);
+    }
+
+    .demo-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 12px;
+    }
+
+    .demo-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .demo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border-default);
+    }
+
+    .demo-dot.red { background: #FF5F57; }
+    .demo-dot.yellow { background: #FEBC2E; }
+    .demo-dot.green { background: #28C840; }
+
+    .demo-title {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'Geist Mono', monospace;
+    }
+
+    .demo-body {
+      padding: 24px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    /* Log line animation */
+    .log-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .log-line.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .log-line.scanning .log-content {
+      background: linear-gradient(90deg, transparent, rgba(0, 229, 160, 0.1), transparent);
+      background-size: 200% 100%;
+      animation: scan 0.8s ease-out;
+    }
+
+    @keyframes scan {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    .log-number {
+      color: var(--text-muted);
+      user-select: none;
+      min-width: 24px;
+      text-align: right;
+    }
+
+    .log-content {
+      flex: 1;
+      padding: 2px 0;
+      border-radius: 4px;
+    }
+
+    .log-key {
+      color: var(--accent-secondary);
+    }
+
+    .log-value {
+      color: var(--text-secondary);
+    }
+
+    .log-secret {
+      color: var(--accent-warning);
+      position: relative;
+    }
+
+    .log-redacted {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0, 229, 160, 0.15);
+      color: var(--accent-primary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .redacted-icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Stats bar */
+    .demo-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-family: 'Geist Mono', monospace;
+    }
+
+    .stat-value.success { color: var(--accent-primary); }
+    .stat-value.warning { color: var(--accent-warning); }
+
+    /* Floating labels */
+    .demo-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .floating-label {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .floating-label.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .floating-label.input-label {
+      top: 80px;
+      left: -60px;
+    }
+
+    .floating-label.output-label {
+      bottom: 40px;
+      right: -60px;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .label-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .input-label .label-dot { background: var(--accent-warning); }
+    .output-label .label-dot { background: var(--accent-primary); }
+
+    /* Problem Section */
+    .problem {
+      padding: 160px 24px;
+      position: relative;
+    }
+
+    .problem::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+    }
+
+    .section-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      max-width: 600px;
+      margin-bottom: 80px;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .section-label.warning { color: var(--accent-warning); }
+    .section-label.success { color: var(--accent-primary); }
+    .section-label.info { color: var(--accent-secondary); }
+
+    .section-title {
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    .section-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Icon styles */
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .icon-sm {
+      width: 18px;
+      height: 18px;
+    }
+
+    .icon-lg {
+      width: 28px;
+      height: 28px;
+    }
+
+    /* Bento Grid */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .bento-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 32px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bento-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06), transparent 40%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .bento-card:hover::before {
+      opacity: 1;
+    }
+
+    .bento-card:hover {
+      border-color: var(--border-default);
+      transform: translateY(-4px);
+    }
+
+    .bento-card.large {
+      grid-column: span 2;
+    }
+
+    .bento-icon {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      margin-bottom: 24px;
+    }
+
+    .bento-icon.warning {
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      color: var(--accent-warning);
+    }
+
+    .bento-icon.success {
+      background: rgba(0, 229, 160, 0.1);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      color: var(--accent-primary);
+    }
+
+    .bento-icon.info {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      color: var(--accent-secondary);
+    }
+
+    .bento-card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .bento-card p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* Visual element in large card */
+    .bento-visual {
+      margin-top: 32px;
+      padding: 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .log-leak {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .log-leak-line {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .leak-arrow {
+      color: var(--text-muted);
+    }
+
+    .leak-destination {
+      padding: 4px 10px;
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      border-radius: 4px;
+      color: var(--accent-warning);
+      font-size: 12px;
+    }
+
+    /* Solution Section */
+    .solution {
+      padding: 160px 24px;
+      position: relative;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-elevated) 100%);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 40px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(0, 229, 160, 0.3);
+      box-shadow: 0 0 60px rgba(0, 229, 160, 0.05);
+    }
+
+    .feature-number {
+      position: absolute;
+      top: 40px;
+      right: 40px;
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--border-subtle);
+      line-height: 1;
+    }
+
+    .feature-card h3 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 1.7;
+      max-width: 400px;
+    }
+
+    /* What LogShield is NOT section */
+    .not-section {
+      padding: 120px 24px;
+      position: relative;
+    }
+
+    .not-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+    }
+
+    .not-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .not-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+
+    .not-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .not-item span {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Use cases section */
+    .use-cases {
+      padding: 120px 24px;
+      position: relative;
+    }
+
+    .use-cases::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+    }
+
+    .use-cases-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .use-case {
+      padding: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .use-case:hover {
+      border-color: var(--accent-secondary);
+      transform: translateY(-4px);
+    }
+
+    .use-case-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: 12px;
+      color: var(--accent-secondary);
+    }
+
+    .use-case h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .use-case p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Flags Section */
+    .flags-section {
+      padding: 120px 24px;
+      position: relative;
+      background: var(--bg-elevated);
+    }
+
+    .flags-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .flag-item {
+      display: flex;
+      gap: 16px;
+      padding: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+
+    .flag-code {
+      font-family: 'Geist Mono', monospace;
+      font-size: 14px;
+      color: var(--accent-primary);
+      background: rgba(0, 229, 160, 0.1);
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      height: fit-content;
+    }
+
+    .flag-info h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .flag-info p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Code Section */
+    .code-section {
+      padding: 160px 24px;
+      position: relative;
+    }
+
+    .code-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+    }
+
+    .code-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    .code-info {
+      position: sticky;
+      top: 120px;
+    }
+
+    .code-block {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .code-filename {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'Geist Mono', monospace;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .code-body {
+      padding: 24px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+
+    .code-line {
+      display: flex;
+      gap: 16px;
+    }
+
+    .line-num {
+      color: var(--text-muted);
+      user-select: none;
+      min-width: 24px;
+      text-align: right;
+    }
+
+    .code-comment { color: var(--text-muted); }
+    .code-cmd { color: var(--accent-primary); }
+    .code-flag { color: var(--accent-secondary); }
+    .code-file { color: #E5C07B; }
+    .code-pipe { color: var(--text-muted); }
+
+    /* CTA Section */
+    .cta {
+      padding: 160px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 100%, var(--glow-primary), transparent);
+    }
+
+    .cta-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-title {
+      font-size: clamp(40px, 5vw, 56px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+    }
+
+    .cta-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+
+    .install-command {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      margin-bottom: 32px;
+    }
+
+    .install-command code {
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+
+    .install-command .dollar {
+      color: var(--accent-primary);
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 24px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .footer-logo {
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .footer-copy {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+
+      .hero-text {
+        max-width: 100%;
+        text-align: center;
+      }
+
+      .hero-desc {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-actions {
+        justify-content: center;
+      }
+
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bento-card.large {
+        grid-column: span 1;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .code-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .code-info {
+        position: static;
+      }
+
+      .floating-label {
+        display: none;
+      }
+
+      .not-grid, .use-cases-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .flags-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding: 100px 16px 60px;
+      }
+
+      .problem, .solution, .code-section, .cta {
+        padding: 100px 16px;
+      }
+
+      .not-section, .use-cases, .flags-section {
+        padding: 80px 16px;
+      }
+
+      nav a:not(.nav-cta) {
+        display: none;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .demo-body {
+        font-size: 12px;
+        padding: 16px;
+      }
+
+      .section-header {
+        margin-bottom: 48px;
+      }
+
+      .bento-card, .feature-card {
+        padding: 24px;
+      }
+
+      .feature-number {
+        font-size: 48px;
+        top: 24px;
+        right: 24px;
+      }
+
+      .not-grid, .use-cases-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+      }
+
+      .footer-left {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    /* Back to Top Button */
+    .back-to-top {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 48px;
+      height: 48px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 99;
+    }
+
+    .back-to-top:hover {
+      background: var(--bg-elevated);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .back-to-top svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+      }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.2s !important;
+      }
+
+      .gradient-orb {
+        animation: none;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav>
+      <a href="#solution">Features</a>
+      <a href="docs.html">Docs</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+      <a href="#get-started" class="nav-cta">Get Started</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+    <div class="grid-pattern"></div>
+  </div>
+  
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="badge-pulse"></span>
+        Open Source CLI Tool
+      </div>
+      
+      <h1 class="hero-title">
+        <span class="line">Sanitize logs.</span>
+        <span class="line gradient-text">Protect secrets.</span>
+      </h1>
+      
+      <p class="hero-desc">
+        LogShield strips API keys, tokens, and credentials from your logs using deterministic, rule-based detection. No AI. No cloud. No config. Just pipe in logs and get safe output.
+      </p>
+      
+      <div class="hero-actions">
+        <a href="#get-started" class="btn btn-primary">
+          Get Started Free
+        </a>
+        <a href="https://github.com/afria85/LogShield" class="btn btn-secondary" target="_blank">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+    
+    <div class="hero-demo">
+      <div class="demo-container">
+        <div class="demo-header">
+          <div class="demo-dots">
+            <div class="demo-dot red"></div>
+            <div class="demo-dot yellow"></div>
+            <div class="demo-dot green"></div>
+          </div>
+          <div class="demo-title">logshield scan</div>
+          <div style="width: 52px;"></div>
+        </div>
+        
+        <div class="demo-body" id="demo-body">
+          <!-- Lines will be added by JS -->
+        </div>
+        
+        <div class="demo-stats">
+          <div class="stat">
+            <span>Lines scanned</span>
+            <span class="stat-value" id="stat-lines">0</span>
+          </div>
+          <div class="stat">
+            <span>Secrets found</span>
+            <span class="stat-value warning" id="stat-secrets">0</span>
+          </div>
+          <div class="stat">
+            <span>Status</span>
+            <span class="stat-value success" id="stat-status">Ready</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="demo-labels">
+        <div class="floating-label input-label" id="label-input">
+          <span class="label-dot"></span>
+          Raw logs with secrets
+        </div>
+        <div class="floating-label output-label" id="label-output">
+          <span class="label-dot"></span>
+          Safe, sanitized output
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="problem">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label warning">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        The Problem
+      </div>
+      <h2 class="section-title">Secrets leak through logs. Every single day.</h2>
+      <p class="section-desc">
+        One accidental console.log() with an API key can expose your entire infrastructure. And once it's in your logs, it goes everywhere.
+      </p>
+    </div>
+    
+    <div class="bento-grid">
+      <div class="bento-card large reveal reveal-delay-1">
+        <div class="bento-icon warning">
+          <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><line x1="12" y1="15" x2="12" y2="17"/></svg>
+        </div>
+        <h3>Logs flow everywhere</h3>
+        <p>Your logs end up in bug reports, Slack channels, third-party monitoring services, and support tickets. Each destination is a potential leak point.</p>
+        
+        <div class="bento-visual">
+          <div class="log-leak">
+            <div class="log-leak-line">
+              <span style="color: var(--accent-warning)">sk_live_4f9e...</span>
+              <span class="leak-arrow">&rarr;</span>
+              <span class="leak-destination">Datadog</span>
+            </div>
+            <div class="log-leak-line">
+              <span style="color: var(--accent-warning)">AKIA7X3F...</span>
+              <span class="leak-arrow">&rarr;</span>
+              <span class="leak-destination">Slack #bugs</span>
+            </div>
+            <div class="log-leak-line">
+              <span style="color: var(--accent-warning)">ghp_1234...</span>
+              <span class="leak-arrow">&rarr;</span>
+              <span class="leak-destination">GitHub Issue</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bento-card reveal reveal-delay-2">
+        <div class="bento-icon warning">
+          <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Debug pressure</h3>
+        <p>When production is down, devs paste logs without checking for secrets. Speed beats security in the moment.</p>
+      </div>
+      
+      <div class="bento-card reveal reveal-delay-3">
+        <div class="bento-icon warning">
+          <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Hidden exposure</h3>
+        <p>Secrets in logs sit in third-party systems for months. You don't know they're exposed until it's too late.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="solution" id="solution">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label success">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        The Solution
+      </div>
+      <h2 class="section-title">Deterministic sanitization. Zero guesswork.</h2>
+      <p class="section-desc">
+        LogShield uses explicit pattern matching to find and redact secrets. The same input always produces the same output. You can write tests against it and trust the results.
+      </p>
+    </div>
+    
+    <div class="feature-grid">
+      <div class="feature-card reveal reveal-delay-1">
+        <span class="feature-number">01</span>
+        <h3>Zero configuration</h3>
+        <p>No flags, config files, or setup required. STDIN to STDOUT automatically. Works the moment you install it.</p>
+      </div>
+      
+      <div class="feature-card reveal reveal-delay-2">
+        <span class="feature-number">02</span>
+        <h3>Structure preserved</h3>
+        <p>Format, whitespace, and context stay intact. Only the sensitive values are replaced. Safe for debugging, diff, and audit.</p>
+      </div>
+      
+      <div class="feature-card reveal reveal-delay-3">
+        <span class="feature-number">03</span>
+        <h3>Zero false positives</h3>
+        <p>Explicit patterns mean we only redact what matches. No accidental corruption of legitimate data. No broken JSON or mangled headers.</p>
+      </div>
+      
+      <div class="feature-card reveal reveal-delay-4">
+        <span class="feature-number">04</span>
+        <h3>Fail-fast for CI</h3>
+        <p>Use --fail-on-detect to break your pipeline if secrets are found. Prevent leaks before they reach production.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What LogShield is NOT -->
+<section class="not-section">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label info">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        What LogShield is NOT
+      </div>
+      <h2 class="section-title">Explicit behavior. No hidden magic.</h2>
+      <p class="section-desc">
+        We believe tools should be transparent about what they do and don't do. Here's what LogShield explicitly avoids.
+      </p>
+    </div>
+    
+    <div class="not-grid reveal reveal-delay-1">
+      <div class="not-item">
+        <svg class="not-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Not an AI or ML-based tool. Rules are explicit and inspectable.</span>
+      </div>
+      <div class="not-item">
+        <svg class="not-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>No cloud processing. Your logs never leave your machine.</span>
+      </div>
+      <div class="not-item">
+        <svg class="not-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>No telemetry. No tracking. No data collection of any kind.</span>
+      </div>
+      <div class="not-item">
+        <svg class="not-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>No mutation of log structure. Output is always diffable.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Designed For -->
+<section class="use-cases">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label success">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Designed For
+      </div>
+      <h2 class="section-title">Fits your existing workflow.</h2>
+    </div>
+    
+    <div class="use-cases-grid reveal reveal-delay-1">
+      <div class="use-case">
+        <div class="use-case-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h4>CI/CD Pipelines</h4>
+        <p>Add to any build step</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        </div>
+        <h4>Log Shipping</h4>
+        <p>Before sending to Datadog, Splunk</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h4>Local Debugging</h4>
+        <p>Safe to paste anywhere</p>
+      </div>
+      <div class="use-case">
+        <div class="use-case-icon">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h4>Incident Reports</h4>
+        <p>Share logs without risk</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Flags -->
+<section class="flags-section">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label info">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        CLI Flags
+      </div>
+      <h2 class="section-title">Simple options when you need them.</h2>
+    </div>
+    
+    <div class="flags-grid reveal reveal-delay-1">
+      <div class="flag-item">
+        <span class="flag-code">--strict</span>
+        <div class="flag-info">
+          <h4>Strict mode</h4>
+          <p>Maximum detection sensitivity for high-security environments</p>
+        </div>
+      </div>
+      <div class="flag-item">
+        <span class="flag-code">--fail-on-detect</span>
+        <div class="flag-info">
+          <h4>Fail on detect</h4>
+          <p>Exit with error code if any secret is found. Perfect for CI gates.</p>
+        </div>
+      </div>
+      <div class="flag-item">
+        <span class="flag-code">--json</span>
+        <div class="flag-info">
+          <h4>JSON output</h4>
+          <p>Machine-readable output for integration with other tools</p>
+        </div>
+      </div>
+      <div class="flag-item">
+        <span class="flag-code">--summary</span>
+        <div class="flag-info">
+          <h4>Summary report</h4>
+          <p>Show statistics about what was found and redacted</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="code-section" id="how-it-works">
+  <div class="section-inner">
+    <div class="code-grid">
+      <div class="code-info reveal">
+        <div class="section-label info">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          How it works
+        </div>
+        <h2 class="section-title">Pipe in logs. Get safe output.</h2>
+        <p class="section-desc" style="max-width: 100%;">
+          LogShield reads from stdin and writes sanitized logs to stdout. Three steps: parse log lines, apply explicit rules, output safe logs with structure intact.
+        </p>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px; font-family: 'Geist Mono', monospace;">
+          <span style="color: var(--accent-primary);">&#8594;</span> STDIN is auto-detected when input is piped.
+        </p>
+      </div>
+      
+      <div class="code-block reveal reveal-delay-1">
+        <div class="code-header">
+          <span class="code-filename">terminal</span>
+          <button class="copy-btn" onclick="copyCode()">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <div class="code-line"><span class="line-num">1</span><span class="code-comment"># Install globally</span></div>
+          <div class="code-line"><span class="line-num">2</span><span class="code-cmd">npm</span> install -g logshield-cli</div>
+          <div class="code-line"><span class="line-num">3</span></div>
+          <div class="code-line"><span class="line-num">4</span><span class="code-comment"># Basic usage</span></div>
+          <div class="code-line"><span class="line-num">5</span><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> <span class="code-flag">scan</span> <span class="code-pipe">&gt;</span> <span class="code-file">safe.log</span></div>
+          <div class="code-line"><span class="line-num">6</span></div>
+          <div class="code-line"><span class="line-num">7</span><span class="code-comment"># Strict mode</span></div>
+          <div class="code-line"><span class="line-num">8</span><span class="code-cmd">cat</span> <span class="code-file">debug.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> <span class="code-flag">scan --strict</span></div>
+          <div class="code-line"><span class="line-num">9</span></div>
+          <div class="code-line"><span class="line-num">10</span><span class="code-comment"># CI/CD gate</span></div>
+          <div class="code-line"><span class="line-num">11</span><span class="code-cmd">cat</span> <span class="code-file">build.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> <span class="code-flag">scan --fail-on-detect</span></div>
+          <div class="code-line"><span class="line-num">12</span></div>
+          <div class="code-line"><span class="line-num">13</span><span class="code-comment"># In Docker pipeline</span></div>
+          <div class="code-line"><span class="line-num">14</span><span class="code-cmd">docker</span> logs app <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> <span class="code-flag">scan</span> <span class="code-pipe">|</span> <span class="code-cmd">upload-logs</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="get-started">
+  <div class="cta-bg"></div>
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Start protecting your logs in 30 seconds.</h2>
+    <p class="cta-desc">Install LogShield and sanitize your first log file right now. No signup. No config. No cloud.</p>
+    
+    <div class="install-command">
+      <code><span class="dollar">$</span> npm install -g logshield-cli</code>
+      <button class="copy-btn" onclick="copyInstall()">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+    
+    <div class="hero-actions" style="justify-content: center;">
+      <a href="docs.html" class="btn btn-primary">
+        Read Documentation
+      </a>
+      <a href="https://github.com/afria85/LogShield" class="btn btn-secondary" target="_blank">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Star on GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Back to Top Button -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="#" class="footer-logo" id="footerLogo">LogShield</a>
+      <span class="footer-copy">&copy; 2025 LogShield &middot; ISC License</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+      <a href="docs.html">Documentation</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Header scroll effect
+const header = document.getElementById('header');
+const backToTop = document.getElementById('backToTop');
+
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 50);
+  backToTop.classList.toggle('visible', window.scrollY > 500);
+});
+
+backToTop.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Footer logo scroll to top
+document.getElementById('footerLogo').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Scroll reveal
+const revealElements = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '-50px' });
+
+revealElements.forEach(el => revealObserver.observe(el));
+
+// Card mouse tracking for glow effect
+document.querySelectorAll('.bento-card, .feature-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    card.style.setProperty('--mouse-x', x + '%');
+    card.style.setProperty('--mouse-y', y + '%');
+  });
+});
+
+// Demo animation
+const demoBody = document.getElementById('demo-body');
+const statLines = document.getElementById('stat-lines');
+const statSecrets = document.getElementById('stat-secrets');
+const statStatus = document.getElementById('stat-status');
+const labelInput = document.getElementById('label-input');
+const labelOutput = document.getElementById('label-output');
+
+const logData = [
+  { raw: 'INFO  App started on port 3000', hasSecret: false },
+  { raw: 'DEBUG Authorization: Bearer sk_live_4f9e3c8d7a2b1c9d8e7f', hasSecret: true, secretType: 'STRIPE_KEY' },
+  { raw: 'INFO  User login successful', hasSecret: false },
+  { raw: 'DEBUG AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE', hasSecret: true, secretType: 'AWS_KEY' },
+  { raw: 'WARN  Rate limit approaching', hasSecret: false },
+  { raw: 'DEBUG x-api-key: ghp_1a2b3c4d5e6f7g8h9i0j', hasSecret: true, secretType: 'GITHUB_TOKEN' },
+];
+
+let currentLine = 0;
+let secretCount = 0;
+let demoPhase = 'input';
+
+function createLogLine(index, data, isRedacted = false) {
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.id = 'log-' + index;
+  
+  const num = document.createElement('span');
+  num.className = 'log-number';
+  num.textContent = (index + 1).toString().padStart(2, '0');
+  
+  const content = document.createElement('span');
+  content.className = 'log-content';
+  
+  if (isRedacted && data.hasSecret) {
+    const parts = data.raw.split(/(:|\=)\s*/);
+    if (parts.length >= 2) {
+      const keyPart = parts[0] + (parts[1] || '');
+      content.innerHTML = '<span class="log-key">' + keyPart + '</span> <span class="log-redacted"><svg class="redacted-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>[REDACTED:' + data.secretType + ']</span>';
+    }
+  } else if (data.hasSecret) {
+    const parts = data.raw.split(/(:|\=)\s*/);
+    if (parts.length >= 2) {
+      const keyPart = parts[0] + (parts[1] || '');
+      const valuePart = parts.slice(2).join('');
+      content.innerHTML = '<span class="log-key">' + keyPart + '</span> <span class="log-secret">' + valuePart + '</span>';
+    } else {
+      content.innerHTML = '<span class="log-value">' + data.raw + '</span>';
+    }
+  } else {
+    content.innerHTML = '<span class="log-value">' + data.raw + '</span>';
+  }
+  
+  line.appendChild(num);
+  line.appendChild(content);
+  
+  return line;
+}
+
+function runDemo() {
+  if (demoPhase === 'input') {
+    if (currentLine < logData.length) {
+      const line = createLogLine(currentLine, logData[currentLine]);
+      demoBody.appendChild(line);
+      
+      setTimeout(function() { line.classList.add('visible'); }, 50);
+      
+      statLines.textContent = currentLine + 1;
+      statStatus.textContent = 'Reading...';
+      
+      if (currentLine === 0) {
+        labelInput.classList.add('visible');
+      }
+      
+      currentLine++;
+      setTimeout(runDemo, 400);
+    } else {
+      demoPhase = 'scanning';
+      statStatus.textContent = 'Scanning...';
+      currentLine = 0;
+      setTimeout(runDemo, 500);
+    }
+  } else if (demoPhase === 'scanning') {
+    if (currentLine < logData.length) {
+      const line = document.getElementById('log-' + currentLine);
+      line.classList.add('scanning');
+      
+      if (logData[currentLine].hasSecret) {
+        secretCount++;
+        statSecrets.textContent = secretCount;
+      }
+      
+      currentLine++;
+      setTimeout(runDemo, 300);
+    } else {
+      demoPhase = 'output';
+      currentLine = 0;
+      labelInput.classList.remove('visible');
+      setTimeout(runDemo, 500);
+    }
+  } else if (demoPhase === 'output') {
+    demoBody.innerHTML = '';
+    
+    logData.forEach(function(data, i) {
+      const line = createLogLine(i, data, true);
+      demoBody.appendChild(line);
+      setTimeout(function() { line.classList.add('visible'); }, i * 100);
+    });
+    
+    statStatus.textContent = 'Complete';
+    labelOutput.classList.add('visible');
+    
+    demoPhase = 'reset';
+    setTimeout(runDemo, 4000);
+  } else if (demoPhase === 'reset') {
+    demoBody.innerHTML = '';
+    currentLine = 0;
+    secretCount = 0;
+    statLines.textContent = '0';
+    statSecrets.textContent = '0';
+    statStatus.textContent = 'Ready';
+    labelOutput.classList.remove('visible');
+    demoPhase = 'input';
+    setTimeout(runDemo, 1000);
+  }
+}
+
+// Start demo when visible
+const demoObserver = new IntersectionObserver(function(entries) {
+  if (entries[0].isIntersecting) {
+    setTimeout(runDemo, 800);
+    demoObserver.disconnect();
+  }
+}, { threshold: 0.3 });
+
+demoObserver.observe(document.querySelector('.hero-demo'));
+
+// Copy functions
+function copyCode() {
+  navigator.clipboard.writeText('npm install -g logshield-cli');
+  var btn = event.target.closest('.copy-btn');
+  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+  setTimeout(function() {
+    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+  }, 2000);
+}
+
+function copyInstall() {
+  navigator.clipboard.writeText('npm install -g logshield-cli');
+  var btn = event.target.closest('.copy-btn');
+  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+  setTimeout(function() {
+    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+  }, 2000);
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
 </body>
 </html>

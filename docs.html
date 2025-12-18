@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LogShield Documentation — Deterministic CLI tool for sanitizing secrets from logs." />
+  <title>Documentation — LogShield</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://logshield.dev/docs">
+  <meta property="og:title" content="Documentation — LogShield">
+  <meta property="og:description" content="Complete documentation for LogShield CLI. Installation, usage, flags, and security model.">
+  <meta property="og:image" content="https://logshield.dev/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Documentation — LogShield">
+  <meta name="twitter:description" content="Complete documentation for LogShield CLI. Installation, usage, flags, and security model.">
+  
+  <!-- Additional SEO -->
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/docs">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #000000;
+      --bg-elevated: #0a0a0a;
+      --bg-card: #111111;
+      --bg-code: #0d0d0d;
+      --text-primary: #fafafa;
+      --text-secondary: #a1a1a1;
+      --text-muted: #666666;
+      --accent-primary: #00E5A0;
+      --accent-secondary: #00D4FF;
+      --accent-warning: #FF6B6B;
+      --accent-purple: #A855F7;
+      --border-subtle: #1a1a1a;
+      --border-default: #262626;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    code, pre, .mono {
+      font-family: 'Geist Mono', 'SF Mono', Consolas, monospace;
+    }
+
+    a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 17px;
+      text-decoration: none;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .logo:hover {
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    nav a.active {
+      color: var(--text-primary);
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding-top: 64px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      padding: 32px 24px;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-section {
+      margin-bottom: 32px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .sidebar-links {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .sidebar-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+      text-decoration: none;
+    }
+
+    .sidebar-link.active {
+      color: var(--accent-primary);
+      background: rgba(0, 229, 160, 0.1);
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 48px 64px;
+    }
+
+    .doc-header {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .doc-title {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .doc-desc {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+    }
+
+    /* Content Styles */
+    .content h2 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 64px 0 24px;
+      padding-top: 24px;
+    }
+
+    .content h2:first-child {
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    .content h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 40px 0 16px;
+    }
+
+    .content p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .content ul, .content ol {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    .content li {
+      margin-bottom: 8px;
+    }
+
+    .content strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Code blocks */
+    .code-block {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .code-lang {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'Geist Mono', monospace;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .code-body {
+      padding: 16px 20px;
+      overflow-x: auto;
+    }
+
+    .code-body code {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .code-body .comment { color: var(--text-muted); }
+    .code-body .cmd { color: var(--accent-primary); }
+    .code-body .flag { color: var(--accent-secondary); }
+    .code-body .string { color: #E5C07B; }
+
+    /* Inline code */
+    .content code:not(.code-body code) {
+      background: var(--bg-card);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: var(--accent-primary);
+    }
+
+    /* Tables */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 24px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    td code {
+      background: var(--bg-card);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--accent-primary);
+    }
+
+    /* Info boxes */
+    .info-box {
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+      display: flex;
+      gap: 12px;
+    }
+
+    .info-box.note {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    .info-box.warning {
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+    }
+
+    .info-box.success {
+      background: rgba(0, 229, 160, 0.1);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+    }
+
+    .info-box-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    .info-box.note .info-box-icon { color: var(--accent-secondary); }
+    .info-box.warning .info-box-icon { color: var(--accent-warning); }
+    .info-box.success .info-box-icon { color: var(--accent-primary); }
+
+    .info-box-content {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .info-box-content strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Design goals list */
+    .goals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .goal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+    }
+
+    .goal-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .goal-icon.yes { color: var(--accent-primary); }
+    .goal-icon.no { color: var(--accent-warning); }
+
+    .goal-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Footer */
+    footer {
+      padding: 32px 24px;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 80px;
+    }
+
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-copy {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Back to Top */
+    .back-to-top {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 44px;
+      height: 44px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      z-index: 99;
+    }
+
+    .back-to-top:hover {
+      background: var(--bg-elevated);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* Mobile */
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 32px 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .doc-title {
+        font-size: 32px;
+      }
+
+      .content h2 {
+        font-size: 24px;
+      }
+
+      .goals-grid {
+        grid-template-columns: 1fr;
+      }
+
+      nav a:not(:last-child) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="docs.html" class="active">Docs</a>
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Getting Started</div>
+      <div class="sidebar-links">
+        <a href="#overview" class="sidebar-link active">Overview</a>
+        <a href="#installation" class="sidebar-link">Installation</a>
+        <a href="#basic-usage" class="sidebar-link">Basic Usage</a>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Usage</div>
+      <div class="sidebar-links">
+        <a href="#input-output" class="sidebar-link">Input &amp; Output</a>
+        <a href="#flags" class="sidebar-link">Flags Reference</a>
+        <a href="#exit-codes" class="sidebar-link">Exit Codes</a>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Concepts</div>
+      <div class="sidebar-links">
+        <a href="#determinism" class="sidebar-link">Determinism</a>
+        <a href="#security" class="sidebar-link">Security Model</a>
+        <a href="#secret-types" class="sidebar-link">Secret Types</a>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Other</div>
+      <div class="sidebar-links">
+        <a href="#license" class="sidebar-link">License</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="doc-header">
+      <h1 class="doc-title">Documentation</h1>
+      <p class="doc-desc">Everything you need to know about using LogShield to sanitize secrets from your logs.</p>
+    </div>
+
+    <div class="content">
+      <h2 id="overview">Overview</h2>
+      <p>LogShield is a deterministic CLI tool for sanitizing secrets from logs. It reads log data from stdin or files, applies explicit rule-based detection, and writes safe, structure-preserving output to stdout.</p>
+
+      <h3>Design Goals</h3>
+      <div class="goals-grid">
+        <div class="goal-item">
+          <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="goal-text">Deterministic output (same input → same output)</span>
+        </div>
+        <div class="goal-item">
+          <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="goal-text">Zero false positives by design</span>
+        </div>
+        <div class="goal-item">
+          <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="goal-text">Pipeline-native (STDIN → STDOUT)</span>
+        </div>
+        <div class="goal-item">
+          <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="goal-text">Local-only, no network, no telemetry</span>
+        </div>
+      </div>
+
+      <h3>Non-Goals (Intentional)</h3>
+      <div class="goals-grid">
+        <div class="goal-item">
+          <svg class="goal-icon no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span class="goal-text">No probabilistic / AI-based detection</span>
+        </div>
+        <div class="goal-item">
+          <svg class="goal-icon no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span class="goal-text">No log reformatting or restructuring</span>
+        </div>
+        <div class="goal-item">
+          <svg class="goal-icon no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span class="goal-text">No cloud service or hosted mode</span>
+        </div>
+      </div>
+
+      <h2 id="installation">Installation</h2>
+      <p>Install LogShield globally via npm:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'npm install -g logshield-cli')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">npm</span> install -g logshield-cli</code>
+        </div>
+      </div>
+
+      <p>Verify installation:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'logshield --version')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">logshield</span> <span class="flag">--version</span></code>
+        </div>
+      </div>
+
+      <h2 id="basic-usage">Basic Usage</h2>
+      <p>Scan a log file:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'logshield scan app.log > safe.log')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">logshield</span> <span class="flag">scan</span> <span class="string">app.log</span> &gt; safe.log</code>
+        </div>
+      </div>
+
+      <p>Pipe logs via stdin:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'cat app.log | logshield scan > safe.log')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">cat</span> <span class="string">app.log</span> | <span class="cmd">logshield</span> <span class="flag">scan</span> &gt; safe.log</code>
+        </div>
+      </div>
+
+      <div class="info-box note">
+        <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="info-box-content">
+          <strong>Auto-detection</strong>
+          STDIN is auto-detected when input is piped. No additional flags required.
+        </div>
+      </div>
+
+      <h2 id="input-output">Input &amp; Output Behavior</h2>
+
+      <h3>Input Sources</h3>
+      <p>LogShield supports two input modes:</p>
+
+      <p><strong>1. File input</strong></p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">logshield</span> <span class="flag">scan</span> <span class="string">app.log</span></code>
+        </div>
+      </div>
+
+      <p><strong>2. STDIN (pipe)</strong></p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">cat</span> <span class="string">app.log</span> | <span class="cmd">logshield</span> <span class="flag">scan</span></code>
+        </div>
+      </div>
+
+      <p>When data is piped, LogShield automatically switches to stdin mode.</p>
+
+      <h3>The --stdin Flag</h3>
+      <p>The <code>--stdin</code> flag exists as an explicit override:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">logshield</span> <span class="flag">scan --stdin</span></code>
+        </div>
+      </div>
+
+      <p>Use cases:</p>
+      <ul>
+        <li>When stdin is not auto-detected by the shell</li>
+        <li>When integrating with non-standard runners</li>
+      </ul>
+      <p>In normal usage, <code>--stdin</code> is not required.</p>
+
+      <h3>Output Guarantees</h3>
+      <ul>
+        <li>Output is written only to stdout</li>
+        <li>Original line order is preserved</li>
+        <li>Whitespace and structure are preserved</li>
+        <li>Only detected secrets are replaced</li>
+      </ul>
+
+      <p>Example transformation:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Before</span>
+        </div>
+        <div class="code-body">
+          <code>Authorization: Bearer sk_live_123</code>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">After</span>
+        </div>
+        <div class="code-body">
+          <code>Authorization: Bearer <span style="color: var(--accent-primary)">[REDACTED:STRIPE_SECRET]</span></code>
+        </div>
+      </div>
+
+      <h2 id="flags">Flags Reference</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>scan</code></td>
+              <td>Scan input logs for secrets</td>
+            </tr>
+            <tr>
+              <td><code>--strict</code></td>
+              <td>Enable extended detection rules</td>
+            </tr>
+            <tr>
+              <td><code>--stdin</code></td>
+              <td>Force stdin mode</td>
+            </tr>
+            <tr>
+              <td><code>--json</code></td>
+              <td>Output machine-readable JSON summary</td>
+            </tr>
+            <tr>
+              <td><code>--summary</code></td>
+              <td>Print detection summary to stderr</td>
+            </tr>
+            <tr>
+              <td><code>--fail-on-detect</code></td>
+              <td>Exit with non-zero code if secrets are found</td>
+            </tr>
+            <tr>
+              <td><code>--version</code></td>
+              <td>Print version</td>
+            </tr>
+            <tr>
+              <td><code>--help</code></td>
+              <td>Show help</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="exit-codes">Exit Codes</h2>
+      <p>LogShield uses stable, CI-safe exit codes:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>0</code></td>
+              <td>Success, no secrets detected</td>
+            </tr>
+            <tr>
+              <td><code>1</code></td>
+              <td>Secrets detected (with <code>--fail-on-detect</code>)</td>
+            </tr>
+            <tr>
+              <td><code>2</code></td>
+              <td>Invalid arguments or usage</td>
+            </tr>
+            <tr>
+              <td><code>3</code></td>
+              <td>Runtime error</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>This allows LogShield to be used as a CI gate.</p>
+
+      <h2 id="determinism">Determinism Guarantees</h2>
+      <p>LogShield guarantees:</p>
+      <ul>
+        <li>Same input produces identical output</li>
+        <li>No randomness</li>
+        <li>No heuristic scoring</li>
+        <li>No context-dependent behavior</li>
+      </ul>
+
+      <p>This makes LogShield safe for:</p>
+      <ul>
+        <li>CI pipelines</li>
+        <li>Auditing</li>
+        <li>Diff-based workflows</li>
+        <li>Reproducible builds</li>
+      </ul>
+
+      <h2 id="security">Security Model</h2>
+
+      <div class="info-box success">
+        <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="info-box-content">
+          <strong>Local-only by design</strong>
+          LogShield runs fully locally. No outbound network calls. No telemetry. No data persistence.
+        </div>
+      </div>
+
+      <p>All detection rules are:</p>
+      <ul>
+        <li>Explicit</li>
+        <li>Inspectable</li>
+        <li>Versioned</li>
+      </ul>
+
+      <p>You can audit every rule applied to your logs by reviewing the <a href="https://github.com/afria85/LogShield" target="_blank">source code</a>.</p>
+
+      <h2 id="secret-types">Supported Secret Types</h2>
+      <p>LogShield detects common secret patterns including:</p>
+      <ul>
+        <li>Stripe secret keys</li>
+        <li>AWS access keys</li>
+        <li>GitHub tokens</li>
+        <li>Authorization Bearer tokens</li>
+        <li>Generic API keys</li>
+        <li>Database connection strings</li>
+      </ul>
+
+      <p>See the <a href="https://github.com/afria85/LogShield" target="_blank">source code</a> for the full rule list.</p>
+
+      <h2 id="license">License</h2>
+      <p>LogShield is released under the <strong>ISC License</strong>.</p>
+
+    </div>
+  </main>
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; 2025 LogShield &middot; ISC License</span>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+      <a href="index.html">Home</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Back to top
+const backToTop = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+  backToTop.classList.toggle('visible', window.scrollY > 300);
+});
+
+backToTop.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Sidebar active state
+const sidebarLinks = document.querySelectorAll('.sidebar-link');
+const sections = document.querySelectorAll('h2[id]');
+
+function updateActiveLink() {
+  let current = '';
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - 100;
+    if (window.scrollY >= sectionTop) {
+      current = section.getAttribute('id');
+    }
+  });
+
+  sidebarLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + current) {
+      link.classList.add('active');
+    }
+  });
+}
+
+window.addEventListener('scroll', updateActiveLink);
+
+// Smooth scroll for sidebar links
+sidebarLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Copy code
+function copyCode(btn, text) {
+  navigator.clipboard.writeText(text);
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+  setTimeout(() => {
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+  }, 2000);
+}
+</script>
+
+</body>
+</html>
