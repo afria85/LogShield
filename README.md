@@ -1,9 +1,9 @@
----
-# LogShield
+# ?? LogShield
 
-LogShield is a CLI tool to **redact sensitive data from logs** before sharing them with others, AI tools, or public channels.
+LogShield is a CLI tool to **redact real sensitive data from logs** before sharing them with others, AI tools, CI systems, or public channels.
 
-Designed to be safe by default, deterministic, and free of runtime dependencies.
+It is designed to be **deterministic**, **safe by default**, and free of runtime dependencies.
+
 ---
 
 ## Install
@@ -22,41 +22,55 @@ Scan a log file:
 logshield scan app.log
 ```
 
-Scan from stdin:
+Scan from stdin (auto-detected):
 
 ```bash
 cat app.log | logshield scan
 ```
 
-Strict mode (more aggressive):
+Explicit stdin mode:
+
+```bash
+cat app.log | logshield scan --stdin
+```
+
+Strict mode (more aggressive redaction):
 
 ```bash
 logshield scan app.log --strict
 ```
 
-JSON output:
+JSON output (machine-readable):
 
 ```bash
 logshield scan app.log --json
 ```
 
-Summary only (printed to stderr):
+Print summary to stderr:
 
 ```bash
 logshield scan app.log --summary
+```
+
+Fail CI if any secret is detected:
+
+```bash
+logshield scan app.log --strict --fail-on-detect
 ```
 
 ---
 
 ## What Gets Redacted
 
-- API keys
-- Passwords
+- Passwords (`password=...`, DB URLs)
+- API keys (query params, headers)
 - JWT tokens
-- `Bearer <TOKEN>` (always redacted)
-- Stripe keys
-- Cloud credentials (AWS, etc.)
-- Credit cards (Luhn-validated)
+- `Authorization: Bearer <TOKEN>`
+- Stripe secret keys
+- Cloud credentials (AWS access & secret keys)
+- OAuth access & refresh tokens
+- Credit cards (Luhn-validated, strict mode)
+- URLs (sanitized to avoid leaking endpoints)
 
 ---
 
@@ -65,24 +79,29 @@ logshield scan app.log --summary
 ### Default (recommended)
 
 - Conservative
-- Low false positives
-- Safe for sharing logs publicly
+- Very low false positives
+- Preserves debugging context
 
 ### Strict
 
-- Aggressive
 - Security-first
-- May redact more than necessary
+- Redacts more aggressively
+- Suitable for CI, support bundles, and AI sharing
 
 ---
 
 ## Design Guarantees
 
-- Deterministic output
+These guarantees are **locked for v0.3.x**:
+
+- Deterministic output (same input ? same output)
 - Zero runtime dependencies
-- Snapshot-tested & contract-tested
 - No network calls
-- No telemetry
+- No telemetry or tracking
+- Snapshot-tested & contract-tested
+- Fixed rule order (token ? credential ? cloud ? CC ? URL ? custom)
+
+When in doubt, LogShield prefers **not** to redact.
 
 ---
 
@@ -94,8 +113,18 @@ cat server.log | logshield scan --strict --summary
 
 ---
 
+## Non-goals
+
+LogShield is **not**:
+
+- A DLP system
+- A runtime security monitor
+- A replacement for secret rotation
+
+It is a **last-line safety net**, not a primary defense.
+
+---
+
 ## License
 
 ISC
-
----
