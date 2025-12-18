@@ -34,13 +34,29 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://logshield.dev/">
 
-  <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
+  <!-- Analytics (uncomment when ready) -->
+  <!-- <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script> -->
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    /* Fallback fonts if Google Fonts blocked */
+    @font-face {
+      font-family: 'Instrument Sans';
+      font-style: normal;
+      font-weight: 400 700;
+      src: local('Instrument Sans'), local('Inter'), local('SF Pro Display'), local('Segoe UI');
+    }
+    
+    @font-face {
+      font-family: 'Geist Mono';
+      font-style: normal;
+      font-weight: 400 600;
+      src: local('Geist Mono'), local('SF Mono'), local('Consolas'), local('Monaco');
+    }
+
     :root {
       --bg-primary: #000000;
       --bg-elevated: #0a0a0a;
@@ -1419,7 +1435,7 @@
     </a>
     <nav>
       <a href="#solution">Features</a>
-      <a href="/docs.html">Docs</a>
+      <a href="docs.html">Docs</a>
       <a href="#how-it-works">How it works</a>
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
       <a href="#get-started" class="nav-cta">Get Started</a>
@@ -1753,7 +1769,7 @@
       <div class="code-block reveal reveal-delay-1">
         <div class="code-header">
           <span class="code-filename">terminal</span>
-          <button class="copy-btn" onclick="copyCode()">
+          <button class="copy-btn" onclick="copyCode(event)">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
@@ -1787,14 +1803,14 @@
     
     <div class="install-command">
       <code><span class="dollar">$</span> npm install -g logshield-cli</code>
-      <button class="copy-btn" onclick="copyInstall()">
+      <button class="copy-btn" onclick="copyInstall(event)">
         <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
         Copy
       </button>
     </div>
     
     <div class="hero-actions" style="justify-content: center;">
-      <a href="/docs.html" class="btn btn-primary">
+      <a href="docs.html" class="btn btn-primary">
         Read Documentation
       </a>
       <a href="https://github.com/afria85/LogShield" class="btn btn-secondary" target="_blank">
@@ -1820,220 +1836,12 @@
     </div>
     <div class="footer-links">
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
-      <a href="/docs.html">Documentation</a>
+      <a href="docs.html">Documentation</a>
     </div>
   </div>
 </footer>
 
-<script>
-// Header scroll effect
-const header = document.getElementById('header');
-const backToTop = document.getElementById('backToTop');
-
-window.addEventListener('scroll', () => {
-  header.classList.toggle('scrolled', window.scrollY > 50);
-  backToTop.classList.toggle('visible', window.scrollY > 500);
-});
-
-backToTop.addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-// Footer logo scroll to top
-document.getElementById('footerLogo').addEventListener('click', (e) => {
-  e.preventDefault();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-// Scroll reveal
-const revealElements = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.1, rootMargin: '-50px' });
-
-revealElements.forEach(el => revealObserver.observe(el));
-
-// Card mouse tracking for glow effect
-document.querySelectorAll('.bento-card, .feature-card').forEach(card => {
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    card.style.setProperty('--mouse-x', x + '%');
-    card.style.setProperty('--mouse-y', y + '%');
-  });
-});
-
-// Demo animation
-const demoBody = document.getElementById('demo-body');
-const statLines = document.getElementById('stat-lines');
-const statSecrets = document.getElementById('stat-secrets');
-const statStatus = document.getElementById('stat-status');
-const labelInput = document.getElementById('label-input');
-const labelOutput = document.getElementById('label-output');
-
-const logData = [
-  { raw: 'INFO  App started on port 3000', hasSecret: false },
-  { raw: 'DEBUG Authorization: Bearer sk_live_4f9e3c8d7a2b1c9d8e7f', hasSecret: true, secretType: 'STRIPE_KEY' },
-  { raw: 'INFO  User login successful', hasSecret: false },
-  { raw: 'DEBUG AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE', hasSecret: true, secretType: 'AWS_KEY' },
-  { raw: 'WARN  Rate limit approaching', hasSecret: false },
-  { raw: 'DEBUG x-api-key: ghp_1a2b3c4d5e6f7g8h9i0j', hasSecret: true, secretType: 'GITHUB_TOKEN' },
-];
-
-let currentLine = 0;
-let secretCount = 0;
-let demoPhase = 'input';
-
-function createLogLine(index, data, isRedacted = false) {
-  const line = document.createElement('div');
-  line.className = 'log-line';
-  line.id = 'log-' + index;
-  
-  const num = document.createElement('span');
-  num.className = 'log-number';
-  num.textContent = (index + 1).toString().padStart(2, '0');
-  
-  const content = document.createElement('span');
-  content.className = 'log-content';
-  
-  if (isRedacted && data.hasSecret) {
-    const parts = data.raw.split(/(:|\=)\s*/);
-    if (parts.length >= 2) {
-      const keyPart = parts[0] + (parts[1] || '');
-      content.innerHTML = '<span class="log-key">' + keyPart + '</span> <span class="log-redacted"><svg class="redacted-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>[REDACTED:' + data.secretType + ']</span>';
-    }
-  } else if (data.hasSecret) {
-    const parts = data.raw.split(/(:|\=)\s*/);
-    if (parts.length >= 2) {
-      const keyPart = parts[0] + (parts[1] || '');
-      const valuePart = parts.slice(2).join('');
-      content.innerHTML = '<span class="log-key">' + keyPart + '</span> <span class="log-secret">' + valuePart + '</span>';
-    } else {
-      content.innerHTML = '<span class="log-value">' + data.raw + '</span>';
-    }
-  } else {
-    content.innerHTML = '<span class="log-value">' + data.raw + '</span>';
-  }
-  
-  line.appendChild(num);
-  line.appendChild(content);
-  
-  return line;
-}
-
-function runDemo() {
-  if (demoPhase === 'input') {
-    if (currentLine < logData.length) {
-      const line = createLogLine(currentLine, logData[currentLine]);
-      demoBody.appendChild(line);
-      
-      setTimeout(function() { line.classList.add('visible'); }, 50);
-      
-      statLines.textContent = currentLine + 1;
-      statStatus.textContent = 'Reading...';
-      
-      if (currentLine === 0) {
-        labelInput.classList.add('visible');
-      }
-      
-      currentLine++;
-      setTimeout(runDemo, 400);
-    } else {
-      demoPhase = 'scanning';
-      statStatus.textContent = 'Scanning...';
-      currentLine = 0;
-      setTimeout(runDemo, 500);
-    }
-  } else if (demoPhase === 'scanning') {
-    if (currentLine < logData.length) {
-      const line = document.getElementById('log-' + currentLine);
-      line.classList.add('scanning');
-      
-      if (logData[currentLine].hasSecret) {
-        secretCount++;
-        statSecrets.textContent = secretCount;
-      }
-      
-      currentLine++;
-      setTimeout(runDemo, 300);
-    } else {
-      demoPhase = 'output';
-      currentLine = 0;
-      labelInput.classList.remove('visible');
-      setTimeout(runDemo, 500);
-    }
-  } else if (demoPhase === 'output') {
-    demoBody.innerHTML = '';
-    
-    logData.forEach(function(data, i) {
-      const line = createLogLine(i, data, true);
-      demoBody.appendChild(line);
-      setTimeout(function() { line.classList.add('visible'); }, i * 100);
-    });
-    
-    statStatus.textContent = 'Complete';
-    labelOutput.classList.add('visible');
-    
-    demoPhase = 'reset';
-    setTimeout(runDemo, 4000);
-  } else if (demoPhase === 'reset') {
-    demoBody.innerHTML = '';
-    currentLine = 0;
-    secretCount = 0;
-    statLines.textContent = '0';
-    statSecrets.textContent = '0';
-    statStatus.textContent = 'Ready';
-    labelOutput.classList.remove('visible');
-    demoPhase = 'input';
-    setTimeout(runDemo, 1000);
-  }
-}
-
-// Start demo when visible
-const demoObserver = new IntersectionObserver(function(entries) {
-  if (entries[0].isIntersecting) {
-    setTimeout(runDemo, 800);
-    demoObserver.disconnect();
-  }
-}, { threshold: 0.3 });
-
-demoObserver.observe(document.querySelector('.hero-demo'));
-
-// Copy functions
-function copyCode() {
-  navigator.clipboard.writeText('npm install -g logshield-cli');
-  var btn = event.target.closest('.copy-btn');
-  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-  setTimeout(function() {
-    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
-  }, 2000);
-}
-
-function copyInstall() {
-  navigator.clipboard.writeText('npm install -g logshield-cli');
-  var btn = event.target.closest('.copy-btn');
-  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-  setTimeout(function() {
-    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
-  }, 2000);
-}
-
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-  anchor.addEventListener('click', function(e) {
-    e.preventDefault();
-    var target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-});
-</script>
+<script src="main.js"></script>
 
 </body>
 </html>
