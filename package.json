@@ -1,6 +1,6 @@
 {
   "name": "logshield-cli",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "commonjs",
   "bin": {
     "logshield": "dist/cli/index.cjs"
