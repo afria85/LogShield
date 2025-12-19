@@ -8,6 +8,13 @@ It is designed to be **predictable, conservative, and safe for production pipeli
 
 ---
 
+## Website & Documentation
+
+The website and documentation live in the `/docs` directory.
+They are deployed to https://logshield.dev via Vercel.
+
+---
+
 ## &#x1F4CC; Why LogShield exists
 
 Logs are frequently copied into:
