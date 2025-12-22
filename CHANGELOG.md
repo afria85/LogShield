@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.4
+
+### Fixed
+
+- README CI badge link on npmjs.com
+
 ## v0.3.3
 
 ### Added
