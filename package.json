@@ -15,6 +15,7 @@
     "build": "node scripts/build-cli.cjs",
     "build:web": "vite build --outDir dist-web",
     "dev:web": "vite",
+    "pretest": "npm run build",
     "test": "vitest"
   },
   "devDependencies": {

@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LogShield CLI --help (SNAPSHOT) > shows help output 1`] = `
+"Usage: logshield scan [file]
+
+Behavior:
+  - If a file is provided, LogShield reads from that file
+  - If input is piped, LogShield reads from STDIN automatically
+  - --stdin is optional and only needed for explicitness
+
+Options:
+  --strict            Aggressive redaction
+  --dry-run           Preview redactions without modifying output
+  --stdin             Force read from STDIN
+  --fail-on-detect    Exit with code 1 if any redaction occurs
+  --json              JSON output
+  --summary           Print summary
+  --version           Print version
+  --help              Show help
+"
+`;
+
+exports[`LogShield CLI --help (SNAPSHOT) > shows help output with -h 1`] = `
+"Usage: logshield scan [file]
+
+Behavior:
+  - If a file is provided, LogShield reads from that file
+  - If input is piped, LogShield reads from STDIN automatically
+  - --stdin is optional and only needed for explicitness
+
+Options:
+  --strict            Aggressive redaction
+  --dry-run           Preview redactions without modifying output
+  --stdin             Force read from STDIN
+  --fail-on-detect    Exit with code 1 if any redaction occurs
+  --json              JSON output
+  --summary           Print summary
+  --version           Print version
+  --help              Show help
+"
+`;
