@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="LogShield Documentation — Deterministic CLI tool for sanitizing secrets from logs." />
-  <title>Documentation — LogShield</title>
+  <meta name="description" content="LogShield Documentation - Deterministic CLI tool for sanitizing secrets from logs." />
+  <title>Documentation - LogShield</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
@@ -17,13 +17,13 @@
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://logshield.dev/docs">
-  <meta property="og:title" content="Documentation — LogShield">
+  <meta property="og:title" content="Documentation - LogShield">
   <meta property="og:description" content="Complete documentation for LogShield CLI. Installation, usage, flags, and security model.">
   <meta property="og:image" content="https://logshield.dev/og-image.png">
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Documentation — LogShield">
+  <meta name="twitter:title" content="Documentation - LogShield">
   <meta name="twitter:description" content="Complete documentation for LogShield CLI. Installation, usage, flags, and security model.">
   
   <!-- Additional SEO -->
@@ -329,6 +329,7 @@
     .code-body .cmd { color: var(--accent-primary); }
     .code-body .flag { color: var(--accent-secondary); }
     .code-body .string { color: #E5C07B; }
+    .code-body .redacted { color: var(--accent-primary); }
 
     /* Inline code */
     .content code:not(.code-body code) {
@@ -588,24 +589,32 @@
       </div>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-title">Usage</div>
+      <div class="sidebar-title">Behavior</div>
       <div class="sidebar-links">
-        <a href="#input-output" class="sidebar-link">Input &amp; Output</a>
-        <a href="#flags" class="sidebar-link">Flags Reference</a>
-        <a href="#exit-codes" class="sidebar-link">Exit Codes</a>
+        <a href="#output-behavior" class="sidebar-link">Output Behavior</a>
+        <a href="#redaction-format" class="sidebar-link">Redaction Format</a>
+        <a href="#determinism" class="sidebar-link">Determinism</a>
       </div>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-title">Concepts</div>
+      <div class="sidebar-title">Reference</div>
       <div class="sidebar-links">
-        <a href="#determinism" class="sidebar-link">Determinism</a>
-        <a href="#security" class="sidebar-link">Security Model</a>
+        <a href="#flags" class="sidebar-link">Flags</a>
+        <a href="#exit-codes" class="sidebar-link">Exit Codes</a>
         <a href="#secret-types" class="sidebar-link">Secret Types</a>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Pipelines</div>
+      <div class="sidebar-links">
+        <a href="#common-pipelines" class="sidebar-link">Common Pipelines</a>
       </div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-title">Other</div>
       <div class="sidebar-links">
+        <a href="#non-goals" class="sidebar-link">What LogShield is NOT</a>
+        <a href="#security" class="sidebar-link">Security Model</a>
         <a href="#license" class="sidebar-link">License</a>
       </div>
     </div>
@@ -614,18 +623,18 @@
   <main class="main">
     <div class="doc-header">
       <h1 class="doc-title">Documentation</h1>
-      <p class="doc-desc">Everything you need to know about using LogShield to sanitize secrets from your logs.</p>
+      <p class="doc-desc">LogShield is a deterministic CLI tool for sanitizing sensitive data from logs before they are shared, stored, or processed further. This documentation is authoritative.</p>
     </div>
 
     <div class="content">
       <h2 id="overview">Overview</h2>
-      <p>LogShield is a deterministic CLI tool for sanitizing secrets from logs. It reads log data from stdin or files, applies explicit rule-based detection, and writes safe, structure-preserving output to stdout.</p>
+      <p>LogShield reads log data from stdin or files, applies explicit rule-based detection, and writes safe, structure-preserving output to stdout.</p>
 
       <h3>Design Goals</h3>
       <div class="goals-grid">
         <div class="goal-item">
           <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span class="goal-text">Deterministic output (same input → same output)</span>
+          <span class="goal-text">Deterministic output (same input -> same output)</span>
         </div>
         <div class="goal-item">
           <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -633,27 +642,11 @@
         </div>
         <div class="goal-item">
           <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span class="goal-text">Pipeline-native (STDIN → STDOUT)</span>
+          <span class="goal-text">Pipeline-native (STDIN -> STDOUT)</span>
         </div>
         <div class="goal-item">
           <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           <span class="goal-text">Local-only, no network, no telemetry</span>
-        </div>
-      </div>
-
-      <h3>Non-Goals (Intentional)</h3>
-      <div class="goals-grid">
-        <div class="goal-item">
-          <svg class="goal-icon no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <span class="goal-text">No probabilistic / AI-based detection</span>
-        </div>
-        <div class="goal-item">
-          <svg class="goal-icon no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <span class="goal-text">No log reformatting or restructuring</span>
-        </div>
-        <div class="goal-item">
-          <svg class="goal-icon no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <span class="goal-text">No cloud service or hosted mode</span>
         </div>
       </div>
 
@@ -694,13 +687,13 @@
       <div class="code-block">
         <div class="code-header">
           <span class="code-lang">bash</span>
-          <button class="copy-btn" onclick="copyCode(this, 'logshield scan app.log > safe.log')">
+          <button class="copy-btn" onclick="copyCode(this, 'logshield scan app.log')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
         </div>
         <div class="code-body">
-          <code><span class="cmd">logshield</span> <span class="flag">scan</span> <span class="string">app.log</span> &gt; safe.log</code>
+          <code><span class="cmd">logshield</span> <span class="flag">scan</span> <span class="string">app.log</span></code>
         </div>
       </div>
 
@@ -709,13 +702,13 @@
       <div class="code-block">
         <div class="code-header">
           <span class="code-lang">bash</span>
-          <button class="copy-btn" onclick="copyCode(this, 'cat app.log | logshield scan > safe.log')">
+          <button class="copy-btn" onclick="copyCode(this, 'cat app.log | logshield scan')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
         </div>
         <div class="code-body">
-          <code><span class="cmd">cat</span> <span class="string">app.log</span> | <span class="cmd">logshield</span> <span class="flag">scan</span> &gt; safe.log</code>
+          <code><span class="cmd">cat</span> <span class="string">app.log</span> | <span class="cmd">logshield</span> <span class="flag">scan</span></code>
         </div>
       </div>
 
@@ -727,7 +720,17 @@
         </div>
       </div>
 
-      <h2 id="input-output">Input &amp; Output Behavior</h2>
+      <h2 id="output-behavior">Output Behavior</h2>
+      <p>LogShield is designed to be predictable and non-destructive.</p>
+
+      <h3>What LogShield guarantees</h3>
+      <ul>
+        <li>Line order is preserved</li>
+        <li>Whitespace is preserved</li>
+        <li>Non-secret values are never modified</li>
+        <li>Only the value of detected secrets is replaced</li>
+        <li>Keys, field names, and surrounding text are untouched</li>
+      </ul>
 
       <h3>Input Sources</h3>
       <p>LogShield supports two input modes:</p>
@@ -752,42 +755,31 @@
         </div>
       </div>
 
-      <p>When data is piped, LogShield automatically switches to stdin mode.</p>
+      <p>When data is piped, LogShield automatically switches to stdin mode. The <code>--stdin</code> flag exists as an explicit override for edge cases.</p>
 
-      <h3>The --stdin Flag</h3>
-      <p>The <code>--stdin</code> flag exists as an explicit override:</p>
+      <h2 id="redaction-format">Redaction Format</h2>
+      <p>All redacted values follow this format:</p>
 
       <div class="code-block">
         <div class="code-header">
-          <span class="code-lang">bash</span>
+          <span class="code-lang">format</span>
         </div>
         <div class="code-body">
-          <code><span class="cmd">logshield</span> <span class="flag">scan --stdin</span></code>
+          <code>&lt;REDACTED_TYPE&gt;</code>
         </div>
       </div>
 
-      <p>Use cases:</p>
-      <ul>
-        <li>When stdin is not auto-detected by the shell</li>
-        <li>When integrating with non-standard runners</li>
-      </ul>
-      <p>In normal usage, <code>--stdin</code> is not required.</p>
+      <p>No hashing, masking, or partial replacement is performed. Examples:</p>
 
-      <h3>Output Guarantees</h3>
-      <ul>
-        <li>Output is written only to stdout</li>
-        <li>Original line order is preserved</li>
-        <li>Whitespace and structure are preserved</li>
-        <li>Only detected secrets are replaced</li>
-      </ul>
-
-      <p>Example transformation:</p>
       <div class="code-block">
         <div class="code-header">
           <span class="code-lang">Before</span>
         </div>
         <div class="code-body">
-          <code>Authorization: Bearer sk_live_123</code>
+          <code>password=secret123
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+x-api-key: 1234567890abcdef
+email: user@example.com</code>
         </div>
       </div>
 
@@ -796,9 +788,30 @@
           <span class="code-lang">After</span>
         </div>
         <div class="code-body">
-          <code>Authorization: Bearer <span style="color: var(--accent-primary)">[REDACTED:STRIPE_SECRET]</span></code>
+          <code>password=<span class="redacted">&lt;REDACTED_PASSWORD&gt;</span>
+Authorization: Bearer <span class="redacted">&lt;REDACTED_TOKEN&gt;</span>
+x-api-key: <span class="redacted">&lt;REDACTED_API_KEY&gt;</span>
+email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
         </div>
       </div>
+
+      <h2 id="determinism">Determinism</h2>
+      <p>LogShield is fully deterministic. This means:</p>
+      <ul>
+        <li>The same input always produces the same output</li>
+        <li>There is no randomness or sampling</li>
+        <li>Results are reproducible across machines and runs</li>
+        <li>No heuristic scoring or context-dependent behavior</li>
+      </ul>
+
+      <p>Determinism is critical for:</p>
+      <ul>
+        <li>CI pipelines</li>
+        <li>Snapshot tests</li>
+        <li>Auditable incident workflows</li>
+        <li>Diff-based workflows</li>
+        <li>Reproducible builds</li>
+      </ul>
 
       <h2 id="flags">Flags Reference</h2>
 
@@ -817,23 +830,27 @@
             </tr>
             <tr>
               <td><code>--strict</code></td>
-              <td>Enable extended detection rules</td>
+              <td>Aggressive, security-first redaction. Fails on ambiguous matches. Intended for CI and production.</td>
+            </tr>
+            <tr>
+              <td><code>--dry-run</code></td>
+              <td>Detect secrets without modifying output. Safe for validation and preview.</td>
             </tr>
             <tr>
               <td><code>--stdin</code></td>
-              <td>Force stdin mode</td>
+              <td>Force stdin mode (usually auto-detected)</td>
             </tr>
             <tr>
               <td><code>--json</code></td>
-              <td>Output machine-readable JSON summary</td>
+              <td>Machine-readable JSON output for programmatic consumption</td>
             </tr>
             <tr>
               <td><code>--summary</code></td>
-              <td>Print detection summary to stderr</td>
+              <td>Print compact redaction summary</td>
             </tr>
             <tr>
               <td><code>--fail-on-detect</code></td>
-              <td>Exit with non-zero code if secrets are found</td>
+              <td>Exit with code 1 if secrets are found (CI gate)</td>
             </tr>
             <tr>
               <td><code>--version</code></td>
@@ -848,7 +865,7 @@
       </div>
 
       <h2 id="exit-codes">Exit Codes</h2>
-      <p>LogShield uses stable, CI-safe exit codes:</p>
+      <p>LogShield uses explicit exit codes for automation. You should rely on exit codes in CI environments.</p>
 
       <div class="table-wrapper">
         <table>
@@ -869,34 +886,117 @@
             </tr>
             <tr>
               <td><code>2</code></td>
-              <td>Invalid arguments or usage</td>
-            </tr>
-            <tr>
-              <td><code>3</code></td>
-              <td>Runtime error</td>
+              <td>Invalid arguments or usage error</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <p>This allows LogShield to be used as a CI gate.</p>
-
-      <h2 id="determinism">Determinism Guarantees</h2>
-      <p>LogShield guarantees:</p>
+      <h2 id="secret-types">Supported Secret Types</h2>
+      <p>LogShield detects common secret patterns including:</p>
       <ul>
-        <li>Same input produces identical output</li>
-        <li>No randomness</li>
-        <li>No heuristic scoring</li>
-        <li>No context-dependent behavior</li>
+        <li>Passwords</li>
+        <li>API key headers</li>
+        <li>Authorization Bearer tokens</li>
+        <li>JWTs</li>
+        <li>Emails</li>
+        <li>URLs with embedded credentials</li>
+        <li>Database credentials (DB_URL)</li>
+        <li>OAuth tokens (access_token, refresh_token)</li>
       </ul>
 
-      <p>This makes LogShield safe for:</p>
+      <p><strong>Strict mode additionally detects:</strong></p>
       <ul>
-        <li>CI pipelines</li>
-        <li>Auditing</li>
-        <li>Diff-based workflows</li>
-        <li>Reproducible builds</li>
+        <li>Stripe keys (sk_live_, sk_test_)</li>
+        <li>AWS access keys (AKIA...)</li>
+        <li>AWS secret keys</li>
+        <li>Credit card numbers (Luhn-validated)</li>
       </ul>
+
+      <p>See the <a href="https://github.com/afria85/LogShield" target="_blank">source code</a> for the full rule list.</p>
+
+      <h2 id="common-pipelines">Common Pipelines</h2>
+
+      <h3>Local debugging</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'cat debug.log | logshield scan --dry-run')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">cat</span> <span class="string">debug.log</span> | <span class="cmd">logshield</span> <span class="flag">scan --dry-run</span></code>
+        </div>
+      </div>
+
+      <h3>CI validation</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'logshield scan app.log --strict --fail-on-detect')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">logshield</span> <span class="flag">scan</span> <span class="string">app.log</span> <span class="flag">--strict --fail-on-detect</span></code>
+        </div>
+      </div>
+
+      <h3>Sanitize and save</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'cat app.log | logshield scan > safe.log')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">cat</span> <span class="string">app.log</span> | <span class="cmd">logshield</span> <span class="flag">scan</span> > <span class="string">safe.log</span></code>
+        </div>
+      </div>
+
+      <h3>Upload sanitized logs</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+          <button class="copy-btn" onclick="copyCode(this, 'docker logs app | logshield scan | upload-logs')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">docker</span> logs app | <span class="cmd">logshield</span> <span class="flag">scan</span> | <span class="cmd">upload-logs</span></code>
+        </div>
+      </div>
+
+      <h3>GitHub Actions</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">yaml</span>
+        </div>
+        <div class="code-body">
+          <code>- name: Scan logs
+  run: |
+    cat logs.txt | logshield scan --dry-run --fail-on-detect</code>
+        </div>
+      </div>
+
+      <h2 id="non-goals">What LogShield is NOT</h2>
+      <p>To avoid ambiguity, LogShield intentionally does not:</p>
+      <ul>
+        <li>Send data to the cloud</li>
+        <li>Use AI or probabilistic models</li>
+        <li>Modify log structure</li>
+        <li>Remove entire lines</li>
+        <li>Perform partial masking (e.g., sk_live_****)</li>
+        <li>Learn or adapt over time</li>
+      </ul>
+
+      <p>LogShield is designed to be boring, predictable, and safe.</p>
 
       <h2 id="security">Security Model</h2>
 
@@ -917,21 +1017,14 @@
 
       <p>You can audit every rule applied to your logs by reviewing the <a href="https://github.com/afria85/LogShield" target="_blank">source code</a>.</p>
 
-      <h2 id="secret-types">Supported Secret Types</h2>
-      <p>LogShield detects common secret patterns including:</p>
-      <ul>
-        <li>Stripe secret keys</li>
-        <li>AWS access keys</li>
-        <li>GitHub tokens</li>
-        <li>Authorization Bearer tokens</li>
-        <li>Generic API keys</li>
-        <li>Database connection strings</li>
-      </ul>
-
-      <p>See the <a href="https://github.com/afria85/LogShield" target="_blank">source code</a> for the full rule list.</p>
-
       <h2 id="license">License</h2>
       <p>LogShield is released under the <strong>ISC License</strong>.</p>
+
+      <h3>Support</h3>
+      <ul>
+        <li>Source code: <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a></li>
+        <li>Issues and discussions: <a href="https://github.com/afria85/LogShield/issues" target="_blank">GitHub Issues</a></li>
+      </ul>
 
     </div>
   </main>
@@ -945,7 +1038,7 @@
 
 <footer>
   <div class="footer-inner">
-    <span class="footer-copy">&copy; 2025 LogShield &middot; ISC License</span>
+    <span class="footer-copy">2025 LogShield - ISC License</span>
     <div class="footer-links">
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
       <a href="index.html">Home</a>
