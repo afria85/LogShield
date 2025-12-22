@@ -4,7 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
 [![npm downloads](https://img.shields.io/npm/dm/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
-[![CI](https://github.com/your-org/logshield/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/logshield/actions)
+[![CI](https://github.com/afria85/LogShield/actions/workflows/ci.yml/badge.svg)](https://github.com/afria85/LogShield/actions/workflows/ci.yml)
 
 Deterministic log sanitization for developers.
 
