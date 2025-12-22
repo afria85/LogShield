@@ -1,4 +1,10 @@
-# &#x1F512; LogShield
+---
+
+# LogShield
+
+[![npm version](https://img.shields.io/npm/v/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
+[![npm downloads](https://img.shields.io/npm/dm/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
+[![CI](https://github.com/your-org/logshield/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/logshield/actions)
 
 Deterministic log sanitization for developers.
 
@@ -11,11 +17,11 @@ It is designed to be **predictable, conservative, and safe for production pipeli
 ## Website & Documentation
 
 The website and documentation live in the `/docs` directory.
-They are deployed to https://logshield.dev via Vercel.
+They are deployed to **[https://logshield.dev](https://logshield.dev)** via Vercel.
 
 ---
 
-## &#x1F4CC; Why LogShield exists
+## Why LogShield exists
 
 Logs are frequently copied into:
 
@@ -37,7 +43,7 @@ LogShield intentionally avoids those failures.
 
 ---
 
-## &#x1F512; Core principles (non-negotiable)
+## Core principles (non-negotiable)
 
 ### 1. Deterministic output
 
@@ -49,7 +55,7 @@ The same input always produces the same output.
 
 ---
 
-### 2. Zero false-positive fatal
+### 2. Zero false-positive fatality
 
 LogShield must **not** redact non-secrets.
 
@@ -60,7 +66,7 @@ When in doubt, LogShield prefers **not** to redact.
 
 ---
 
-### 3. Predictable redaction flags
+### 3. Explicit redaction markers
 
 Every redaction is explicit and consistent.
 
@@ -68,19 +74,18 @@ Examples:
 
 ```
 <REDACTED_PASSWORD>
-<REDACTED_API_KEY>
-<REDACTED_JWT>
-<REDACTED_STRIPE_KEY>
-<REDACTED_CC>
+<REDACTED_API_KEY_HEADER>
+<REDACTED_AUTH_BEARER>
+<REDACTED_EMAIL>
 ```
 
 No generic `[REDACTED]` placeholders.
 
 ---
 
-## &#x1F50D; What LogShield does
+## What LogShield does
 
-- Scans plain text logs
+- Scans plain-text logs
 - Applies a fixed, deterministic rule set
 - Replaces matched secrets with explicit markers
 
@@ -88,7 +93,7 @@ It does **not** learn, guess, or infer intent.
 
 ---
 
-## &#x1F6AB; What LogShield deliberately does NOT do
+## What LogShield deliberately does NOT do
 
 - No AI / LLM inference
 - No entropy or probabilistic guessing
@@ -100,7 +105,7 @@ These are intentional design decisions.
 
 ---
 
-## &#x1F4E6; Installation
+## Installation
 
 ```bash
 npm install -g logshield-cli
@@ -108,96 +113,219 @@ npm install -g logshield-cli
 
 ---
 
-## &#x1F5A5; CLI Usage
+## CLI Usage
 
-Scan a log file:
+```bash
+logshield scan [file]
+```
+
+If a file is not provided and input is piped, LogShield automatically reads from **STDIN**.
+
+---
+
+## CLI Flags
+
+- `--strict`
+  Aggressive, security-first redaction
+
+- `--stdin`
+  Explicitly force reading from STDIN
+
+- `--dry-run`
+  Detect sensitive data without modifying output
+
+- `--fail-on-detect`
+  Exit with code `1` if any redaction is detected (CI-friendly)
+
+- `--summary`
+  Print a compact redaction summary
+
+- `--json`
+  JSON output (cannot be combined with `--dry-run`)
+
+- `--version`
+  Print CLI version
+
+- `--help`
+  Show help
+
+---
+
+## Basic usage
+
+### Scan a file
 
 ```bash
 logshield scan app.log
 ```
 
-Read from stdin:
+### Scan from STDIN (recommended for CI)
 
 ```bash
 cat app.log | logshield scan
 ```
 
-Strict mode (more aggressive):
+`--stdin` is optional; piped input is auto-detected.
+
+---
+
+## Dry-run (REPORT MODE, CI-safe)
+
+Use `--dry-run` to **detect** sensitive data without modifying output.
 
 ```bash
-logshield scan app.log --strict
+cat app.log | logshield scan --dry-run
 ```
 
-JSON output (machine-readable):
+### Output
 
-```bash
-logshield scan app.log --json
+```
+[DRY RUN] Detected redactions:
+  OAUTH_ACCESS_TOKEN   x1
+  AUTH_BEARER          x2
+  EMAIL                x1
+  PASSWORD             x1
+
+No output was modified.
+Use without --dry-run to apply.
 ```
 
-Print redaction summary to stderr:
+### Properties
+
+- No log content is echoed
+- Deterministic and snapshot-friendly
+- Safe for CI pipelines
+
+---
+
+## Fail CI on detection
+
+Use `--fail-on-detect` to exit with code `1` when secrets are found.
 
 ```bash
-logshield scan app.log --summary
+cat app.log | logshield scan --dry-run --fail-on-detect
+```
+
+Typical CI pattern:
+
+```bash
+logshield scan --dry-run --fail-on-detect < logs.txt
 ```
 
 ---
 
-## &#x2699; CLI Flags
+## GitHub Actions (example)
 
-- `--strict`  
-  Aggressive, security-first redaction
+Minimal CI integration example:
 
-- `--stdin`  
-  Explicitly read from STDIN
+```yaml
+name: LogShield
 
-- `--fail-on-detect`  
-  Exit with code `1` if any secret is detected (CI-friendly)
+on:
+  push:
+  pull_request:
 
-- `--json`  
-  JSON output instead of plain text
+jobs:
+  logshield:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-- `--summary`  
-  Print redaction summary to stderr
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-- `--version`  
-  Print CLI version
+      - run: npm install -g logshield-cli
 
-- `--help`  
-  Show help
-
----
-
-## &#x1F527; CI / Pipeline Example
-
-Fail the build if any secret appears in logs:
-
-```bash
-cat app.log | logshield scan --strict --fail-on-detect
+      - name: Scan logs
+        run: |
+          cat logs.txt | logshield scan --dry-run --fail-on-detect
 ```
 
-Exit codes:
-
-- `0` : no secrets detected
-- `1` : secrets detected
-- `2` : runtime error
+This will **fail the pipeline** if any secret is detected.
 
 ---
 
-## &#x1F4DD; What gets redacted
+## Apply redaction
+
+To actually sanitize logs, run **without** `--dry-run`:
+
+```bash
+cat app.log | logshield scan > sanitized.log
+```
+
+---
+
+## Strict mode
+
+Enable more aggressive detection rules:
+
+```bash
+logshield scan --strict < logs.txt
+```
+
+---
+
+## Summary output
+
+Print a compact rule-based summary:
+
+```bash
+logshield scan --summary < logs.txt
+```
+
+Example:
+
+```
+LogShield Summary
+PASSWORD: 2
+API_KEY_HEADER: 1
+```
+
+---
+
+## JSON output
+
+Structured output for tooling and automation:
+
+```bash
+logshield scan --json < logs.txt
+```
+
+Notes:
+
+- `--json` **cannot** be combined with `--dry-run`
+- Output schema is stable within v0.3.x
+
+---
+
+## Exit codes
+
+| Code | Meaning                              |
+| ---: | ------------------------------------ |
+|    0 | Success / no detection               |
+|    1 | Detection found (`--fail-on-detect`) |
+|    2 | Runtime or input error               |
+
+---
+
+## What gets redacted
+
+Depending on rules and mode:
 
 - Passwords
-- API keys
-- JWT tokens
-- `Authorization: Bearer <TOKEN>`
-- Stripe secret keys
-- Cloud credentials (AWS, etc.)
-- Credit card numbers (Luhn-validated)
+- API key headers
+- Authorization bearer tokens
+- JWTs
 - Emails
-- URLs
+- URLs with embedded credentials
+- Database credentials
+- Cloud provider credentials
+- Credit card numbers (Luhn-validated)
 
 ---
 
-## &#x1F4CA; Modes
+## Modes
 
 ### Default mode (recommended)
 
@@ -213,12 +341,12 @@ Exit codes:
 
 ---
 
-## &#x1F6E1; Guarantees
+## Guarantees
 
 LogShield guarantees:
 
 - Deterministic output
-- Stable behavior within v0.3.x
+- Stable behavior within **v0.3.x**
 - No runtime dependencies
 - Snapshot-tested and contract-tested
 - No telemetry
@@ -226,7 +354,7 @@ LogShield guarantees:
 
 ---
 
-## &#x26A0; Non-goals
+## Non-goals
 
 LogShield is **not**:
 
@@ -238,7 +366,7 @@ It is a **last-line safety net**, not a primary defense.
 
 ---
 
-## &#x1F4E3; Status
+## Status
 
 - Engine behavior locked
 - Rule set evolving conservatively
@@ -246,6 +374,8 @@ It is a **last-line safety net**, not a primary defense.
 
 ---
 
-## &#x1F4DC; License
+## License
 
 ISC
+
+---

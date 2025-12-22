@@ -27,6 +27,11 @@ export function applyRules(
         });
       }
 
+      // DRY-RUN: do NOT mutate output
+      if (ctx.dryRun) {
+        return match;
+      }
+
       return replaced;
     });
   }

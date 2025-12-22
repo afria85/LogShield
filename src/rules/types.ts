@@ -1,5 +1,6 @@
 export type RuleContext = {
   strict: boolean;
+  dryRun?: boolean;
 };
 
 export type RuleReplace = (

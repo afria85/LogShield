@@ -10,7 +10,7 @@ export type SanitizeMatch = {
 
 export function sanitizeLog(
   input: string,
-  options?: { strict?: boolean }
+  options?: { strict?: boolean; dryRun?: boolean }
 ) {
   guardInput(input);
 
@@ -20,11 +20,19 @@ export function sanitizeLog(
 
   const ctx: RuleContext = {
     strict: Boolean(options?.strict),
+    dryRun: Boolean(options?.dryRun),
   };
 
   const matches: SanitizeMatch[] = [];
 
-  const output = applyRules(input, allRules, ctx, matches);
+  // IMPORTANT:
+  // If dry-run ? we still apply rules for detection,
+  // but we must NOT mutate output.
+  if (ctx.dryRun) {
+    applyRules(input, allRules, ctx, matches);
+    return { output: input, matches };
+  }
 
+  const output = applyRules(input, allRules, ctx, matches);
   return { output, matches };
 }

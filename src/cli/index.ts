@@ -36,7 +36,7 @@ Behavior:
 
 Options:
   --strict            Aggressive redaction
-  --dry-run           Preview redactions without modifying output
+  --dry-run           Report detected redactions only
   --stdin             Force read from STDIN
   --fail-on-detect    Exit with code 1 if any redaction occurs
   --json              JSON output
@@ -65,28 +65,45 @@ function isStdinPiped(): boolean {
   return !process.stdin.isTTY;
 }
 
-function truncateMiddle(str: string, max = 120): string {
-  if (str.length <= max) return str;
-  const half = Math.floor((max - 1) / 2);
-  return `${str.slice(0, half)}?${str.slice(-half)}`;
-}
-
-function renderDryRun(
-  input: string,
-  matches: { rule: string; value: string }[]
+function renderDryRunReport(
+  matches: { rule: string }[]
 ) {
-  const seen = new Set<string>();
+  if (matches.length === 0) {
+    process.stdout.write("logshield (dry-run)\n");
+    process.stdout.write("Detected 0 redactions.\n");
+    process.stdout.write("No output was modified.\n");
+    return;
+  }
+
+  const counter: Record<string, number> = {};
 
   for (const m of matches) {
-    const key = `${m.rule}:${m.value}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    const before = truncateMiddle(m.value);
-    const after = truncateMiddle(`<REDACTED_${m.rule}>`);
-
-    process.stdout.write(`${before} ? ${after}\n`);
+    counter[m.rule] = (counter[m.rule] || 0) + 1;
   }
+
+  const entries = Object.entries(counter)
+    .map(([rule, count]) => ({ rule, count }))
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.rule.localeCompare(b.rule);
+    });
+
+  const maxLen = Math.max(...entries.map(e => e.rule.length));
+  const total = matches.length;
+  const label = total === 1 ? "redaction" : "redactions";
+
+  process.stdout.write("logshield (dry-run)\n");
+  process.stdout.write(`Detected ${total} ${label}:\n`);
+
+  for (const { rule, count } of entries) {
+    process.stdout.write(
+      `  ${rule.padEnd(maxLen)}  x${count}\n`
+    );
+  }
+
+  process.stdout.write("\n");
+  process.stdout.write("No output was modified.\n");
+  process.stdout.write("Use without --dry-run to apply.\n");
 }
 
 async function main() {
@@ -96,7 +113,7 @@ async function main() {
   }
 
   if (rawArgs.includes("--version")) {
-    console.log(`logshield v${getVersion()}`);
+    process.stdout.write(`logshield v${getVersion()}\n`);
     process.exit(0);
   }
 
@@ -104,7 +121,7 @@ async function main() {
 
   const command = positionals[0];
   if (command !== "scan") {
-    process.stderr.write("Unknown command\n");
+    process.stdout.write("Unknown command\n");
     process.exit(1);
   }
 
@@ -120,12 +137,12 @@ async function main() {
   const useStdin = stdinFlag || stdinAuto;
 
   if (useStdin && file) {
-    process.stderr.write("Cannot read from both STDIN and file\n");
+    process.stdout.write("Cannot read from both STDIN and file\n");
     process.exit(1);
   }
 
   if (dryRun && json) {
-    process.stderr.write("--dry-run cannot be used with --json\n");
+    process.stdout.write("--dry-run cannot be used with --json\n");
     process.exit(1);
   }
 
@@ -134,11 +151,7 @@ async function main() {
     const result = sanitizeLog(input, { strict });
 
     if (dryRun) {
-      renderDryRun(input, result.matches);
-
-      if (summary) {
-        printSummary(result.matches);
-      }
+      renderDryRunReport(result.matches);
 
       if (failOnDetect && result.matches.length > 0) {
         process.exit(1);
@@ -159,8 +172,8 @@ async function main() {
 
     process.exit(0);
   } catch (err: any) {
-    process.stderr.write(err?.message || "Unexpected error");
-    process.stderr.write("\n");
+    process.stdout.write(err?.message || "Unexpected error");
+    process.stdout.write("\n");
     process.exit(2);
   }
 }

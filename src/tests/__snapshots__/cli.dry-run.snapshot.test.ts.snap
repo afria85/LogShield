@@ -1,12 +1,20 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`LogShield CLI --dry-run (SNAPSHOT) > default mode dry-run preview 1`] = `
-"password=secret123 ? <REDACTED_PASSWORD>
+"[DRY RUN] Detected redactions:
+  PASSWORD  x1
+
+No output was modified.
+Use without --dry-run to apply.
 "
 `;
 
 exports[`LogShield CLI --dry-run (SNAPSHOT) > strict mode dry-run preview 1`] = `
-"AKIA1234567890TEST1234 ? <REDACTED_AWS_ACCESS_KEY>
-4111 1111 1111 1111 ? <REDACTED_CREDIT_CARD>
+"[DRY RUN] Detected redactions:
+  AWS_ACCESS_KEY  x1
+  CREDIT_CARD     x1
+
+No output was modified.
+Use without --dry-run to apply.
 "
 `;
