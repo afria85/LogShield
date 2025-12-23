@@ -424,26 +424,62 @@
   }
 
   // ==================== COPY FUNCTIONS ====================
+  function copyToClipboard(text, btn) {
+    // Modern clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showCopySuccess(btn);
+      }).catch(function() {
+        // Fallback if clipboard API fails
+        fallbackCopy(text, btn);
+      });
+    } else {
+      // Fallback for older browsers
+      fallbackCopy(text, btn);
+    }
+  }
+
+  function fallbackCopy(text, btn) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      showCopySuccess(btn);
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
+    document.body.removeChild(textarea);
+  }
+
+  function showCopySuccess(btn) {
+    if (!btn) return;
+    var originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+    setTimeout(function() {
+      btn.innerHTML = originalHTML;
+    }, 2000);
+  }
+
   window.copyInstall = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     var text = 'npm install -g logshield-cli';
-    navigator.clipboard.writeText(text).then(function() {
-      var btn = e.target.closest('.copy-btn');
-      if (btn) {
-        var originalHTML = btn.innerHTML;
-        btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-        setTimeout(function() {
-          btn.innerHTML = originalHTML;
-        }, 2000);
-      }
-    });
+    var btn = e ? e.target.closest('.copy-btn') : null;
+    copyToClipboard(text, btn);
   };
 
   window.copyCode = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    var btn = e.target.closest('.copy-btn');
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    var btn = e ? e.target.closest('.copy-btn') : null;
     if (!btn) return;
     
     var codeBlock = btn.closest('.code-block');
@@ -457,13 +493,7 @@
     // Remove line numbers if present
     text = text.replace(/^\d+\s*/gm, '').trim();
     
-    navigator.clipboard.writeText(text).then(function() {
-      var originalHTML = btn.innerHTML;
-      btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-      setTimeout(function() {
-        btn.innerHTML = originalHTML;
-      }, 2000);
-    });
+    copyToClipboard(text, btn);
   };
 
   // ==================== SMOOTH SCROLL ====================
