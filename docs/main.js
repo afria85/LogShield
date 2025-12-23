@@ -6,13 +6,15 @@
   var backToTop = document.getElementById('backToTop');
 
   window.addEventListener('scroll', function() {
-    header.classList.toggle('scrolled', window.scrollY > 50);
-    backToTop.classList.toggle('visible', window.scrollY > 400);
+    if (header) header.classList.toggle('scrolled', window.scrollY > 50);
+    if (backToTop) backToTop.classList.toggle('visible', window.scrollY > 400);
   });
 
-  backToTop.addEventListener('click', function() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  if (backToTop) {
+    backToTop.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
   // Footer logo scroll to top
   var footerLogo = document.getElementById('footerLogo');
@@ -25,8 +27,6 @@
 
   // ==================== REVEAL ANIMATIONS ====================
   var revealElements = document.querySelectorAll('.reveal');
-  
-  // Check for reduced motion preference
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
   if (prefersReducedMotion) {
@@ -54,56 +54,44 @@
   var dryRunToggle = document.getElementById('toggle-dryrun');
   
   // Demo data - shows real difference between default and strict mode
-  // Default mode: redacts PASSWORD, AUTH_BEARER, API_KEY_HEADER, EMAIL
-  // Strict mode: ALSO redacts STRIPE_KEY, AWS_KEY
   var logLines = [
     { 
-      num: '01', 
       prefix: '[DEBUG]', 
-      content: 'password=',
+      key: 'password=',
       secret: 'secret123',
-      redacted: '&lt;REDACTED_PASSWORD&gt;',
-      redactedStrict: '&lt;REDACTED_PASSWORD&gt;',
+      redacted: '<REDACTED_PASSWORD>',
       type: 'PASSWORD',
       alwaysRedact: true
     },
     { 
-      num: '02', 
       prefix: '[INFO]', 
-      content: 'Authorization: Bearer ',
-      secret: 'eyJhbGciOiJIUzI1...',
-      redacted: '&lt;REDACTED_TOKEN&gt;',
-      redactedStrict: '&lt;REDACTED_TOKEN&gt;',
+      key: 'Authorization: Bearer ',
+      secret: 'eyJhbGciOiJIUzI1NiIs...',
+      redacted: '<REDACTED_TOKEN>',
       type: 'AUTH_BEARER',
       alwaysRedact: true
     },
     { 
-      num: '03', 
       prefix: '[WARN]', 
-      content: 'STRIPE_SECRET_KEY=',
+      key: 'STRIPE_SECRET_KEY=',
       secret: 'sk_test_51Nabc...',
-      redacted: 'sk_test_51Nabc...', // NOT redacted in default
-      redactedStrict: '&lt;REDACTED_STRIPE_KEY&gt;',
+      redacted: '<REDACTED_STRIPE_KEY>',
       type: 'STRIPE_KEY',
       alwaysRedact: false // only in strict
     },
     { 
-      num: '04', 
       prefix: '[INFO]', 
-      content: 'AWS_ACCESS_KEY_ID=',
+      key: 'AWS_ACCESS_KEY_ID=',
       secret: 'AKIAIOSFODNN7EXAMPLE',
-      redacted: 'AKIAIOSFODNN7EXAMPLE', // NOT redacted in default
-      redactedStrict: '&lt;REDACTED_AWS_KEY&gt;',
+      redacted: '<REDACTED_AWS_KEY>',
       type: 'AWS_KEY',
       alwaysRedact: false // only in strict
     },
     { 
-      num: '05', 
       prefix: '[DEBUG]', 
-      content: 'email: ',
+      key: 'email: ',
       secret: 'user@example.com',
-      redacted: '&lt;REDACTED_EMAIL&gt;',
-      redactedStrict: '&lt;REDACTED_EMAIL&gt;',
+      redacted: '<REDACTED_EMAIL>',
       type: 'EMAIL',
       alwaysRedact: true
     }
@@ -111,11 +99,11 @@
 
   var demoState = {
     phase: 'idle',
-    currentLine: 0,
     isStrict: false,
     isDryRun: false,
     hasRunOnce: false,
-    animationTimeout: null
+    animationTimeout: null,
+    lineElements: [] // store references to line elements
   };
 
   function clearAnimation() {
@@ -123,125 +111,6 @@
       clearTimeout(demoState.animationTimeout);
       demoState.animationTimeout = null;
     }
-  }
-
-  function escapeHtml(text) {
-    return text
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>');
-  }
-
-  function createLogLine(data, showRedacted, isStrict) {
-    var line = document.createElement('div');
-    line.className = 'log-line';
-    
-    var num = document.createElement('span');
-    num.className = 'log-number';
-    num.textContent = data.num;
-    
-    var content = document.createElement('span');
-    content.className = 'log-content';
-    
-    var prefix = document.createElement('span');
-    prefix.className = 'log-prefix';
-    prefix.textContent = data.prefix + ' ';
-    
-    var key = document.createElement('span');
-    key.className = 'log-key';
-    key.textContent = data.content;
-    
-    var value = document.createElement('span');
-    
-    if (showRedacted) {
-      var redactedValue = isStrict ? data.redactedStrict : data.redacted;
-      var isActuallyRedacted = redactedValue.indexOf('REDACTED') !== -1;
-      
-      if (isActuallyRedacted) {
-        value.className = 'log-redacted';
-        value.textContent = escapeHtml(redactedValue);
-      } else {
-        // Not redacted in this mode - show as warning (still exposed)
-        value.className = 'log-secret';
-        value.textContent = redactedValue;
-      }
-    } else {
-      value.className = 'log-secret';
-      value.textContent = data.secret;
-    }
-    
-    content.appendChild(prefix);
-    content.appendChild(key);
-    content.appendChild(value);
-    
-    line.appendChild(num);
-    line.appendChild(content);
-    
-    return line;
-  }
-
-  function getRedactedCount(isStrict) {
-    if (isStrict) {
-      return logLines.length; // All redacted in strict
-    }
-    return logLines.filter(function(l) { return l.alwaysRedact; }).length;
-  }
-
-  function createDryRunOutput(isStrict) {
-    var container = document.createElement('div');
-    container.className = 'dry-run-output';
-    
-    // Header
-    var headerLine = document.createElement('div');
-    headerLine.className = 'log-line';
-    headerLine.innerHTML = '<span class="log-content"><span class="log-redacted">[DRY RUN]</span> <span class="log-value">Detected redactions:</span></span>';
-    container.appendChild(headerLine);
-    
-    // Count each type that would be redacted
-    var types = {};
-    logLines.forEach(function(line) {
-      if (isStrict || line.alwaysRedact) {
-        if (!types[line.type]) {
-          types[line.type] = 0;
-        }
-        types[line.type]++;
-      }
-    });
-    
-    // List each type with aligned counts using non-breaking spaces
-    var typeKeys = Object.keys(types);
-    var maxTypeLength = Math.max.apply(null, typeKeys.map(function(t) { return t.length; }));
-    var padLength = Math.max(maxTypeLength + 3, 20); // minimum 20 chars
-    
-    typeKeys.forEach(function(type) {
-      var typeLine = document.createElement('div');
-      typeLine.className = 'log-line';
-      var spaces = '';
-      var spacesNeeded = padLength - type.length;
-      for (var i = 0; i < spacesNeeded; i++) {
-        spaces += '\u00A0'; // non-breaking space
-      }
-      typeLine.innerHTML = '<span class="log-content"><span class="log-key">\u00A0\u00A0' + type + spaces + '</span><span class="log-value">x' + types[type] + '</span></span>';
-      container.appendChild(typeLine);
-    });
-    
-    // Empty line
-    var emptyLine = document.createElement('div');
-    emptyLine.className = 'log-line';
-    emptyLine.innerHTML = '<span class="log-content">&nbsp;</span>';
-    container.appendChild(emptyLine);
-    
-    // Footer
-    var footer1 = document.createElement('div');
-    footer1.className = 'log-line';
-    footer1.innerHTML = '<span class="log-content"><span class="log-value">No output was modified.</span></span>';
-    container.appendChild(footer1);
-    
-    var footer2 = document.createElement('div');
-    footer2.className = 'log-line';
-    footer2.innerHTML = '<span class="log-content"><span class="log-prefix">Use without --dry-run to apply.</span></span>';
-    container.appendChild(footer2);
-    
-    return container;
   }
 
   function updateDemoStatus(text, rightText) {
@@ -257,12 +126,200 @@
     }
   }
 
+  function getRedactedCount(isStrict) {
+    if (isStrict) {
+      return logLines.length;
+    }
+    return logLines.filter(function(l) { return l.alwaysRedact; }).length;
+  }
+
+  function shouldRedact(line, isStrict) {
+    return isStrict || line.alwaysRedact;
+  }
+
+  // Build initial lines with secret values
+  function buildLines() {
+    demoBody.innerHTML = '';
+    demoState.lineElements = [];
+
+    logLines.forEach(function(data, index) {
+      var line = document.createElement('div');
+      line.className = 'log-line';
+      
+      var num = document.createElement('span');
+      num.className = 'log-number';
+      num.textContent = String(index + 1).padStart(2, '0');
+      
+      var content = document.createElement('span');
+      content.className = 'log-content';
+      
+      var prefix = document.createElement('span');
+      prefix.className = 'log-prefix';
+      prefix.textContent = data.prefix + ' ';
+      
+      var key = document.createElement('span');
+      key.className = 'log-key';
+      key.textContent = data.key;
+      
+      var value = document.createElement('span');
+      value.className = 'log-secret';
+      value.textContent = data.secret;
+      value.setAttribute('data-index', index);
+      
+      content.appendChild(prefix);
+      content.appendChild(key);
+      content.appendChild(value);
+      
+      line.appendChild(num);
+      line.appendChild(content);
+      
+      demoBody.appendChild(line);
+      
+      // Store reference
+      demoState.lineElements.push({
+        line: line,
+        valueEl: value,
+        data: data
+      });
+    });
+  }
+
+  // Show lines one by one
+  function showLinesSequentially(callback) {
+    var index = 0;
+    
+    function showNext() {
+      if (index < demoState.lineElements.length) {
+        demoState.lineElements[index].line.classList.add('visible');
+        index++;
+        demoState.animationTimeout = setTimeout(showNext, 150);
+      } else {
+        demoState.animationTimeout = setTimeout(callback, 300);
+      }
+    }
+    
+    showNext();
+  }
+
+  // Glow secrets that will be redacted
+  function glowSecrets(callback) {
+    var toGlow = [];
+    
+    demoState.lineElements.forEach(function(item) {
+      if (shouldRedact(item.data, demoState.isStrict)) {
+        toGlow.push(item.valueEl);
+      }
+    });
+    
+    // Add glow class
+    toGlow.forEach(function(el) {
+      el.classList.add('glow');
+    });
+    
+    updateDemoStatus('Scanning...', '');
+    
+    // Wait for glow effect
+    demoState.animationTimeout = setTimeout(function() {
+      callback(toGlow);
+    }, 800);
+  }
+
+  // Transform secrets to redacted (in-place)
+  function transformSecrets(glowedElements, callback) {
+    var index = 0;
+    
+    function transformNext() {
+      if (index < glowedElements.length) {
+        var el = glowedElements[index];
+        var dataIndex = parseInt(el.getAttribute('data-index'));
+        var data = logLines[dataIndex];
+        
+        // Remove glow, change class and text
+        el.classList.remove('glow');
+        el.classList.remove('log-secret');
+        el.classList.add('log-redacted');
+        el.textContent = data.redacted;
+        
+        index++;
+        demoState.animationTimeout = setTimeout(transformNext, 120);
+      } else {
+        demoState.animationTimeout = setTimeout(callback, 200);
+      }
+    }
+    
+    transformNext();
+  }
+
+  // Create dry-run output (replaces entire content)
+  function showDryRunOutput(callback) {
+    demoBody.innerHTML = '';
+    
+    var container = document.createElement('div');
+    container.className = 'dry-run-output';
+    
+    // Header
+    var headerLine = document.createElement('div');
+    headerLine.className = 'log-line';
+    headerLine.innerHTML = '<span class="log-content"><span class="log-redacted">[DRY RUN]</span> <span class="log-value">Detected redactions:</span></span>';
+    container.appendChild(headerLine);
+    
+    // Count types
+    var types = {};
+    logLines.forEach(function(line) {
+      if (shouldRedact(line, demoState.isStrict)) {
+        if (!types[line.type]) types[line.type] = 0;
+        types[line.type]++;
+      }
+    });
+    
+    // List types with aligned counts
+    var typeKeys = Object.keys(types);
+    var maxLen = Math.max.apply(null, typeKeys.map(function(t) { return t.length; }));
+    var padLen = Math.max(maxLen + 3, 20);
+    
+    typeKeys.forEach(function(type) {
+      var typeLine = document.createElement('div');
+      typeLine.className = 'log-line';
+      var spaces = '';
+      for (var i = 0; i < padLen - type.length; i++) {
+        spaces += '\u00A0';
+      }
+      typeLine.innerHTML = '<span class="log-content"><span class="log-key">\u00A0\u00A0' + type + spaces + '</span><span class="log-value">x' + types[type] + '</span></span>';
+      container.appendChild(typeLine);
+    });
+    
+    // Empty line
+    var emptyLine = document.createElement('div');
+    emptyLine.className = 'log-line';
+    emptyLine.innerHTML = '<span class="log-content">\u00A0</span>';
+    container.appendChild(emptyLine);
+    
+    // Footer
+    var footer1 = document.createElement('div');
+    footer1.className = 'log-line';
+    footer1.innerHTML = '<span class="log-content"><span class="log-value">No output was modified.</span></span>';
+    container.appendChild(footer1);
+    
+    var footer2 = document.createElement('div');
+    footer2.className = 'log-line';
+    footer2.innerHTML = '<span class="log-content"><span class="log-prefix">Use without --dry-run to apply.</span></span>';
+    container.appendChild(footer2);
+    
+    demoBody.appendChild(container);
+    
+    // Animate lines
+    var lines = container.querySelectorAll('.log-line');
+    lines.forEach(function(line, i) {
+      setTimeout(function() {
+        line.classList.add('visible');
+      }, i * 80);
+    });
+    
+    demoState.animationTimeout = setTimeout(callback, lines.length * 80 + 200);
+  }
+
   function runDemoAnimation() {
     clearAnimation();
-    
-    demoState.phase = 'input';
-    demoState.currentLine = 0;
-    demoBody.innerHTML = '';
     updateDemoStatus('Reading input...', '');
 
     if (prefersReducedMotion) {
@@ -270,122 +327,67 @@
       return;
     }
 
-    function showInputLines() {
-      if (demoState.currentLine < logLines.length) {
-        var line = createLogLine(logLines[demoState.currentLine], false, false);
-        demoBody.appendChild(line);
+    // Build lines first
+    buildLines();
+
+    // Step 1: Show lines sequentially
+    showLinesSequentially(function() {
+      
+      // Step 2: Glow secrets (both for normal and dry-run)
+      glowSecrets(function(glowedElements) {
         
-        setTimeout(function() {
-          line.classList.add('visible');
-        }, 50);
-        
-        demoState.currentLine++;
-        demoState.animationTimeout = setTimeout(showInputLines, 180);
-      } else {
-        demoState.animationTimeout = setTimeout(startScanning, 350);
-      }
-    }
-
-    function startScanning() {
-      demoState.phase = 'scanning';
-      updateDemoStatus('Scanning...', '');
-      demoState.animationTimeout = setTimeout(showOutput, 700);
-    }
-
-    function showOutput() {
-      demoState.phase = 'output';
-      demoBody.innerHTML = '';
-      demoState.currentLine = 0;
-      
-      if (demoState.isDryRun) {
-        showDryRunOutput();
-      } else {
-        showRedactedOutput();
-      }
-    }
-
-    function showDryRunOutput() {
-      var dryRunContainer = createDryRunOutput(demoState.isStrict);
-      var lines = dryRunContainer.querySelectorAll('.log-line');
-      
-      demoBody.appendChild(dryRunContainer);
-      
-      lines.forEach(function(line, i) {
-        setTimeout(function() {
-          line.classList.add('visible');
-        }, i * 80);
-      });
-      
-      demoState.animationTimeout = setTimeout(function() {
-        freezeDemo();
-      }, lines.length * 80 + 250);
-    }
-
-    function showRedactedOutput() {
-      function showOutputLines() {
-        if (demoState.currentLine < logLines.length) {
-          var line = createLogLine(logLines[demoState.currentLine], true, demoState.isStrict);
-          demoBody.appendChild(line);
-          
-          setTimeout(function() {
-            line.classList.add('visible');
-          }, 50);
-          
-          demoState.currentLine++;
-          demoState.animationTimeout = setTimeout(showOutputLines, 130);
+        if (demoState.isDryRun) {
+          // Step 3a: For dry-run, show dry-run output after glow
+          demoState.animationTimeout = setTimeout(function() {
+            showDryRunOutput(function() {
+              finishDemo();
+            });
+          }, 300);
         } else {
-          demoState.animationTimeout = setTimeout(freezeDemo, 250);
+          // Step 3b: Transform in-place
+          transformSecrets(glowedElements, function() {
+            finishDemo();
+          });
         }
-      }
-      
-      showOutputLines();
-    }
-
-    function freezeDemo() {
-      demoState.phase = 'frozen';
-      demoState.hasRunOnce = true;
-      
-      var count = getRedactedCount(demoState.isStrict);
-      
-      if (demoState.isDryRun) {
-        updateDemoStatus('dry-run complete', count + ' detections');
-      } else {
-        var modeText = demoState.isStrict ? 'strict mode' : 'default mode';
-        updateDemoStatus(modeText, count + ' secrets redacted');
-      }
-    }
-
-    showInputLines();
+      });
+    });
   }
 
-  function showFinalState() {
-    demoBody.innerHTML = '';
+  function finishDemo() {
+    demoState.phase = 'frozen';
+    demoState.hasRunOnce = true;
     
     var count = getRedactedCount(demoState.isStrict);
     
     if (demoState.isDryRun) {
-      var dryRunContainer = createDryRunOutput(demoState.isStrict);
-      var lines = dryRunContainer.querySelectorAll('.log-line');
-      demoBody.appendChild(dryRunContainer);
-      lines.forEach(function(line) {
-        line.classList.add('visible');
-      });
       updateDemoStatus('dry-run complete', count + ' detections');
     } else {
-      logLines.forEach(function(data) {
-        var line = createLogLine(data, true, demoState.isStrict);
-        line.classList.add('visible');
-        demoBody.appendChild(line);
-      });
       var modeText = demoState.isStrict ? 'strict mode' : 'default mode';
       updateDemoStatus(modeText, count + ' secrets redacted');
     }
-    
-    demoState.phase = 'frozen';
-    demoState.hasRunOnce = true;
   }
 
-  // Flag toggles - restart animation from beginning
+  function showFinalState() {
+    // For reduced motion - show end state immediately
+    if (demoState.isDryRun) {
+      showDryRunOutput(function() {
+        finishDemo();
+      });
+    } else {
+      buildLines();
+      demoState.lineElements.forEach(function(item) {
+        item.line.classList.add('visible');
+        if (shouldRedact(item.data, demoState.isStrict)) {
+          item.valueEl.classList.remove('log-secret');
+          item.valueEl.classList.add('log-redacted');
+          item.valueEl.textContent = item.data.redacted;
+        }
+      });
+      finishDemo();
+    }
+  }
+
+  // Flag toggles
   if (strictToggle) {
     strictToggle.addEventListener('click', function() {
       this.classList.toggle('active');
@@ -423,6 +425,8 @@
 
   // ==================== COPY FUNCTIONS ====================
   window.copyInstall = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     var text = 'npm install -g logshield-cli';
     navigator.clipboard.writeText(text).then(function() {
       var btn = e.target.closest('.copy-btn');
@@ -437,21 +441,29 @@
   };
 
   window.copyCode = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     var btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    
     var codeBlock = btn.closest('.code-block');
-    if (codeBlock) {
-      var codeBody = codeBlock.querySelector('.code-body');
-      if (codeBody) {
-        var text = codeBody.textContent;
-        navigator.clipboard.writeText(text).then(function() {
-          var originalHTML = btn.innerHTML;
-          btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-          setTimeout(function() {
-            btn.innerHTML = originalHTML;
-          }, 2000);
-        });
-      }
-    }
+    if (!codeBlock) return;
+    
+    var codeBody = codeBlock.querySelector('.code-body');
+    if (!codeBody) return;
+    
+    // Get text content, clean it up
+    var text = codeBody.textContent || codeBody.innerText;
+    // Remove line numbers if present
+    text = text.replace(/^\d+\s*/gm, '').trim();
+    
+    navigator.clipboard.writeText(text).then(function() {
+      var originalHTML = btn.innerHTML;
+      btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+      setTimeout(function() {
+        btn.innerHTML = originalHTML;
+      }, 2000);
+    });
   };
 
   // ==================== SMOOTH SCROLL ====================

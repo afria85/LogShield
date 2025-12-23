@@ -9,7 +9,7 @@
   --bg-code: #0d0d0d;
   --text-primary: #fafafa;
   --text-secondary: #a1a1a1;
-  --text-muted: #666666;
+  --text-muted: #8a8a8a;
   --accent-primary: #00E5A0;
   --accent-secondary: #00D4FF;
   --accent-warning: #FF6B6B;
@@ -189,6 +189,16 @@ nav a:hover {
   background: rgba(0, 229, 160, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
+}
+
+.trust-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.trust-link:hover {
+  color: var(--text-secondary);
 }
 
 /* ==================== HERO ==================== */
@@ -463,6 +473,21 @@ nav a:hover {
 .log-redacted {
   color: var(--accent-primary);
   font-weight: 500;
+}
+
+/* Glow effect for scanning animation */
+.log-secret.glow {
+  animation: secretGlow 0.8s ease-in-out;
+}
+
+@keyframes secretGlow {
+  0%, 100% {
+    text-shadow: none;
+  }
+  50% {
+    text-shadow: 0 0 8px var(--accent-warning), 0 0 16px var(--accent-warning);
+    color: #fff;
+  }
 }
 
 /* Demo status bar */
@@ -1063,6 +1088,16 @@ footer {
   font-size: 13px;
 }
 
+.footer-license {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-license:hover {
+  color: var(--text-secondary);
+}
+
 .footer-links {
   display: flex;
   gap: 20px;
@@ -1179,8 +1214,12 @@ footer {
     padding: 80px 16px;
   }
 
-  nav a:not(:last-child) {
-    display: none;
+  nav {
+    gap: 16px;
+  }
+
+  nav a {
+    font-size: 13px;
   }
 
   .install-box {
