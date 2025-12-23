@@ -423,79 +423,6 @@
     demoObserver.observe(heroDemo);
   }
 
-  // ==================== COPY FUNCTIONS ====================
-  function copyToClipboard(text, btn) {
-    // Modern clipboard API
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function() {
-        showCopySuccess(btn);
-      }).catch(function() {
-        // Fallback if clipboard API fails
-        fallbackCopy(text, btn);
-      });
-    } else {
-      // Fallback for older browsers
-      fallbackCopy(text, btn);
-    }
-  }
-
-  function fallbackCopy(text, btn) {
-    var textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-      showCopySuccess(btn);
-    } catch (err) {
-      console.error('Copy failed:', err);
-    }
-    document.body.removeChild(textarea);
-  }
-
-  function showCopySuccess(btn) {
-    if (!btn) return;
-    var originalHTML = btn.innerHTML;
-    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-    setTimeout(function() {
-      btn.innerHTML = originalHTML;
-    }, 2000);
-  }
-
-  window.copyInstall = function(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    var text = 'npm install -g logshield-cli';
-    var btn = e ? e.target.closest('.copy-btn') : null;
-    copyToClipboard(text, btn);
-  };
-
-  window.copyCode = function(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    var btn = e ? e.target.closest('.copy-btn') : null;
-    if (!btn) return;
-    
-    var codeBlock = btn.closest('.code-block');
-    if (!codeBlock) return;
-    
-    var codeBody = codeBlock.querySelector('.code-body');
-    if (!codeBody) return;
-    
-    // Get text content, clean it up
-    var text = codeBody.textContent || codeBody.innerText;
-    // Remove line numbers if present
-    text = text.replace(/^\d+\s*/gm, '').trim();
-    
-    copyToClipboard(text, btn);
-  };
-
   // ==================== SMOOTH SCROLL ====================
   document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
     anchor.addEventListener('click', function(e) {
@@ -511,3 +438,85 @@
   });
 
 })();
+
+// ==================== COPY FUNCTIONS (Global Scope) ====================
+function copyToClipboard(text, btn) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showCopySuccess(btn);
+    }).catch(function() {
+      fallbackCopy(text, btn);
+    });
+  } else {
+    fallbackCopy(text, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  var textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    document.execCommand('copy');
+    showCopySuccess(btn);
+  } catch (err) {
+    console.error('Copy failed:', err);
+  }
+  document.body.removeChild(textarea);
+}
+
+function showCopySuccess(btn) {
+  if (!btn) return;
+  var originalHTML = btn.innerHTML;
+  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+  setTimeout(function() {
+    btn.innerHTML = originalHTML;
+  }, 2000);
+}
+
+// Attach event listeners after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Copy install buttons
+  var copyInstallHero = document.getElementById('copy-install-hero');
+  var copyInstallCta = document.getElementById('copy-install-cta');
+  
+  function handleCopyInstall(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var text = 'npm install -g logshield-cli';
+    var btn = e.target.closest('.copy-btn');
+    copyToClipboard(text, btn);
+  }
+  
+  if (copyInstallHero) {
+    copyInstallHero.addEventListener('click', handleCopyInstall);
+  }
+  if (copyInstallCta) {
+    copyInstallCta.addEventListener('click', handleCopyInstall);
+  }
+  
+  // Copy code buttons
+  var copyCodeBtns = document.querySelectorAll('.copy-code-btn');
+  copyCodeBtns.forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      var codeBlock = btn.closest('.code-block');
+      if (!codeBlock) return;
+      
+      var codeBody = codeBlock.querySelector('.code-body');
+      if (!codeBody) return;
+      
+      var text = codeBody.textContent || codeBody.innerText;
+      text = text.replace(/^\d+\s*/gm, '').trim();
+      
+      copyToClipboard(text, btn);
+    });
+  });
+});

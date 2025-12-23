@@ -65,7 +65,9 @@
       <span>LogShield</span>
     </a>
     <nav>
+      <a href="#solution">Features</a>
       <a href="docs.html">Docs</a>
+      <a href="#advanced">Advanced</a>
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
       
       <!-- Trust bar -->
@@ -109,7 +111,7 @@
         <div class="install-box">
           <span class="dollar">$</span>
           <code>npm install -g logshield-cli</code>
-          <button class="copy-btn" onclick="copyInstall(event)">
+          <button class="copy-btn" id="copy-install-hero">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
@@ -475,7 +477,7 @@
       <div class="code-block reveal reveal-delay-1">
         <div class="code-header">
           <span class="code-filename">terminal</span>
-          <button class="copy-btn" onclick="copyCode(event)">
+          <button class="copy-btn copy-code-btn">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             Copy
           </button>
@@ -511,7 +513,7 @@
     <div class="install-box">
       <span class="dollar">$</span>
       <code>npm install -g logshield-cli</code>
-      <button class="copy-btn" onclick="copyInstall(event)">
+      <button class="copy-btn" id="copy-install-cta">
         <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
         Copy
       </button>
