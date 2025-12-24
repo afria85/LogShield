@@ -17,7 +17,8 @@
     "build:web": "vite build --outDir dist-web",
     "dev:web": "vite",
     "pretest": "npm run build",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
