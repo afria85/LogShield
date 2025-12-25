@@ -1,7 +1,8 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`LogShield CLI --dry-run (SNAPSHOT) > default mode dry-run preview 1`] = `
-"[DRY RUN] Detected redactions:
+"logshield (dry-run)
+Detected 1 redaction:
   PASSWORD  x1
 
 No output was modified.
@@ -10,7 +11,8 @@ Use without --dry-run to apply.
 `;
 
 exports[`LogShield CLI --dry-run (SNAPSHOT) > strict mode dry-run preview 1`] = `
-"[DRY RUN] Detected redactions:
+"logshield (dry-run)
+Detected 2 redactions:
   AWS_ACCESS_KEY  x1
   CREDIT_CARD     x1
 
