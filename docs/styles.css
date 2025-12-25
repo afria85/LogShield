@@ -1085,6 +1085,11 @@ footer {
   text-decoration: none;
 }
 
+.footer-logo:hover {
+  text-decoration: none;
+  opacity: 0.8;
+}
+
 .footer-copy {
   color: var(--text-muted);
   font-size: 13px;

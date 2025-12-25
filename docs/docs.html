@@ -502,12 +502,13 @@
 
     .footer-copy {
       color: var(--text-muted);
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .footer-license {
       color: var(--text-muted);
       text-decoration: none;
+      transition: color 0.2s;
     }
 
     .footer-license:hover {
@@ -517,13 +518,14 @@
 
     .footer-links {
       display: flex;
-      gap: 24px;
+      gap: 20px;
     }
 
     .footer-links a {
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 13px;
       text-decoration: none;
+      transition: color 0.2s;
     }
 
     .footer-links a:hover {
@@ -595,6 +597,17 @@
 
       nav a {
         font-size: 13px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .footer-left {
+        flex-direction: column;
+        gap: 8px;
       }
     }
   </style>
@@ -1088,7 +1101,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
       <p>You can audit every rule applied to your logs by reviewing the <a href="https://github.com/afria85/LogShield" target="_blank">source code</a>.</p>
 
       <h2 id="license">License</h2>
-      <p>LogShield is released under the <strong>ISC License</strong>.</p>
+      <p>LogShield is released under the <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank">ISC License</a>.</p>
 
       <h3>Support</h3>
       <ul>
@@ -1110,7 +1123,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
   <div class="footer-inner">
     <div class="footer-left">
       <a href="index.html" class="footer-logo">LogShield</a>
-      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" class="footer-license">ISC License</a> - v0.3.x</span>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" class="footer-license">ISC License</a></span>
     </div>
     <div class="footer-links">
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
