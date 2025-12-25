@@ -1013,16 +1013,34 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
       </div>
 
       <h3>GitHub Actions</h3>
+      <p>Basic setup:</p>
       <div class="code-block">
         <div class="code-header">
           <span class="code-lang">yaml</span>
         </div>
         <div class="code-body">
-          <code>- name: Scan logs
-  run: |
-    cat logs.txt | logshield scan --dry-run --fail-on-detect</code>
+          <code>- name: Install LogShield
+  run: npm install -g logshield-cli
+
+- name: Run tests (sanitized)
+  run: npm test 2>&1 | logshield scan</code>
         </div>
       </div>
+
+      <p>CI gate - fail if secrets detected:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">yaml</span>
+        </div>
+        <div class="code-body">
+          <code>- name: Check for secrets
+  run: |
+    npm test > test.log 2>&1
+    logshield scan --dry-run --fail-on-detect < test.log</code>
+        </div>
+      </div>
+
+      <p>For more advanced patterns (reusable workflows, Docker builds, conditional strict mode), see the <a href="blog/how-to-sanitize-logs-github-actions.html">GitHub Actions tutorial</a> on the blog.</p>
 
       <h2 id="non-goals">What LogShield is NOT</h2>
       <p>To avoid ambiguity, LogShield intentionally does not:</p>

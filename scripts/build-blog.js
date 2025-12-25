@@ -28,13 +28,21 @@ function normalizeLineEndings(text) {
 function markdownToHtml(markdown) {
   let html = markdown;
   
-  // Code blocks (must be first)
+  // Store code blocks temporarily to protect them from other processing
+  const codeBlocks = [];
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-    return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
+    const placeholder = `<<<CODEBLOCK${codeBlocks.length}>>>`;
+    codeBlocks.push(`<pre><code>${escapeHtml(code.trim())}</code></pre>`);
+    return placeholder;
   });
   
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Inline code - also protect
+  const inlineCodes = [];
+  html = html.replace(/`([^`]+)`/g, (match, code) => {
+    const placeholder = `<<<INLINECODE${inlineCodes.length}>>>`;
+    inlineCodes.push(`<code>${escapeHtml(code)}</code>`);
+    return placeholder;
+  });
   
   // Headers
   html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
@@ -51,8 +59,12 @@ function markdownToHtml(markdown) {
   // Blockquotes
   html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
   
-  // Unordered lists - collect consecutive list items
+  // Unordered lists - collect consecutive list items (but not inside placeholders)
   html = html.replace(/(^[\*\-] .+$\n?)+/gm, (match) => {
+    // Skip if this looks like a placeholder
+    if (match.includes('<<<CODEBLOCK') || match.includes('<<<INLINECODE')) {
+      return match;
+    }
     const items = match.trim().split('\n').map(line => {
       return '<li>' + line.replace(/^[\*\-] /, '') + '</li>';
     }).join('\n');
@@ -82,12 +94,27 @@ function markdownToHtml(markdown) {
       return block;
     }
     
+    // Check for placeholder blocks
+    if (/^<<<CODEBLOCK\d+>>>$/.test(block) || /^<<<INLINECODE\d+>>>$/.test(block)) {
+      return block;
+    }
+    
     // Already a block element
     if (/^<(h[1-6]|p|div|ul|ol|pre|blockquote)/.test(block)) return block;
     
     // Wrap in paragraph
     return `<p>${block.replace(/\n/g, ' ')}</p>`;
   }).join('\n\n');
+  
+  // Restore code blocks
+  codeBlocks.forEach((code, i) => {
+    html = html.replace(`<<<CODEBLOCK${i}>>>`, code);
+  });
+  
+  // Restore inline codes
+  inlineCodes.forEach((code, i) => {
+    html = html.replace(`<<<INLINECODE${i}>>>`, code);
+  });
   
   return html;
 }

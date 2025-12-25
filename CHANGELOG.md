@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.6
+
+### Fixed
+
+- `--summary` output now correctly written to stderr (safe for piping & redirects)
+
+### Improved
+
+- CLI documentation clarity
+- Blog and docs structure consistency
+- Shared `styles.css` and `main.js` across site pages
+
+### Notes
+
+- No breaking changes
+
 ## v0.3.5
 
 ### Fixed

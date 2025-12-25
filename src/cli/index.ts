@@ -146,6 +146,12 @@ async function main() {
     process.exit(1);
   }
 
+  if (json && summary) {
+    process.stdout.write("--summary cannot be used with --json\n");
+    process.exit(1);
+  }
+
+
   try {
     const input = await readInput(useStdin ? undefined : file);
     const result = sanitizeLog(input, { strict });

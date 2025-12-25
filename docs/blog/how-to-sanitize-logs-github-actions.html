@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Step-by-step guide to automatically remove secrets from CI logs before they get stored or shipped." />
+  <title>How to Sanitize Logs in GitHub Actions - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/how-to-sanitize-logs-github-actions.html">
+  <meta property="og:title" content="How to Sanitize Logs in GitHub Actions - LogShield Blog">
+  <meta property="og:description" content="Step-by-step guide to automatically remove secrets from CI logs before they get stored or shipped.">
+  <meta property="og:image" content="https://logshield.dev/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Sanitize Logs in GitHub Actions - LogShield Blog">
+  <meta name="twitter:description" content="Step-by-step guide to automatically remove secrets from CI logs before they get stored or shipped.">
+  
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/how-to-sanitize-logs-github-actions.html">
+
+  <!-- Plausible Analytics -->
+  <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../docs.html">Docs</a>
+      <a href="./">Blog</a>
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout reveal">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">How to Sanitize Logs in GitHub Actions</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          December 25, 2025
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          5 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>CI logs are one of the most common places secrets accidentally end up. A failed API call prints the full request including the auth header. An environment variable gets echoed during debugging. A stack trace includes a database connection string.</p>
+
+<p>GitHub Actions stores these logs for 90 days by default. Anyone with repo access can download them. If you ship logs to Datadog, Splunk, or any external service, those secrets now live there too.</p>
+
+<p>I learned this the hard way after finding an AWS key in exported CI logs that had been sitting in our logging dashboard for weeks. Now I sanitize by default.</p>
+
+<p>This guide shows how to add LogShield to your GitHub Actions workflow.</p>
+
+<h2>The Basic Setup</h2>
+
+<p>Install LogShield and pipe your command output through it:</p>
+
+<pre><code>name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install LogShield
+        run: npm install -g logshield-cli
+
+      - name: Run tests (sanitized output)
+        run: npm test 2&gt;&amp;1 | logshield scan</code></pre>
+
+<p>The <code>2&gt;&amp;1</code> redirects stderr to stdout so both streams get sanitized. This is now my default setup for new repos.</p>
+
+<h2>Saving Sanitized Logs as Artifacts</h2>
+
+<p>If you need to keep logs for debugging but want them clean:</p>
+
+<pre><code>- name: Run application
+  run: |
+    npm start &gt; raw.log 2&gt;&amp;1 &amp;
+    sleep 10
+    kill $! || true
+
+- name: Sanitize logs
+  run: logshield scan &lt; raw.log &gt; sanitized.log
+
+- name: Upload sanitized logs
+  uses: actions/upload-artifact@v4
+  with:
+    name: logs
+    path: sanitized.log</code></pre>
+
+<p>The raw log never leaves the runner. Only the sanitized version gets stored as an artifact.</p>
+
+<h2>CI Gate: Fail if Secrets Detected</h2>
+
+<p>For stricter workflows, you can fail the build if LogShield detects secrets:</p>
+
+<pre><code>- name: Check for secrets in logs
+  run: |
+    npm test &gt; test.log 2&gt;&amp;1
+    logshield scan --dry-run --fail-on-detect &lt; test.log</code></pre>
+
+<p>This runs in dry-run mode (no modification) but exits with code 1 if any secrets are found. The build fails, alerting you to fix the leak at the source.</p>
+
+<p>I use this on main branch builds where I want to catch leaks before they hit production logs.</p>
+
+<h2>Sanitizing Docker Build Logs</h2>
+
+<p>Docker builds are notorious for leaking secrets through build args and multi-stage output:</p>
+
+<pre><code>- name: Build Docker image
+  run: |
+    docker build -t myapp:latest . 2&gt;&amp;1 | logshield scan</code></pre>
+
+<p>Or save the full build log for later analysis:</p>
+
+<pre><code>- name: Build and analyze
+  run: |
+    docker build -t myapp:latest . &gt; docker-build.log 2&gt;&amp;1
+    logshield scan &lt; docker-build.log
+    logshield scan --dry-run --summary &lt; docker-build.log</code></pre>
+
+<p>The <code>--summary</code> flag gives you a count of what was redacted without printing the full log again.</p>
+
+<h2>Strict Mode for Production</h2>
+
+<p>Default mode catches obvious secrets like passwords, bearer tokens, and API keys. For production deployments, use strict mode:</p>
+
+<pre><code>- name: Deploy (strict sanitization)
+  run: |
+    ./deploy.sh 2&gt;&amp;1 | logshield scan --strict</code></pre>
+
+<p>Strict mode additionally catches AWS access keys, private key headers, and vendor-specific tokens like Stripe or Slack keys.</p>
+
+<h2>Reusable Workflow</h2>
+
+<p>If you have many repos, create a reusable workflow:</p>
+
+<pre><code># .github/workflows/sanitized-run.yml
+name: Run with sanitized output
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        required: true
+        type: string
+      strict:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LogShield
+        run: npm install -g logshield-cli
+
+      - name: Run command
+        run: |
+          if [ "${{ inputs.strict }}" = "true" ]; then
+            ${{ inputs.command }} 2&gt;&amp;1 | logshield scan --strict
+          else
+            ${{ inputs.command }} 2&gt;&amp;1 | logshield scan
+          fi</code></pre>
+
+<p>Then call it from other workflows:</p>
+
+<pre><code>jobs:
+  build:
+    uses: ./.github/workflows/sanitized-run.yml
+    with:
+      command: npm test
+      strict: false</code></pre>
+
+<p>This way you don't have to repeat the LogShield setup in every workflow.</p>
+
+<h2>Advanced Patterns</h2>
+
+<p>A few patterns I've found useful:</p>
+
+<p><strong>Sanitize and tee</strong> - see output live while saving clean version:</p>
+
+<pre><code>npm test 2&gt;&amp;1 | tee raw.log | logshield scan</code></pre>
+
+<p><strong>Multiple commands</strong> - wrap in a block:</p>
+
+<pre><code>- name: Run integration tests
+  run: |
+    {
+      echo "=== Database setup ==="
+      ./scripts/setup-db.sh
+      echo "=== Running tests ==="
+      npm run test:integration
+      echo "=== Cleanup ==="
+      ./scripts/cleanup.sh
+    } 2&gt;&amp;1 | logshield scan</code></pre>
+
+<p><strong>Conditional strict mode</strong> - stricter on main branch:</p>
+
+<pre><code>- name: Run with appropriate strictness
+  run: |
+    if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+      npm test 2&gt;&amp;1 | logshield scan --strict
+    else
+      npm test 2&gt;&amp;1 | logshield scan
+    fi</code></pre>
+
+<h2>What This Does Not Solve</h2>
+
+<p>LogShield sanitizes log output. It does not:</p>
+
+<ul>
+<li>Prevent secrets from being used in the first place</li>
+<li>Replace GitHub's built-in secret masking</li>
+<li>Protect against secrets in source code</li>
+</ul>
+
+<p>Use it as one layer in your security setup, not the only layer.</p>
+
+<h2>Next Steps</h2>
+
+<p>Once you have LogShield in your CI:</p>
+
+<p>- Add <code>--fail-on-detect</code> to critical workflows - Review what gets caught with <code>--dry-run --summary</code> - Consider <code>--strict</code> for production pipelines</p>
+
+<p>The goal is to make sanitized logs the default, not an afterthought.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" class="footer-license">ISC License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>
