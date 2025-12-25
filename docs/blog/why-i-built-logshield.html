@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="The story behind LogShield and why deterministic log sanitization matters for DevOps teams." />
+  <title>Why I Built LogShield - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/why-i-built-logshield.html">
+  <meta property="og:title" content="Why I Built LogShield - LogShield Blog">
+  <meta property="og:description" content="The story behind LogShield and why deterministic log sanitization matters for DevOps teams.">
+  <meta property="og:image" content="https://logshield.dev/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Why I Built LogShield - LogShield Blog">
+  <meta name="twitter:description" content="The story behind LogShield and why deterministic log sanitization matters for DevOps teams.">
+  
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/why-i-built-logshield.html">
+
+  <!-- Plausible Analytics -->
+  <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../docs.html">Docs</a>
+      <a href="./">Blog</a>
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout reveal">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">Why I Built LogShield</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          January 15, 2025
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          3 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>I've seen it happen too many times. A developer copies a log into Slack to ask for help debugging. Hidden in that log is an API key. Now that secret is sitting in a chat history, indexed, searchable, and potentially compromised.</p>
+
+<p>This is why I built LogShield.</p>
+
+<h2>The Problem</h2>
+
+<p>Logs are everywhere. They flow through CI/CD pipelines, get attached to bug reports, shared in chat tools, and increasingly fed into AI assistants for analysis. Every one of these is a potential leak vector.</p>
+
+<p>Most teams know this is a problem. But the solutions available today fall into two camps:</p>
+
+<ul>
+<li><strong>Enterprise DLP systems</strong> - expensive, complex, and designed for compliance rather than developer workflows.</li>
+<li><strong>Regex scripts</strong> - brittle, inconsistent, and never quite catch everything.</li>
+</ul>
+
+<p>Neither works for the average DevOps engineer who just wants to safely share a log.</p>
+
+<h2>Why Determinism Matters</h2>
+
+<p>The first principle of LogShield is determinism. The same input always produces the same output.</p>
+
+<p>This sounds obvious, but it's surprisingly rare. Many tools use probabilistic detection, entropy analysis, or machine learning to identify secrets. These approaches have a fundamental problem: they're unpredictable.</p>
+
+<p>When you run a probabilistic tool twice on the same input, you might get different results. That makes them unsuitable for:</p>
+
+<ul>
+<li>CI/CD pipelines (where reproducibility is essential)</li>
+<li>Audit trails (where you need to prove what was redacted)</li>
+<li>Diff-based workflows (where spurious changes create noise)</li>
+</ul>
+
+<p>LogShield uses explicit, rule-based detection. If a pattern matches, it gets redacted. If it doesn't, it doesn't. Every time.</p>
+
+<h2>Treating False Positives as a Failure Mode</h2>
+
+<p>The second principle is even more important: zero false positives.</p>
+
+<p>A false positive in log sanitization means losing debugging context. Order IDs, transaction hashes, request identifiers - these look like secrets but aren't. If your tool redacts them, you've made the log useless.</p>
+
+<p>LogShield is intentionally conservative. When there's ambiguity, it prefers not to redact. This is a deliberate trade-off:</p>
+
+<ul>
+<li><strong>Missing a secret</strong> = you can fix it by adding a rule.</li>
+<li><strong>Redacting non-secrets</strong> = you've destroyed information that can never be recovered.</li>
+</ul>
+
+<h2>What LogShield Does Not Do</h2>
+
+<p>I'm equally proud of what LogShield doesn't do:</p>
+
+<ul>
+<li>No cloud service or hosted mode</li>
+<li>No AI or probabilistic detection</li>
+<li>No telemetry or data collection</li>
+<li>No learning or adaptation</li>
+</ul>
+
+<p>These aren't limitations - they're features. LogShield is designed to be boring, predictable, and trustworthy.</p>
+
+<h2>Try It</h2>
+
+<pre><code>npm install -g logshield-cli
+cat your.log | logshield scan</code></pre>
+
+<p>That's it. No signup, no config files, no API keys. Just pipe in a log and get a safe output.</p>
+
+<p>If you find LogShield useful, consider <a href="https://github.com/afria85/LogShield" target="_blank">starring it on GitHub</a>. And if you have feedback, I'd love to hear it.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" class="footer-license">ISC License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>

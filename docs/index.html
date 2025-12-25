@@ -65,9 +65,8 @@
       <span>LogShield</span>
     </a>
     <nav>
-      <a href="#solution">Features</a>
       <a href="docs.html">Docs</a>
-      <a href="#advanced">Advanced</a>
+      <a href="blog/">Blog</a>
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
       
       <!-- Trust bar -->
@@ -317,28 +316,28 @@
         <div class="use-case-icon">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         </div>
-        <h4>CI/CD Pipelines</h4>
+        <div class="item-title">CI/CD Pipelines</div>
         <p>Add to any build step</p>
       </div>
       <div class="use-case">
         <div class="use-case-icon">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
         </div>
-        <h4>Log Shipping</h4>
+        <div class="item-title">Log Shipping</div>
         <p>Before Datadog, Splunk</p>
       </div>
       <div class="use-case">
         <div class="use-case-icon">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </div>
-        <h4>Local Debugging</h4>
+        <div class="item-title">Local Debugging</div>
         <p>Safe to paste anywhere</p>
       </div>
       <div class="use-case">
         <div class="use-case-icon">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </div>
-        <h4>Incident Reports</h4>
+        <div class="item-title">Incident Reports</div>
         <p>Share logs without risk</p>
       </div>
     </div>
@@ -358,7 +357,7 @@
     
     <div class="advanced-grid reveal reveal-delay-1">
       <div class="advanced-item">
-        <h4><code>--dry-run</code> Preview mode</h4>
+        <div class="item-title"><code>--dry-run</code> Preview mode</div>
         <p>Detect secrets without modifying output. Useful for auditing rules.</p>
         <div class="advanced-code">
           <span class="cmd">cat</span> <span class="file">app.log</span> <span class="pipe">|</span> <span class="cmd">logshield</span> <span class="flag">scan --dry-run</span>
@@ -366,7 +365,7 @@
       </div>
       
       <div class="advanced-item">
-        <h4><code>--strict</code> Security-first</h4>
+        <div class="item-title"><code>--strict</code> Security-first</div>
         <p>Aggressive detection for logs shared externally. Redacts more patterns.</p>
         <div class="advanced-code">
           <span class="cmd">cat</span> <span class="file">app.log</span> <span class="pipe">|</span> <span class="cmd">logshield</span> <span class="flag">scan --strict</span>
@@ -374,7 +373,7 @@
       </div>
       
       <div class="advanced-item">
-        <h4><code>--fail-on-detect</code> CI gate</h4>
+        <div class="item-title"><code>--fail-on-detect</code> CI gate</div>
         <p>Exit with code 1 if secrets found. Blocks pipeline.</p>
         <div class="advanced-code">
           <span class="cmd">logshield</span> <span class="flag">scan --dry-run --fail-on-detect</span> <span class="pipe">&lt;</span> <span class="file">logs.txt</span>
@@ -382,7 +381,7 @@
       </div>
       
       <div class="advanced-item">
-        <h4><code>--summary</code> Compact report</h4>
+        <div class="item-title"><code>--summary</code> Compact report</div>
         <p>Rule-based summary of what was redacted.</p>
         <div class="advanced-code">
           <span class="cmd">cat</span> <span class="file">app.log</span> <span class="pipe">|</span> <span class="cmd">logshield</span> <span class="flag">scan --summary</span>
@@ -392,7 +391,7 @@
     
     <!-- Determinism note -->
     <div class="reveal reveal-delay-2" style="margin-top: 48px; padding: 24px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px;">
-      <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Deterministic guarantees</h4>
+      <div class="item-title" style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Deterministic guarantees</div>
       <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">Same input produces same output. No randomness. No environment-dependent behavior. Safe for CI, audits, and reproducible builds.</p>
     </div>
   </div>
@@ -413,42 +412,42 @@
       <div class="flag-item">
         <span class="flag-code">--strict</span>
         <div class="flag-info">
-          <h4>Strict mode</h4>
+          <div class="item-title">Strict mode</div>
           <p>Aggressive, security-first redaction</p>
         </div>
       </div>
       <div class="flag-item">
         <span class="flag-code">--dry-run</span>
         <div class="flag-info">
-          <h4>Dry run</h4>
+          <div class="item-title">Dry run</div>
           <p>Detect without modifying output</p>
         </div>
       </div>
       <div class="flag-item">
         <span class="flag-code">--fail-on-detect</span>
         <div class="flag-info">
-          <h4>Fail on detect</h4>
+          <div class="item-title">Fail on detect</div>
           <p>Exit code 1 if secrets found (CI-safe)</p>
         </div>
       </div>
       <div class="flag-item">
         <span class="flag-code">--summary</span>
         <div class="flag-info">
-          <h4>Summary</h4>
+          <div class="item-title">Summary</div>
           <p>Print compact redaction summary</p>
         </div>
       </div>
       <div class="flag-item">
         <span class="flag-code">--json</span>
         <div class="flag-info">
-          <h4>JSON output</h4>
+          <div class="item-title">JSON output</div>
           <p>Machine-readable output for tooling</p>
         </div>
       </div>
       <div class="flag-item">
         <span class="flag-code">--stdin</span>
         <div class="flag-info">
-          <h4>Force stdin</h4>
+          <div class="item-title">Force stdin</div>
           <p>Explicitly read from stdin</p>
         </div>
       </div>
@@ -548,7 +547,7 @@
 </footer>
 
 <!-- Scripts -->
-<script src="./main.js"></script>
+<script defer src="./main.js"></script>
 
 </body>
 </html>

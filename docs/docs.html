@@ -30,6 +30,9 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://logshield.dev/docs">
 
+  <!-- Plausible Analytics -->
+  <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
+
   <style>
     :root {
       --bg-primary: #000000;
@@ -38,7 +41,7 @@
       --bg-code: #0d0d0d;
       --text-primary: #fafafa;
       --text-secondary: #a1a1a1;
-      --text-muted: #666666;
+      --text-muted: #8a8a8a;
       --accent-primary: #00E5A0;
       --accent-secondary: #00D4FF;
       --accent-warning: #FF6B6B;
@@ -72,10 +75,12 @@
     a {
       color: var(--accent-primary);
       text-decoration: none;
+      transition: opacity 0.2s;
     }
 
     a:hover {
-      text-decoration: underline;
+      opacity: 0.8;
+      text-decoration: none;
     }
 
     /* Header */
@@ -468,9 +473,36 @@
       align-items: center;
     }
 
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-logo {
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .footer-logo:hover {
+      text-decoration: none;
+      opacity: 0.8;
+    }
+
     .footer-copy {
       color: var(--text-muted);
       font-size: 14px;
+    }
+
+    .footer-license {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer-license:hover {
+      color: var(--text-secondary);
+      text-decoration: none;
     }
 
     .footer-links {
@@ -481,6 +513,12 @@
     .footer-links a {
       color: var(--text-secondary);
       font-size: 14px;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+      text-decoration: none;
     }
 
     /* Back to Top */
@@ -573,6 +611,7 @@
     <nav>
       <a href="index.html">Home</a>
       <a href="docs.html" class="active">Docs</a>
+      <a href="blog/">Blog</a>
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
     </nav>
   </div>
@@ -1038,7 +1077,10 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
 
 <footer>
   <div class="footer-inner">
-    <span class="footer-copy">2025 LogShield - ISC License</span>
+    <div class="footer-left">
+      <a href="index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" class="footer-license">ISC License</a> - v0.3.x</span>
+    </div>
     <div class="footer-links">
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
       <a href="index.html">Home</a>
@@ -1046,66 +1088,8 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
   </div>
 </footer>
 
-<script>
-(function() {
-  'use strict';
-
-  // Back to top
-  var backToTop = document.getElementById('backToTop');
-  
-  window.addEventListener('scroll', function() {
-    backToTop.classList.toggle('visible', window.scrollY > 300);
-  });
-
-  backToTop.addEventListener('click', function() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  // Sidebar active state
-  var sidebarLinks = document.querySelectorAll('.sidebar-link');
-  var sections = document.querySelectorAll('h2[id]');
-
-  function updateActiveLink() {
-    var current = '';
-    sections.forEach(function(section) {
-      var sectionTop = section.offsetTop - 100;
-      if (window.scrollY >= sectionTop) {
-        current = section.getAttribute('id');
-      }
-    });
-
-    sidebarLinks.forEach(function(link) {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === '#' + current) {
-        link.classList.add('active');
-      }
-    });
-  }
-
-  window.addEventListener('scroll', updateActiveLink);
-
-  // Smooth scroll for sidebar links
-  sidebarLinks.forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var target = document.querySelector(link.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  });
-
-  // Copy code function
-  window.copyCode = function(btn, text) {
-    navigator.clipboard.writeText(text);
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
-    setTimeout(function() {
-      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
-    }, 2000);
-  };
-
-})();
-</script>
+<!-- Scripts - External JS like main page -->
+<script defer src="./main.js"></script>
 
 </body>
 </html>

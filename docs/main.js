@@ -7,7 +7,22 @@
 
   window.addEventListener('scroll', function() {
     if (header) header.classList.toggle('scrolled', window.scrollY > 50);
-    if (backToTop) backToTop.classList.toggle('visible', window.scrollY > 400);
+    
+    // Show backToTop after scrolling 400px, but hide near footer
+    if (backToTop) {
+      var footer = document.querySelector('footer');
+      var hideNearFooter = false;
+      
+      if (footer) {
+        var footerTop = footer.getBoundingClientRect().top;
+        var windowHeight = window.innerHeight;
+        // Hide when footer is visible (within 150px of viewport bottom)
+        hideNearFooter = footerTop < windowHeight - 50;
+      }
+      
+      var shouldShow = window.scrollY > 400 && !hideNearFooter;
+      backToTop.classList.toggle('visible', shouldShow);
+    }
   });
 
   if (backToTop) {
@@ -65,8 +80,8 @@
     },
     { 
       prefix: '[INFO]', 
-      key: 'Authorization: Bearer ',
-      secret: 'eyJhbGciOiJIUzI1NiIs...',
+      key: 'Bearer ',
+      secret: 'eyJhbGciOiJIUzI1...',
       redacted: '<REDACTED_TOKEN>',
       type: 'AUTH_BEARER',
       alwaysRedact: true
@@ -479,6 +494,11 @@ function showCopySuccess(btn) {
   }, 2000);
 }
 
+// Global copyCode function for docs page (inline onclick)
+window.copyCode = function(btn, text) {
+  copyToClipboard(text, btn);
+};
+
 // Attach event listeners after DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
   // Copy install buttons
@@ -519,4 +539,40 @@ document.addEventListener('DOMContentLoaded', function() {
       copyToClipboard(text, btn);
     });
   });
+
+  // Docs sidebar active state
+  var sidebarLinks = document.querySelectorAll('.sidebar-link');
+  var sections = document.querySelectorAll('h2[id]');
+
+  if (sidebarLinks.length > 0 && sections.length > 0) {
+    function updateActiveLink() {
+      var current = '';
+      sections.forEach(function(section) {
+        var sectionTop = section.offsetTop - 100;
+        if (window.scrollY >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      sidebarLinks.forEach(function(link) {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateActiveLink);
+
+    // Smooth scroll for sidebar links
+    sidebarLinks.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }
 });
