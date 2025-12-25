@@ -1,7 +1,7 @@
 ---
 title: Why I Built LogShield
 description: The story behind LogShield and why deterministic log sanitization matters for DevOps teams.
-date: 2025-01-15
+date: 2025-12-25
 ---
 
 I've seen it happen too many times. A developer copies a log into Slack to ask for help debugging. Hidden in that log is an API key. Now that secret is sitting in a chat history, indexed, searchable, and potentially compromised.
