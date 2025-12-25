@@ -1747,6 +1747,11 @@ footer {
 
 /* Blog Mobile */
 @media (max-width: 640px) {
+  .blog-layout,
+  .article-layout {
+    padding: 100px 16px 60px;
+  }
+
   .blog-title,
   .article-title {
     font-size: 28px;
@@ -1758,5 +1763,36 @@ footer {
 
   .article-content h2 {
     font-size: 22px;
+  }
+
+  .article-content pre {
+    padding: 14px;
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .article-content pre code {
+    font-size: 12px;
+  }
+
+  .article-meta {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .post-card {
+    padding: 18px;
+  }
+
+  .post-title {
+    font-size: 18px;
+  }
+
+  .post-meta {
+    flex-wrap: wrap;
+    gap: 10px;
   }
 }
