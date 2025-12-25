@@ -357,8 +357,8 @@
     
     <div class="advanced-grid reveal reveal-delay-1">
       <div class="advanced-item">
-        <div class="item-title"><code>--dry-run</code> Preview mode</div>
-        <p>Detect secrets without modifying output. Useful for auditing rules.</p>
+        <div class="item-title"><code>--dry-run</code> Report only</div>
+        <p>Report detected redactions only. Does not output log content.</p>
         <div class="advanced-code">
           <span class="cmd">cat</span> <span class="file">app.log</span> <span class="pipe">|</span> <span class="cmd">logshield</span> <span class="flag">scan --dry-run</span>
         </div>
@@ -420,7 +420,7 @@
         <span class="flag-code">--dry-run</span>
         <div class="flag-info">
           <div class="item-title">Dry run</div>
-          <p>Detect without modifying output</p>
+          <p>Report detected redactions only</p>
         </div>
       </div>
       <div class="flag-item">

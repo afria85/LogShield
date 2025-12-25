@@ -272,23 +272,31 @@
     var container = document.createElement('div');
     container.className = 'dry-run-output';
     
-    // Header
+    // Header: logshield (dry-run)
     var headerLine = document.createElement('div');
     headerLine.className = 'log-line';
-    headerLine.innerHTML = '<span class="log-content"><span class="log-redacted">[DRY RUN]</span> <span class="log-value">Detected redactions:</span></span>';
+    headerLine.innerHTML = '<span class="log-content"><span class="log-prefix">logshield</span> <span class="log-muted">(dry-run)</span></span>';
     container.appendChild(headerLine);
     
     // Count types
     var types = {};
+    var totalCount = 0;
     logLines.forEach(function(line) {
       if (shouldRedact(line, demoState.isStrict)) {
         if (!types[line.type]) types[line.type] = 0;
         types[line.type]++;
+        totalCount++;
       }
     });
     
+    // "Detected N redactions:"
+    var detectedLine = document.createElement('div');
+    detectedLine.className = 'log-line';
+    detectedLine.innerHTML = '<span class="log-content"><span class="log-value">Detected ' + totalCount + ' redactions:</span></span>';
+    container.appendChild(detectedLine);
+    
     // List types with aligned counts
-    var typeKeys = Object.keys(types);
+    var typeKeys = Object.keys(types).sort();
     var maxLen = Math.max.apply(null, typeKeys.map(function(t) { return t.length; }));
     var padLen = Math.max(maxLen + 3, 20);
     
@@ -312,12 +320,12 @@
     // Footer
     var footer1 = document.createElement('div');
     footer1.className = 'log-line';
-    footer1.innerHTML = '<span class="log-content"><span class="log-value">No output was modified.</span></span>';
+    footer1.innerHTML = '<span class="log-content"><span class="log-muted">No output was modified.</span></span>';
     container.appendChild(footer1);
     
     var footer2 = document.createElement('div');
     footer2.className = 'log-line';
-    footer2.innerHTML = '<span class="log-content"><span class="log-prefix">Use without --dry-run to apply.</span></span>';
+    footer2.innerHTML = '<span class="log-content"><span class="log-muted">Use without --dry-run to apply.</span></span>';
     container.appendChild(footer2);
     
     demoBody.appendChild(container);
