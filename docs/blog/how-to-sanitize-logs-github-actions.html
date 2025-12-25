@@ -98,26 +98,26 @@
 
 <p>Install LogShield and pipe your command output through it:</p>
 
-<pre><code>name: Build and Test
+<pre><code><span class="code-keyword">name</span>: Build and Test
 
-on: [push, pull_request]
+<span class="code-keyword">on</span>: [push, pull_request]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+<span class="code-keyword">jobs</span>:
+  <span class="code-key">build</span>:
+    <span class="code-keyword">runs-on</span>: ubuntu-latest
+    <span class="code-keyword">steps</span>:
+      - <span class="code-keyword">uses</span>: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      - <span class="code-keyword">name</span>: Setup Node.js
+        <span class="code-keyword">uses</span>: actions/setup-node@v4
+        <span class="code-keyword">with</span>:
+          <span class="code-key">node-version</span>: "20"
 
-      - name: Install LogShield
-        run: npm install -g logshield-cli
+      - <span class="code-keyword">name</span>: Install LogShield
+        <span class="code-keyword">run</span>: npm install -g logshield-cli
 
-      - name: Run tests (sanitized output)
-        run: npm test 2&gt;&amp;1 | logshield scan</code></pre>
+      - <span class="code-keyword">name</span>: Run tests (sanitized output)
+        <span class="code-keyword">run</span>: npm test 2&gt;&amp;1 | logshield scan</code></pre>
 
 <p>The <code>2&gt;&amp;1</code> redirects stderr to stdout so both streams get sanitized. This is now my default setup for new repos.</p>
 
@@ -125,20 +125,20 @@ jobs:
 
 <p>If you need to keep logs for debugging but want them clean:</p>
 
-<pre><code>- name: Run application
-  run: |
+<pre><code>- <span class="code-keyword">name</span>: Run application
+  <span class="code-keyword">run</span>: |
     npm start &gt; raw.log 2&gt;&amp;1 &amp;
     sleep 10
     kill $! || true
 
-- name: Sanitize logs
-  run: logshield scan &lt; raw.log &gt; sanitized.log
+- <span class="code-keyword">name</span>: Sanitize logs
+  <span class="code-keyword">run</span>: logshield scan &lt; raw.log &gt; sanitized.log
 
-- name: Upload sanitized logs
-  uses: actions/upload-artifact@v4
-  with:
-    name: logs
-    path: sanitized.log</code></pre>
+- <span class="code-keyword">name</span>: Upload sanitized logs
+  <span class="code-keyword">uses</span>: actions/upload-artifact@v4
+  <span class="code-keyword">with</span>:
+    <span class="code-keyword">name</span>: logs
+    <span class="code-key">path</span>: sanitized.log</code></pre>
 
 <p>The raw log never leaves the runner. Only the sanitized version gets stored as an artifact.</p>
 
@@ -146,8 +146,8 @@ jobs:
 
 <p>For stricter workflows, you can fail the build if LogShield detects secrets:</p>
 
-<pre><code>- name: Check for secrets in logs
-  run: |
+<pre><code>- <span class="code-keyword">name</span>: Check for secrets in logs
+  <span class="code-keyword">run</span>: |
     npm test &gt; test.log 2&gt;&amp;1
     logshield scan --dry-run --fail-on-detect &lt; test.log</code></pre>
 
@@ -159,14 +159,14 @@ jobs:
 
 <p>Docker builds are notorious for leaking secrets through build args and multi-stage output:</p>
 
-<pre><code>- name: Build Docker image
-  run: |
+<pre><code>- <span class="code-keyword">name</span>: Build Docker image
+  <span class="code-keyword">run</span>: |
     docker build -t myapp:latest . 2&gt;&amp;1 | logshield scan</code></pre>
 
 <p>Or save the full build log for later analysis:</p>
 
-<pre><code>- name: Build and analyze
-  run: |
+<pre><code>- <span class="code-keyword">name</span>: Build and analyze
+  <span class="code-keyword">run</span>: |
     docker build -t myapp:latest . &gt; docker-build.log 2&gt;&amp;1
     logshield scan &lt; docker-build.log
     logshield scan --dry-run --summary &lt; docker-build.log</code></pre>
@@ -177,8 +177,8 @@ jobs:
 
 <p>Default mode catches obvious secrets like passwords, bearer tokens, and API keys. For production deployments, use strict mode:</p>
 
-<pre><code>- name: Deploy (strict sanitization)
-  run: |
+<pre><code>- <span class="code-keyword">name</span>: Deploy (strict sanitization)
+  <span class="code-keyword">run</span>: |
     ./deploy.sh 2&gt;&amp;1 | logshield scan --strict</code></pre>
 
 <p>Strict mode additionally catches AWS access keys, private key headers, and vendor-specific tokens like Stripe or Slack keys.</p>
@@ -187,31 +187,31 @@ jobs:
 
 <p>If you have many repos, create a reusable workflow:</p>
 
-<pre><code># .github/workflows/sanitized-run.yml
-name: Run with sanitized output
+<pre><code><span class="code-comment"># .github/workflows/sanitized-run.yml</span>
+<span class="code-keyword">name</span>: Run with sanitized output
 
-on:
-  workflow_call:
-    inputs:
-      command:
-        required: true
-        type: string
-      strict:
-        required: false
-        type: boolean
-        default: false
+<span class="code-keyword">on</span>:
+  <span class="code-key">workflow_call</span>:
+    <span class="code-keyword">inputs</span>:
+      <span class="code-key">command</span>:
+        <span class="code-key">required</span>: <span class="code-bool">true</span>
+        <span class="code-key">type</span>: string
+      <span class="code-key">strict</span>:
+        <span class="code-key">required</span>: <span class="code-bool">false</span>
+        <span class="code-key">type</span>: boolean
+        <span class="code-key">default</span>: <span class="code-bool">false</span>
 
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+<span class="code-keyword">jobs</span>:
+  <span class="code-keyword">run</span>:
+    <span class="code-keyword">runs-on</span>: ubuntu-latest
+    <span class="code-keyword">steps</span>:
+      - <span class="code-keyword">uses</span>: actions/checkout@v4
 
-      - name: Install LogShield
-        run: npm install -g logshield-cli
+      - <span class="code-keyword">name</span>: Install LogShield
+        <span class="code-keyword">run</span>: npm install -g logshield-cli
 
-      - name: Run command
-        run: |
+      - <span class="code-keyword">name</span>: Run command
+        <span class="code-keyword">run</span>: |
           if [ "${{ inputs.strict }}" = "true" ]; then
             ${{ inputs.command }} 2&gt;&amp;1 | logshield scan --strict
           else
@@ -220,12 +220,12 @@ jobs:
 
 <p>Then call it from other workflows:</p>
 
-<pre><code>jobs:
-  build:
-    uses: ./.github/workflows/sanitized-run.yml
-    with:
-      command: npm test
-      strict: false</code></pre>
+<pre><code><span class="code-keyword">jobs</span>:
+  <span class="code-key">build</span>:
+    <span class="code-keyword">uses</span>: ./.github/workflows/sanitized-run.yml
+    <span class="code-keyword">with</span>:
+      <span class="code-key">command</span>: npm test
+      <span class="code-key">strict</span>: <span class="code-bool">false</span></code></pre>
 
 <p>This way you don't have to repeat the LogShield setup in every workflow.</p>
 
@@ -235,12 +235,12 @@ jobs:
 
 <p><strong>Sanitize and tee</strong> - see output live while saving clean version:</p>
 
-<pre><code>npm test 2&gt;&amp;1 | tee raw.log | logshield scan</code></pre>
+<pre><code><span class="code-cmd">npm</span> test 2<span class="code-pipe">&gt;</span>&amp;1 <span class="code-pipe">|</span> <span class="code-cmd">tee</span> <span class="code-file">raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan</code></pre>
 
 <p><strong>Multiple commands</strong> - wrap in a block:</p>
 
-<pre><code>- name: Run integration tests
-  run: |
+<pre><code>- <span class="code-keyword">name</span>: Run integration tests
+  <span class="code-keyword">run</span>: |
     {
       echo "=== Database setup ==="
       ./scripts/setup-db.sh
@@ -252,8 +252,8 @@ jobs:
 
 <p><strong>Conditional strict mode</strong> - stricter on main branch:</p>
 
-<pre><code>- name: Run with appropriate strictness
-  run: |
+<pre><code>- <span class="code-keyword">name</span>: Run with appropriate strictness
+  <span class="code-keyword">run</span>: |
     if [ "${{ github.ref }}" = "refs/heads/main" ]; then
       npm test 2&gt;&amp;1 | logshield scan --strict
     else

@@ -335,6 +335,7 @@
     .code-body .flag { color: var(--accent-secondary); }
     .code-body .string { color: #E5C07B; }
     .code-body .redacted { color: var(--accent-primary); }
+    .code-body .code-keyword { color: var(--accent-purple); }
 
     /* Inline code */
     .content code:not(.code-body code) {
@@ -579,12 +580,8 @@
         grid-template-columns: 1fr;
       }
 
-      nav {
-        gap: 16px;
-      }
-
-      nav a {
-        font-size: 13px;
+      nav a:not(:last-child) {
+        display: none;
       }
     }
   </style>
@@ -614,6 +611,7 @@
     </a>
     <nav>
       <a href="index.html">Home</a>
+      <a href="docs.html" class="active">Docs</a>
       <a href="blog/">Blog</a>
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
     </nav>
@@ -1022,11 +1020,11 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
           <span class="code-lang">yaml</span>
         </div>
         <div class="code-body">
-          <code>- name: Install LogShield
-  run: npm install -g logshield-cli
+          <code>- <span class="code-keyword">name</span>: Install LogShield
+  <span class="code-keyword">run</span>: <span class="cmd">npm</span> install -g logshield-cli
 
-- name: Run tests (sanitized)
-  run: npm test 2>&1 | logshield scan</code>
+- <span class="code-keyword">name</span>: Run tests (sanitized)
+  <span class="code-keyword">run</span>: <span class="cmd">npm</span> test 2>&1 | <span class="cmd">logshield</span> <span class="flag">scan</span></code>
         </div>
       </div>
 
@@ -1036,10 +1034,10 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
           <span class="code-lang">yaml</span>
         </div>
         <div class="code-body">
-          <code>- name: Check for secrets
-  run: |
-    npm test > test.log 2>&1
-    logshield scan --dry-run --fail-on-detect < test.log</code>
+          <code>- <span class="code-keyword">name</span>: Check for secrets
+  <span class="code-keyword">run</span>: |
+    <span class="cmd">npm</span> test > <span class="string">test.log</span> 2>&1
+    <span class="cmd">logshield</span> <span class="flag">scan --dry-run --fail-on-detect</span> < <span class="string">test.log</span></code>
         </div>
       </div>
 

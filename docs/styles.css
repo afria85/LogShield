@@ -1709,6 +1709,17 @@ footer {
   color: var(--text-primary);
 }
 
+/* Syntax highlighting for blog code blocks */
+.article-content pre .code-comment { color: var(--text-muted); }
+.article-content pre .code-cmd { color: var(--accent-primary); }
+.article-content pre .code-flag { color: var(--accent-secondary); }
+.article-content pre .code-file { color: #E5C07B; }
+.article-content pre .code-pipe { color: var(--text-muted); }
+.article-content pre .code-key { color: var(--accent-secondary); }
+.article-content pre .code-keyword { color: var(--accent-purple); }
+.article-content pre .code-string { color: #98C379; }
+.article-content pre .code-bool { color: #D19A66; }
+
 .article-content blockquote {
   border-left: 3px solid var(--accent-primary);
   padding-left: 20px;

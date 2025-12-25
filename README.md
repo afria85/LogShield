@@ -180,7 +180,8 @@ cat app.log | logshield scan --dry-run
 ### Output
 
 ```
-[DRY RUN] Detected redactions:
+logshield (dry-run)
+Detected 3 redactions:
   OAUTH_ACCESS_TOKEN   x1
   AUTH_BEARER          x2
   EMAIL                x1

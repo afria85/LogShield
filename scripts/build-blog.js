@@ -32,7 +32,8 @@ function markdownToHtml(markdown) {
   const codeBlocks = [];
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
     const placeholder = `<<<CODEBLOCK${codeBlocks.length}>>>`;
-    codeBlocks.push(`<pre><code>${escapeHtml(code.trim())}</code></pre>`);
+    const highlighted = highlightCode(code.trim(), lang);
+    codeBlocks.push(`<pre><code>${highlighted}</code></pre>`);
     return placeholder;
   });
   
@@ -124,6 +125,60 @@ function escapeHtml(text) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+// Syntax highlighting for code blocks
+function highlightCode(code, lang) {
+  // First escape HTML
+  let escaped = escapeHtml(code);
+  
+  if (lang === 'bash' || lang === 'sh' || lang === 'shell') {
+    // Highlight bash - process line by line for comments
+    const lines = escaped.split('\n');
+    escaped = lines.map(line => {
+      // Check if line is a comment
+      if (/^\s*#/.test(line)) {
+        return line.replace(/^(\s*)(#.*)$/, '$1<span class="code-comment">$2</span>');
+      }
+      
+      // Commands (common ones) - word boundary
+      line = line.replace(/\b(cat|npm|node|docker|logshield|git|curl|wget|echo|cd|ls|mkdir|rm|cp|mv|chmod|chown|sudo|apt|brew|pip|yarn|npx|kill|sleep|tee)\b/g, '<span class="code-cmd">$1</span>');
+      // Flags (must come after command)
+      line = line.replace(/([ \t])(--?[\w-]+)/g, '$1<span class="code-flag">$2</span>');
+      // File extensions
+      line = line.replace(/([\w-]+\.(log|txt|json|yaml|yml|js|ts|sh|env))\b/g, '<span class="code-file">$1</span>');
+      // Pipes and redirects (escaped versions)
+      line = line.replace(/(\|)/g, '<span class="code-pipe">$1</span>');
+      line = line.replace(/(&gt;|&lt;)/g, '<span class="code-pipe">$1</span>');
+      line = line.replace(/(2&gt;&amp;1)/g, '<span class="code-pipe">$1</span>');
+      
+      return line;
+    }).join('\n');
+  } 
+  else if (lang === 'yaml' || lang === 'yml') {
+    // Highlight YAML - process line by line
+    const lines = escaped.split('\n');
+    escaped = lines.map(line => {
+      // Comments
+      if (/^\s*#/.test(line)) {
+        return line.replace(/^(\s*)(#.*)$/, '$1<span class="code-comment">$2</span>');
+      }
+      
+      // GitHub Actions keywords at start of key position
+      line = line.replace(/^(\s*-?\s*)(name|uses|run|with|on|jobs|steps|if|env|needs|outputs|inputs|runs-on|strategy|matrix)(:)/gm, 
+        '$1<span class="code-keyword">$2</span>$3');
+      
+      // Other keys (word followed by colon, not already wrapped)
+      line = line.replace(/^(\s*)([\w-]+)(:)(?![^<]*<\/span>)/gm, '$1<span class="code-key">$2</span>$3');
+      
+      // Booleans
+      line = line.replace(/:\s*(true|false)\s*$/g, ': <span class="code-bool">$1</span>');
+      
+      return line;
+    }).join('\n');
+  }
+  
+  return escaped;
 }
 
 // Parse frontmatter from markdown
