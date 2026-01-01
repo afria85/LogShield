@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A clear statement of scope, contracts, and non-goals behind a deterministic log sanitization tool." />
+  <title>What LogShield Guarantees (and What It Refuses to Do) - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/what-logshield-does-and-does-not-do.html">
+  <meta property="og:title" content="What LogShield Guarantees (and What It Refuses to Do) - LogShield Blog">
+  <meta property="og:description" content="A clear statement of scope, contracts, and non-goals behind a deterministic log sanitization tool.">
+  <meta property="og:image" content="https://logshield.dev/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What LogShield Guarantees (and What It Refuses to Do) - LogShield Blog">
+  <meta name="twitter:description" content="A clear statement of scope, contracts, and non-goals behind a deterministic log sanitization tool.">
+  
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/what-logshield-does-and-does-not-do.html">
+
+  <!-- Plausible Analytics -->
+  <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../docs.html">Docs</a>
+      <a href="./">Blog</a>
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">What LogShield Guarantees (and What It Refuses to Do)</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          January 2, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          3 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>As LogShield gets used in more CI pipelines and local workflows, I keep seeing the same implicit question:</p>
+
+<p><em>What exactly can I rely on this tool to do?</em></p>
+
+<p>This post is a clear answer to that question. Not a roadmap. Not a feature list. But a set of guarantees?and just as importantly, a set of refusals.</p>
+
+<h2>The Core Guarantee: Deterministic Output</h2>
+
+<p>The primary guarantee LogShield makes is simple:</p>
+
+<p><strong>The same input always produces the same output.</strong></p>
+
+<p>No heuristics. No entropy scoring. No probabilistic guesses. No learning over time.</p>
+
+<p>This matters more than it sounds. In practice, determinism enables:</p>
+
+<ul>
+<li>Reproducible CI runs</li>
+<li>Meaningful diffs in code reviews</li>
+<li>Auditable sanitization behavior</li>
+<li>Confidence when piping logs into other systems</li>
+</ul>
+
+<p>If a log line is redacted today, it will be redacted tomorrow. If it isn?t, it won?t suddenly start being redacted after an update unless you explicitly opt into new rules.</p>
+
+<p>There are no hidden degrees of freedom.</p>
+
+<h2>Explicit Rules, Explicit Trade-offs</h2>
+
+<p>LogShield only redacts what it is explicitly told to redact.</p>
+
+<p>Every detection is backed by a concrete rule. If a pattern matches, it gets sanitized. If it doesn?t, it passes through unchanged.</p>
+
+<p>This means LogShield is intentionally conservative. It prefers a false negative over a false positive.</p>
+
+<p>That trade-off is deliberate.</p>
+
+<p>Losing a secret is bad. Losing debugging context is worse. Once a non-secret value is redacted, it cannot be recovered. A missed secret, on the other hand, can be fixed by tightening rules or switching to strict mode.</p>
+
+<p>LogShield treats false positives as a failure mode, not a tolerable side effect.</p>
+
+<h2>Stable Contracts Over Clever Behavior</h2>
+
+<p>Another guarantee is behavioral stability.</p>
+
+<p>LogShield?s output format, exit codes, and CLI semantics are treated as contracts. They are versioned, tested, and intentionally boring.</p>
+
+<p>This is why LogShield avoids ?smart? behavior like:</p>
+
+<ul>
+<li>Automatically inferring intent</li>
+<li>Guessing based on surrounding context</li>
+<li>Adapting rules based on previous runs</li>
+</ul>
+
+<p>Those features tend to be impressive in demos and painful in production.</p>
+
+<p>LogShield is designed to sit in pipelines quietly, do one thing, and never surprise you.</p>
+
+<h2>What LogShield Explicitly Refuses to Do</h2>
+
+<p>Equally important are the things LogShield will not do, even if they sound attractive:</p>
+
+<ul>
+<li><strong>No AI-based detection</strong></li>
+</ul>
+
+<p>Machine learning introduces nondeterminism and opaque failure modes.</p>
+
+<ul>
+<li><strong>No cloud service or hosted scanning</strong></li>
+</ul>
+
+<p>Logs stay local. There is no backend to trust.</p>
+
+<ul>
+<li><strong>No telemetry or usage tracking</strong></li>
+</ul>
+
+<p>LogShield does not phone home.</p>
+
+<ul>
+<li><strong>No automatic ?learning? of new patterns</strong></li>
+</ul>
+
+<p>Rules change only when you change them.</p>
+
+<p>These are not temporary omissions. They are structural decisions.</p>
+
+<p>LogShield is meant to be auditable infrastructure, not an adaptive system.</p>
+
+<h2>Boring Is the Goal</h2>
+
+<p>If LogShield is doing its job, you shouldn?t think about it much.</p>
+
+<p>It should feel like a small, predictable Unix tool that happens to solve a sharp problem well. Something you pipe into without ceremony and trust without anxiety.</p>
+
+<p>That?s the bar.</p>
+
+<h2>When Not to Use LogShield</h2>
+
+<p>LogShield is not a silver bullet. It does not:</p>
+
+<ul>
+<li>Prevent secrets from being created</li>
+<li>Replace proper secret management</li>
+<li>Detect every possible sensitive value</li>
+<li>Protect against secrets committed to source code</li>
+</ul>
+
+<p>It is one layer in a defense-in-depth strategy, designed specifically for logs.</p>
+
+<h2>Closing</h2>
+
+<p>LogShield is opinionated by design. Those opinions exist to make its behavior legible, repeatable, and safe to depend on.</p>
+
+<p>If you ever find yourself wondering <em>why</em> LogShield behaves a certain way, the answer is usually the same: because predictability matters more than cleverness.</p>
+
+<p>That principle isn?t going to change.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" class="footer-license">ISC License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>
