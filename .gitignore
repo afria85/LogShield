@@ -31,3 +31,5 @@ node_modules
 dist
 .env
 *.tgz
+.aistudio/
+data
