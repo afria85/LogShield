@@ -6,15 +6,15 @@ date: 2026-01-02
 
 As LogShield gets used in more CI pipelines and local workflows, I keep seeing the same implicit question:
 
-_What exactly can I rely on this tool to do?_
+What exactly can I rely on this tool to do?
 
-This post is a clear answer to that question. Not a roadmap. Not a feature list. But a set of guarantees?and just as importantly, a set of refusals.
+This post is a clear answer to that question. Not a roadmap. Not a feature list. But a set of guarantees -- and just as importantly, a set of refusals.
 
 ## The Core Guarantee: Deterministic Output
 
 The primary guarantee LogShield makes is simple:
 
-**The same input always produces the same output.**
+The same input always produces the same output.
 
 No heuristics. No entropy scoring. No probabilistic guesses. No learning over time.
 
@@ -25,7 +25,7 @@ This matters more than it sounds. In practice, determinism enables:
 - Auditable sanitization behavior
 - Confidence when piping logs into other systems
 
-If a log line is redacted today, it will be redacted tomorrow. If it isn?t, it won?t suddenly start being redacted after an update unless you explicitly opt into new rules.
+If a log line is redacted today, it will be redacted tomorrow. If it is not, it will not suddenly start being redacted after an update unless you explicitly opt into new rules.
 
 There are no hidden degrees of freedom.
 
@@ -33,7 +33,7 @@ There are no hidden degrees of freedom.
 
 LogShield only redacts what it is explicitly told to redact.
 
-Every detection is backed by a concrete rule. If a pattern matches, it gets sanitized. If it doesn?t, it passes through unchanged.
+Every detection is backed by a concrete rule. If a pattern matches, it gets sanitized. If it does not, it passes through unchanged.
 
 This means LogShield is intentionally conservative. It prefers a false negative over a false positive.
 
@@ -47,9 +47,9 @@ LogShield treats false positives as a failure mode, not a tolerable side effect.
 
 Another guarantee is behavioral stability.
 
-LogShield?s output format, exit codes, and CLI semantics are treated as contracts. They are versioned, tested, and intentionally boring.
+LogShield's output format, exit codes, and CLI semantics are treated as contracts. They are versioned, tested, and intentionally boring.
 
-This is why LogShield avoids ?smart? behavior like:
+This is why LogShield avoids "smart" behavior like:
 
 - Automatically inferring intent
 - Guessing based on surrounding context
@@ -72,7 +72,7 @@ Equally important are the things LogShield will not do, even if they sound attra
 - **No telemetry or usage tracking**  
   LogShield does not phone home.
 
-- **No automatic ?learning? of new patterns**  
+- **No automatic "learning" of new patterns**  
   Rules change only when you change them.
 
 These are not temporary omissions. They are structural decisions.
@@ -81,11 +81,11 @@ LogShield is meant to be auditable infrastructure, not an adaptive system.
 
 ## Boring Is the Goal
 
-If LogShield is doing its job, you shouldn?t think about it much.
+If LogShield is doing its job, you should not think about it much.
 
 It should feel like a small, predictable Unix tool that happens to solve a sharp problem well. Something you pipe into without ceremony and trust without anxiety.
 
-That?s the bar.
+That is the bar.
 
 ## When Not to Use LogShield
 
@@ -102,6 +102,6 @@ It is one layer in a defense-in-depth strategy, designed specifically for logs.
 
 LogShield is opinionated by design. Those opinions exist to make its behavior legible, repeatable, and safe to depend on.
 
-If you ever find yourself wondering _why_ LogShield behaves a certain way, the answer is usually the same: because predictability matters more than cleverness.
+If you ever find yourself wondering why LogShield behaves a certain way, the answer is usually the same: because predictability matters more than cleverness.
 
-That principle isn?t going to change.
+That principle is not going to change.
