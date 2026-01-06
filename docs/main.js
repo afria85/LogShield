@@ -345,10 +345,9 @@
     clearAnimation();
     updateDemoStatus('Reading input...', '');
 
-    if (prefersReducedMotion) {
-      showFinalState();
-      return;
-    }
+    // Respect reduced motion for reveal effects only; keep demo behavior consistent across devices.
+    // (Demo is part of core product explanation and should still run.)
+    
 
     // Build lines first
     buildLines();

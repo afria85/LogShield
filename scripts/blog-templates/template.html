@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="LogShield Blog - Articles about log sanitization, DevOps security, and CLI tools." />
-  <title>Blog - LogShield</title>
+  <meta name="description" content="{{description}}" />
+  <title>{{title}} - LogShield Blog</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
@@ -13,22 +13,26 @@
   <meta name="theme-color" content="#00E5A0">
   
   <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://logshield.dev/blog/">
-  <meta property="og:title" content="Blog - LogShield">
-  <meta property="og:description" content="Articles about log sanitization, DevOps security, and CLI tools.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/{{slug}}.html">
+  <meta property="og:title" content="{{title}} - LogShield Blog">
+  <meta property="og:description" content="{{description}}">
   <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
   
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://logshield.dev/blog/">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{title}} - LogShield Blog">
+  <meta name="twitter:description" content="{{description}}">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/{{slug}}.html">
 
   <!-- Plausible Analytics -->
   <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
 
   <!-- Styles - External CSS like main page -->
   <link rel="stylesheet" href="../styles.css">
-  <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
-  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 </head>
 <body>
 
@@ -56,64 +60,36 @@
     <nav>
       <a href="../index.html">Home</a>
       <a href="../docs.html">Docs</a>
+      <a href="./">Blog</a>
       <a href="https://github.com/afria85/LogShield" target="_blank">GitHub</a>
     </nav>
   </div>
 </header>
 
-<main class="blog-layout">
-  <div class="blog-header">
-    <h1 class="blog-title">Blog</h1>
-    <p class="blog-desc">Articles about log sanitization, DevOps security, and building CLI tools.</p>
-  </div>
-
-  <div class="posts-list">
-
-    <a href="what-logshield-does-and-does-not-do.html" class="post-card">
-      <h2 class="post-title">What LogShield Guarantees (and What It Refuses to Do)</h2>
-      <p class="post-excerpt">A clear statement of scope, contracts, and non-goals behind a deterministic log sanitization tool.</p>
-      <div class="post-meta">
-        <span class="post-date">
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">{{title}}</h1>
+      <div class="article-meta">
+        <span class="article-date">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          January 2, 2026
+          {{date}}
         </span>
-        <span class="post-reading-time">
+        <span class="article-reading-time">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          3 min read
+          {{readingTime}} min read
         </span>
       </div>
-    </a>
+    </div>
 
-    <a href="how-to-sanitize-logs-github-actions.html" class="post-card">
-      <h2 class="post-title">How to Sanitize Logs in GitHub Actions</h2>
-      <p class="post-excerpt">Step-by-step guide to automatically remove secrets from CI logs before they get stored or shipped.</p>
-      <div class="post-meta">
-        <span class="post-date">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          December 25, 2025
-        </span>
-        <span class="post-reading-time">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          5 min read
-        </span>
-      </div>
-    </a>
-
-    <a href="why-i-built-logshield.html" class="post-card">
-      <h2 class="post-title">Why I Built LogShield</h2>
-      <p class="post-excerpt">The story behind LogShield and why deterministic log sanitization matters for DevOps teams.</p>
-      <div class="post-meta">
-        <span class="post-date">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          December 25, 2025
-        </span>
-        <span class="post-reading-time">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          3 min read
-        </span>
-      </div>
-    </a>
-  </div>
+    <div class="article-content">
+{{content}}
+    </div>
+  </article>
 </main>
 
 <!-- Back to Top Button - same as main page -->

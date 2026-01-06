@@ -8,6 +8,22 @@
 
 Deterministic log sanitization for developers.
 
+## Quick start (30 seconds)
+
+```bash
+# Install (CLI command: logshield)
+npm install -g logshield-cli
+
+# Preview what would be redacted (does not modify output)
+echo "email=test@example.com token=sk_live_123" | logshield scan --dry-run
+
+# Enforce redaction (sanitized output)
+echo "email=test@example.com token=sk_live_123" | logshield scan
+```
+
+- Prefer `--dry-run` first in CI to verify you are not over-redacting.
+- Then switch to enforced mode once you are satisfied with the preview.
+
 LogShield is a CLI tool that scans logs and redacts **real secrets** (API keys, tokens, credentials) before logs are shared with others, AI tools, CI systems, or public channels.
 
 It is designed to be **predictable, conservative, and safe for production pipelines**.

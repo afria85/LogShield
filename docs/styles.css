@@ -63,6 +63,8 @@ code, pre, .mono {
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
@@ -1163,6 +1165,14 @@ footer {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
+  .hero {
+    padding: 104px 24px 72px;
+  }
+
+  .section {
+    padding: 96px 24px;
+  }
+
   .hero-content {
     grid-template-columns: 1fr;
     gap: 48px;

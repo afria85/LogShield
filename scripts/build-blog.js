@@ -16,8 +16,8 @@ const path = require('path');
 
 const POSTS_DIR = path.join(__dirname, '../docs/blog/posts');
 const BLOG_DIR = path.join(__dirname, '../docs/blog');
-const TEMPLATE_PATH = path.join(BLOG_DIR, 'template.html');
-const INDEX_TEMPLATE_PATH = path.join(BLOG_DIR, 'index-template.html');
+const TEMPLATE_PATH = path.join(__dirname, 'blog-templates', 'template.html');
+const INDEX_TEMPLATE_PATH = path.join(__dirname, 'blog-templates', 'index-template.html');
 
 // Normalize line endings (Windows -> Unix)
 function normalizeLineEndings(text) {
