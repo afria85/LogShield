@@ -103,8 +103,8 @@ header::before {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--border-subtle);
   opacity: 0;
   transition: opacity 0.3s;
@@ -253,6 +253,7 @@ nav a:hover {
     linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
   background-size: 80px 80px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black 20%, transparent 70%);
   mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black 20%, transparent 70%);
 }
 
@@ -447,6 +448,7 @@ nav a:hover {
 
 .log-number {
   color: var(--text-muted);
+  -webkit-user-select: none;
   user-select: none;
   min-width: 20px;
   text-align: right;
@@ -1006,6 +1008,7 @@ nav a:hover {
 
 .line-num {
   color: var(--text-muted);
+  -webkit-user-select: none;
   user-select: none;
   min-width: 20px;
   text-align: right;
@@ -1295,228 +1298,52 @@ footer {
 }
 
 /* ==================== DOCS PAGE STYLES ==================== */
+/* Scoped to docs.html only. Prevents sidebar overlap on wide screens. */
 
-/* Docs Layout */
-.docs-layout {
+.docs-page .layout {
   display: flex;
-  min-height: calc(100vh - 64px);
-  padding-top: 64px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 64px; /* header height */
 }
 
-/* Sidebar */
-.sidebar {
-  position: fixed;
-  top: 64px;
-  left: 0;
+/* Sidebar must be in-flow (NOT fixed), sticky is enough */
+.docs-page .sidebar {
   width: 260px;
+  flex-shrink: 0;
+  padding: 32px 24px;
+  position: sticky;
+  top: 64px;
   height: calc(100vh - 64px);
-  padding: 24px;
-  background: var(--bg-primary);
-  border-right: 1px solid var(--border-subtle);
   overflow-y: auto;
-  z-index: 50;
+  border-right: 1px solid var(--border-subtle);
+  background: transparent;
+  z-index: 1;
 }
 
-.sidebar-section {
-  margin-bottom: 24px;
-}
-
-.sidebar-title {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-
-.sidebar-links {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.sidebar-link {
-  display: block;
-  padding: 8px 12px;
-  font-size: 14px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.sidebar-link:hover {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  text-decoration: none;
-}
-
-.sidebar-link.active {
-  background: var(--bg-elevated);
-  color: var(--accent-primary);
-}
-
-/* Main Content */
-.docs-main {
+/* Main content never goes under sidebar */
+.docs-page .main {
   flex: 1;
-  margin-left: 260px;
-  padding: 48px;
-  max-width: 900px;
+  min-width: 0;
+  padding: 48px 64px;
 }
 
-/* Docs Content */
-.docs-content h2 {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 48px 0 16px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-subtle);
+/* Optional: tighten big screens so it looks balanced */
+@media (min-width: 1400px) {
+  .docs-page .main {
+    padding-left: 72px;
+    padding-right: 72px;
+  }
 }
 
-.docs-content h2:first-child {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
-}
-
-.docs-content h3 {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 32px 0 12px;
-  color: var(--text-primary);
-}
-
-.docs-content p {
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-}
-
-.docs-content ul,
-.docs-content ol {
-  margin-bottom: 16px;
-  padding-left: 24px;
-}
-
-.docs-content li {
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-.docs-content code {
-  background: var(--bg-card);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 14px;
-  color: var(--accent-primary);
-}
-
-.docs-content pre {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin: 16px 0;
-  overflow-x: auto;
-  position: relative;
-}
-
-.docs-content pre code {
-  background: none;
-  padding: 0;
-  font-size: 14px;
-  color: var(--text-primary);
-  line-height: 1.6;
-}
-
-/* Docs Code Block with Copy */
-.docs-code-block {
-  position: relative;
-  margin: 16px 0;
-}
-
-.docs-code-block pre {
-  margin: 0;
-  padding-right: 80px;
-}
-
-.docs-code-block .copy-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 6px 12px;
-  font-size: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.docs-code-block .copy-btn:hover {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-}
-
-/* Docs Info Boxes */
-.docs-info {
-  padding: 16px 20px;
-  background: rgba(0, 229, 160, 0.08);
-  border: 1px solid rgba(0, 229, 160, 0.2);
-  border-radius: 8px;
-  margin: 16px 0;
-}
-
-.docs-info p {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-.docs-warning {
-  padding: 16px 20px;
-  background: rgba(255, 171, 0, 0.08);
-  border: 1px solid rgba(255, 171, 0, 0.2);
-  border-radius: 8px;
-  margin: 16px 0;
-}
-
-.docs-warning p {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-/* Docs Mobile */
-@media (max-width: 900px) {
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s;
+/* Mobile/tablet: match your existing behavior (sidebar hidden) */
+@media (max-width: 1024px) {
+  .docs-page .sidebar {
+    display: none;
   }
 
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .docs-main {
-    margin-left: 0;
+  .docs-page .main {
     padding: 32px 24px;
-  }
-}
-
-@media (max-width: 640px) {
-  .docs-content h2 {
-    font-size: 24px;
-  }
-
-  .docs-content h3 {
-    font-size: 18px;
   }
 }
 

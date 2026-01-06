@@ -1,5 +1,4 @@
 ---
-
 # LogShield
 
 [![npm version](https://img.shields.io/npm/v/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
@@ -16,7 +15,19 @@ npm install -g logshield-cli
 
 # Preview what would be redacted (does not modify output)
 echo "email=test@example.com token=sk_live_123" | logshield scan --dry-run
+```
 
+```
+logshield (dry-run)
+Detected 2 redactions:
+  EMAIL               x1
+  STRIPE_SECRET_KEY   x1
+
+No output was modified.
+Use without --dry-run to apply.
+```
+
+```bash
 # Enforce redaction (sanitized output)
 echo "email=test@example.com token=sk_live_123" | logshield scan
 ```
@@ -33,7 +44,7 @@ It is designed to be **predictable, conservative, and safe for production pipeli
 ## Website & Documentation
 
 The website and documentation live in the `/docs` directory.
-They are deployed to **[https://logshield.dev](https://logshield.dev)** via Vercel.
+They are deployed to **https://logshield.dev** via Vercel.
 
 ---
 
@@ -69,8 +80,6 @@ The same input always produces the same output.
 - No environment-dependent behavior
 - Safe for CI, audits, and reproducibility
 
----
-
 ### 2. Zero false-positive fatality
 
 LogShield must **not** redact non-secrets.
@@ -79,8 +88,6 @@ LogShield must **not** redact non-secrets.
 - Losing debugging context is worse than missing a secret
 
 When in doubt, LogShield prefers **not** to redact.
-
----
 
 ### 3. Explicit redaction markers
 
