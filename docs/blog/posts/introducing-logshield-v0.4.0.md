@@ -4,8 +4,6 @@ date: "2026-01-07"
 description: "A foundation release focused on licensing clarity and documentation consistency, without changing engine or CLI behavior."
 ---
 
-# Introducing LogShield v0.4.0
-
 v0.4.0 is a foundation release.  
 There are no engine changes, no new features, and no behavior differences compared to previous versions.
 
