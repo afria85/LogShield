@@ -13,11 +13,9 @@ exports[`LogShield sanitizeLog ? SNAPSHOT > default mode snapshot 2`] = `
 [
   {
     "rule": "JWT",
-    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.TEST.TEST",
   },
   {
     "rule": "PASSWORD",
-    "value": "password=supersecret",
   },
 ]
 `;
@@ -34,11 +32,9 @@ exports[`LogShield sanitizeLog ? SNAPSHOT > strict mode snapshot 2`] = `
 [
   {
     "rule": "STRIPE_SECRET_KEY",
-    "value": "sk_test_1234567890abcdefghijklmnopqrstuvwxyz",
   },
   {
     "rule": "CREDIT_CARD",
-    "value": "4242424242424242",
   },
 ]
 `;

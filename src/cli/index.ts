@@ -65,9 +65,7 @@ function isStdinPiped(): boolean {
   return !process.stdin.isTTY;
 }
 
-function renderDryRunReport(
-  matches: { rule: string }[]
-) {
+function renderDryRunReport(matches: { rule: string }[]) {
   if (matches.length === 0) {
     process.stdout.write("logshield (dry-run)\n");
     process.stdout.write("Detected 0 redactions.\n");
@@ -88,7 +86,7 @@ function renderDryRunReport(
       return a.rule.localeCompare(b.rule);
     });
 
-  const maxLen = Math.max(...entries.map(e => e.rule.length));
+  const maxLen = Math.max(...entries.map((e) => e.rule.length));
   const total = matches.length;
   const label = total === 1 ? "redaction" : "redactions";
 
@@ -96,9 +94,7 @@ function renderDryRunReport(
   process.stdout.write(`Detected ${total} ${label}:\n`);
 
   for (const { rule, count } of entries) {
-    process.stdout.write(
-      `  ${rule.padEnd(maxLen)}  x${count}\n`
-    );
+    process.stdout.write(`  ${rule.padEnd(maxLen)}  x${count}\n`);
   }
 
   process.stdout.write("\n");
@@ -151,10 +147,11 @@ async function main() {
     process.exit(1);
   }
 
-
   try {
     const input = await readInput(useStdin ? undefined : file);
-    const result = sanitizeLog(input, { strict });
+
+    // FIX: forward dryRun into the engine so detection and behavior stay consistent.
+    const result = sanitizeLog(input, { strict, dryRun });
 
     if (dryRun) {
       renderDryRunReport(result.matches);

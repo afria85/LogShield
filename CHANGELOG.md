@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.4.1
+
+### Fixed
+
+- Prevented secret leakage in `--json` output by removing raw match values from the public result shape
+- Forwarded `--dry-run` into the engine to ensure consistent, future-proof behavior
+
+### Improved
+
+- Expanded credential detection for common API key variants (`api_key`, `api-key`, `apikey`) and `Authorization: Bearer ...`
+- Hardened AWS secret key strict detection to reduce false positives while keeping strict mode safe
+
+### Notes
+
+- No breaking changes
+- No new features
+- Stability and safety hardening release
+
 ## v0.4.0
 
 ### Changed
@@ -21,8 +39,6 @@
 ### Improved
 
 - CLI documentation clarity
-- Blog and docs structure consistency
-- Shared `styles.css` and `main.js` across site pages
 
 ### Notes
 

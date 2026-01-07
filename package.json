@@ -17,6 +17,7 @@
     "build:web": "vite build --outDir dist-web",
     "build:blog": "node scripts/build-blog.js",
     "dev:web": "vite",
+    "typecheck": "tsc -p tsconfig.core.json && tsc -p tsconfig.cli.json --noEmit",
     "pretest": "npm run build",
     "test": "vitest",
     "prepublishOnly": "npm run build"
@@ -27,6 +28,7 @@
     "esbuild": "^0.25.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.0"
   }
 }

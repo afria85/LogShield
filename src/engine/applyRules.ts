@@ -2,7 +2,6 @@ import type { Rule, RuleContext } from "../rules/types";
 
 export type ApplyMatch = {
   rule: string;
-  value: string;
 };
 
 export function applyRules(
@@ -21,9 +20,9 @@ export function applyRules(
       const replaced = rule.replace(match, ctx, groups);
 
       if (replaced !== match) {
+        // SECURITY: never store the raw matched secret in matches.
         matches.push({
           rule: rule.name,
-          value: match,
         });
       }
 

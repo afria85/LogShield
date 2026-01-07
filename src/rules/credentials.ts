@@ -1,9 +1,10 @@
 import type { Rule } from "./types";
 
 export const credentialRules: Rule[] = [
+  // password=... or password: ...
   {
     name: "PASSWORD",
-    pattern: /\bpassword=([^\s]+)/gi,
+    pattern: /\bpassword\s*[:=]\s*([^\s]+)/gi,
     replace: () => "password=<REDACTED_PASSWORD>",
   },
 
@@ -15,17 +16,32 @@ export const credentialRules: Rule[] = [
       `${groups[0]}://${groups[1]}:<REDACTED_PASSWORD>@`,
   },
 
-  // apiKey=...
+  /**
+   * API key (common variants):
+   * - apiKey=...
+   * - api_key=...
+   * - api-key: ...
+   * - apikey=...
+   * Supports '=' or ':' and optional quotes/spaces.
+   */
   {
     name: "API_KEY",
-    pattern: /\bapiKey=([A-Za-z0-9_\-]{16,})\b/g,
+    pattern:
+      /\bapi(?:[_-]?key)\s*[:=]\s*["']?([A-Za-z0-9_\-]{16,})["']?\b/gi,
     replace: () => "<REDACTED_API_KEY>",
   },
 
   // x-api-key: ....
   {
     name: "API_KEY_HEADER",
-    pattern: /\bx-api-key:\s*[A-Za-z0-9_\-]{16,}\b/gi,
+    pattern: /\bx-api-key\s*:\s*["']?[A-Za-z0-9_\-]{16,}["']?\b/gi,
     replace: () => "x-api-key: <REDACTED_API_KEY>",
+  },
+
+  // authorization: Bearer ...
+  {
+    name: "AUTHORIZATION_BEARER",
+    pattern: /\bauthorization\s*:\s*bearer\s+([A-Za-z0-9._\-]{16,})\b/gi,
+    replace: () => "authorization: Bearer <REDACTED_TOKEN>",
   },
 ];

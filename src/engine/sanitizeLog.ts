@@ -5,7 +5,6 @@ import type { RuleContext } from "../rules/types";
 
 export type SanitizeMatch = {
   rule: string;
-  value: string;
 };
 
 export function sanitizeLog(
@@ -26,7 +25,7 @@ export function sanitizeLog(
   const matches: SanitizeMatch[] = [];
 
   // IMPORTANT:
-  // If dry-run ? we still apply rules for detection,
+  // If dry-run, we still apply rules for detection,
   // but we must NOT mutate output.
   if (ctx.dryRun) {
     applyRules(input, allRules, ctx, matches);
