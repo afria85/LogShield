@@ -1,18 +1,55 @@
----
 # LogShield
 
 [![npm version](https://img.shields.io/npm/v/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
 [![npm downloads](https://img.shields.io/npm/dm/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
 [![CI](https://github.com/afria85/LogShield/actions/workflows/ci.yml/badge.svg)](https://github.com/afria85/LogShield/actions/workflows/ci.yml)
 
-Deterministic log sanitization for developers.
+Your logs already contain secrets. You just don’t see them.
+
+LogShield is a small CLI that automatically redacts secrets from logs **before**
+you paste them into CI, GitHub issues, Slack, or send them to third-party support.
+
+No configuration. No cloud. Deterministic output.
+
+---
 
 ## Quick start (30 seconds)
 
 ```bash
-# Install (CLI command: logshield)
-npm install -g logshield-cli
+# Sanitize logs before sharing them
+cat app.log | logshield scan
+```
 
+**Example input**
+```txt
+POSTGRES_URL=postgres://user:supersecret@db.internal
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Output**
+```txt
+POSTGRES_URL=postgres://user:<REDACTED_PASSWORD>@db.internal
+Authorization: Bearer <REDACTED_TOKEN>
+```
+
+This is exactly what your logs look like today — until you share them.
+
+---
+
+## When should I use LogShield?
+
+Use LogShield whenever logs leave your system:
+
+- Before pasting logs into CI
+- Before attaching logs to GitHub issues
+- Before sending logs to third-party support
+- Before sharing logs in Slack or email
+
+---
+
+## Preview before enforcing (dry-run)
+
+```bash
 # Preview what would be redacted (does not modify output)
 echo "email=test@example.com token=sk_live_123" | logshield scan --dry-run
 ```
@@ -35,7 +72,9 @@ echo "email=test@example.com token=sk_live_123" | logshield scan
 - Prefer `--dry-run` first in CI to verify you are not over-redacting.
 - Then switch to enforced mode once you are satisfied with the preview.
 
-LogShield is a CLI tool that scans logs and redacts **real secrets** (API keys, tokens, credentials) before logs are shared with others, AI tools, CI systems, or public channels.
+LogShield is a CLI tool that scans logs and redacts **real secrets**
+(API keys, tokens, credentials) before logs are shared with others,
+AI tools, CI systems, or public channels.
 
 It is designed to be **predictable, conservative, and safe for production pipelines**.
 
@@ -148,28 +187,28 @@ If a file is not provided and input is piped, LogShield automatically reads from
 
 ## CLI Flags
 
-- `--strict`
+- `--strict`  
   Aggressive, security-first redaction
 
-- `--stdin`
+- `--stdin`  
   Explicitly force reading from STDIN
 
-- `--dry-run`
+- `--dry-run`  
   Detect sensitive data without modifying output
 
-- `--fail-on-detect`
+- `--fail-on-detect`  
   Exit with code `1` if any redaction is detected (CI-friendly)
 
-- `--summary`
+- `--summary`  
   Print a compact redaction summary
 
-- `--json`
+- `--json`  
   JSON output (cannot be combined with `--dry-run`)
 
-- `--version`
+- `--version`  
   Print CLI version
 
-- `--help`
+- `--help`  
   Show help
 
 ---
@@ -319,7 +358,7 @@ logshield scan --json < logs.txt
 Notes:
 
 - `--json` **cannot** be combined with `--dry-run`
-- Output schema is stable within v0.3.x
+- Output schema is stable within v0.4.x
 
 ---
 
@@ -370,7 +409,7 @@ Depending on rules and mode:
 LogShield guarantees:
 
 - Deterministic output
-- Stable behavior within **v0.3.x**
+- Stable behavior within **v0.4.x**
 - No runtime dependencies
 - Snapshot-tested and contract-tested
 - No telemetry
@@ -401,5 +440,3 @@ It is a **last-line safety net**, not a primary defense.
 ## License
 
 Apache-2.0
-
----
