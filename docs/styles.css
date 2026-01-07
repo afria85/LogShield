@@ -70,16 +70,16 @@ code, pre, .mono {
     animation-iteration-count: 1 !important;
     transition-duration: 0.2s !important;
   }
-  
+
   .reveal {
     opacity: 1;
     transform: none;
   }
-  
+
   .gradient-orb {
     animation: none;
   }
-  
+
   .hero-title .gradient-text {
     animation: none;
   }
@@ -249,7 +249,7 @@ nav a:hover {
 .grid-pattern {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
   background-size: 80px 80px;
@@ -261,15 +261,15 @@ nav a:hover {
   max-width: 1280px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 56px;
   align-items: center;
   position: relative;
   z-index: 1;
 }
 
 .hero-text {
-  max-width: 560px;
+  max-width: 520px;
 }
 
 .hero-badge {
@@ -287,18 +287,23 @@ nav a:hover {
 }
 
 .hero-title {
-  font-size: clamp(44px, 5vw, 64px);
+  font-size: clamp(40px, 4.6vw, 58px);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.03em;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  overflow: visible;
 }
 
+/* IMPORTANT: prevents descender clipping in background-clip text */
 .hero-title .line {
-  display: block;
+  display: inline-block;
+  padding-bottom: 0.14em;
 }
 
 .hero-title .gradient-text {
+  display: inline-block;
+  padding-bottom: 0.14em;
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -388,7 +393,7 @@ nav a:hover {
   border: 1px solid var(--border-default);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     0 0 0 1px rgba(255,255,255,0.05) inset,
     0 40px 80px -20px rgba(0,0,0,0.8);
 }
@@ -1190,6 +1195,10 @@ footer {
     align-items: center;
   }
 
+  .demo-controls {
+    justify-content: center;
+  }
+
   .bento-grid {
     grid-template-columns: 1fr;
   }
@@ -1235,18 +1244,61 @@ footer {
     padding: 80px 16px;
   }
 
+  /* Header/nav: allow wrapping instead of hiding links */
+  header {
+    padding: 0 16px;
+  }
+
+  .header-inner {
+    gap: 12px;
+  }
+
   nav {
-    gap: 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 60vw;
   }
 
   nav a {
     font-size: 13px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    line-height: 1;
+  }
+
+  nav a:hover {
+    border-color: var(--border-default);
+  }
+
+  /* keep Blog visible (no hiding) */
+  .hero-title {
+    margin-bottom: 20px;
+  }
+
+  .hero-desc {
+    margin-bottom: 24px;
+  }
+
+  .hero-cta {
+    gap: 16px;
   }
 
   .install-box {
     width: 100%;
     justify-content: space-between;
     font-size: 13px;
+  }
+
+  /* Prevent install command from overflowing on mobile */
+  .install-box code {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: calc(100% - 120px);
+    display: block;
   }
 
   .secondary-links {
@@ -1297,6 +1349,7 @@ footer {
   }
 }
 
+
 /* ==================== DOCS PAGE STYLES ==================== */
 /* Scoped to docs.html only. Prevents sidebar overlap on wide screens. */
 
@@ -1346,7 +1399,6 @@ footer {
     padding: 32px 24px;
   }
 }
-
 
 /* ==================== BLOG STYLES ==================== */
 
