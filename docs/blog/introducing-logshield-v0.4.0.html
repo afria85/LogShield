@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="{{description}}" />
-  <title>{{title}} - LogShield Blog</title>
+  <meta name="description" content="A foundation release focused on licensing clarity and documentation consistency, without changing engine or CLI behavior." />
+  <title>Introducing LogShield v0.4.0 - LogShield Blog</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
@@ -14,19 +14,19 @@
   
   <!-- Open Graph -->
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://logshield.dev/blog/{{slug}}.html">
-  <meta property="og:title" content="{{title}} - LogShield Blog">
-  <meta property="og:description" content="{{description}}">
+  <meta property="og:url" content="https://logshield.dev/blog/introducing-logshield-v0.4.0.html">
+  <meta property="og:title" content="Introducing LogShield v0.4.0 - LogShield Blog">
+  <meta property="og:description" content="A foundation release focused on licensing clarity and documentation consistency, without changing engine or CLI behavior.">
   <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{{title}} - LogShield Blog">
-  <meta name="twitter:description" content="{{description}}">
+  <meta name="twitter:title" content="Introducing LogShield v0.4.0 - LogShield Blog">
+  <meta name="twitter:description" content="A foundation release focused on licensing clarity and documentation consistency, without changing engine or CLI behavior.">
   
     <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
 <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://logshield.dev/blog/{{slug}}.html">
+  <link rel="canonical" href="https://logshield.dev/blog/introducing-logshield-v0.4.0.html">
 
   <!-- Plausible Analytics -->
   <script defer data-domain="logshield.dev" src="https://plausible.io/js/script.js"></script>
@@ -73,21 +73,78 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back to Blog
       </a>
-      <h1 class="article-title">{{title}}</h1>
+      <h1 class="article-title">Introducing LogShield v0.4.0</h1>
       <div class="article-meta">
         <span class="article-date">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          {{date}}
+          January 7, 2026
         </span>
         <span class="article-reading-time">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          {{readingTime}} min read
+          2 min read
         </span>
       </div>
     </div>
 
     <div class="article-content">
-{{content}}
+<p># Introducing LogShield v0.4.0</p>
+
+<p>v0.4.0 is a <strong>foundation release</strong>.   There are no engine changes, no new features, and no behavior differences compared to previous versions.</p>
+
+<p>This release focuses on clarity, consistency, and long-term maintainability of the project itself.</p>
+
+<h2>Why LogShield exists</h2>
+
+<p>LogShield was created to solve a simple but recurring problem:   logs often contain sensitive data, and once logs leave your machine or CI system, you lose control over them.</p>
+
+<p>The goal of LogShield is intentionally narrow:</p>
+
+<ul>
+<li><strong>Deterministic</strong> ? sanitize logs predictably every time</li>
+<li><strong>Lightweight</strong> ? stay small with no complex runtime dependencies</li>
+<li><strong>Predictable</strong> ? avoid hidden behavior or implicit logic</li>
+</ul>
+
+<p>It is designed to be <strong>boring, reliable, and easy to reason about</strong>.</p>
+
+<h2>What changed in v0.4.0</h2>
+
+<p>Although there are no runtime changes, several important project-level improvements were made:</p>
+
+<ul>
+<li><strong>License clarity</strong></li>
+</ul>
+
+<p>LogShield is now licensed under <strong>Apache License 2.0</strong>, which provides clearer reuse and contribution terms, especially in professional and organizational settings.</p>
+
+<ul>
+<li><strong>Documentation consistency</strong></li>
+</ul>
+
+<p>The README, website, and blog content are now aligned in terminology, examples, and license references.</p>
+
+<h2>What did not change</h2>
+
+<p>To keep existing workflows stable:</p>
+
+<ul>
+<li>No engine changes</li>
+<li>No rule changes</li>
+<li>No CLI output or flag changes</li>
+<li><strong>No breaking changes</strong></li>
+</ul>
+
+<p>Upgrading to v0.4.0 is safe and does not affect existing usage.</p>
+
+<h2>Looking forward</h2>
+
+<p>For now, the focus remains on keeping LogShield simple, predictable, and well-documented before expanding its scope further.</p>
+
+<p><strong>Clarity first. Stability first.</strong></p>
+
+<p>---</p>
+
+<p>For usage details and source code, see the project README on GitHub.</p>
     </div>
   </article>
 </main>

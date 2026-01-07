@@ -1,7 +1,7 @@
 {
   "name": "logshield-cli",
   "version": "0.3.6",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "type": "commonjs",
   "bin": {
     "logshield": "dist/cli/index.cjs"

@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.0
+
+### Changed
+
+- License updated to Apache-2.0
+- README, website, and blog content aligned to reflect the new license and current project state
+
+### Notes
+
+- No engine or CLI behavior changes
+- No breaking changes
+
 ## v0.3.6
 
 ### Fixed

@@ -400,6 +400,6 @@ It is a **last-line safety net**, not a primary defense.
 
 ## License
 
-ISC
+Apache-2.0
 
 ---
