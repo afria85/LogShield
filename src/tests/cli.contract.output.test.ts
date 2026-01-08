@@ -11,16 +11,15 @@ function runCli(args: string[], input?: string) {
   });
 
   return {
-    stdout: result.stdout ?? "",
-    stderr: result.stderr ?? "",
+    stdout: (result.stdout ?? "").replace(/\r\n/g, "\n"),
+    stderr: (result.stderr ?? "").replace(/\r\n/g, "\n"),
     status: result.status,
   };
 }
 
 describe("CLI output contracts", () => {
   it("writes JSON output with a trailing newline", () => {
-    const { stdout, stderr, status } = runCli(["scan", "--json"],
-      "password=secret123\n");
+    const { stdout, stderr, status } = runCli(["scan", "--json"], "password=secret123\n");
 
     expect(status).toBe(0);
     expect(stderr).toBe("");
@@ -32,10 +31,10 @@ describe("CLI output contracts", () => {
     expect(Array.isArray(parsed.matches)).toBe(true);
   });
 
-  it("writes CLI errors to STDERR (not STDOUT)", () => {
+  it("usage/flag errors are written to STDERR and exit with code 2", () => {
     const { stdout, stderr, status } = runCli(["scan", "--dry-run", "--json"], "");
 
-    expect(status).toBe(1);
+    expect(status).toBe(2);
     expect(stdout).toBe("");
     expect(stderr).toContain("--dry-run cannot be used with --json");
   });

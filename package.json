@@ -20,7 +20,8 @@
     "typecheck": "tsc -p tsconfig.core.json && tsc -p tsconfig.cli.json --noEmit",
     "pretest": "npm run build",
     "test": "vitest",
-    "prepublishOnly": "npm run build"
+    "prepublish:check": "npm run typecheck && npm test",
+    "prepublishOnly": "npm run prepublish:check"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

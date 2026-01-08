@@ -1,35 +1,42 @@
-"use strict";
+/**
+ * Minimal match shape needed by the CLI summary printer.
+ * Keep this decoupled from engine types to avoid cross-layer import drift.
+ */
+export type SummaryMatch = { rule: string };
 
-type Match = { rule: string };
-
-export function printSummary(matches: Match[]) {
-  if (!matches || matches.length === 0) {
-    process.stderr.write("logshield: no redactions detected\n");
+/**
+ * Print a compact, deterministic summary.
+ *
+ * Contract:
+ * - Output goes to STDERR (CI-safe, does not pollute stdout).
+ * - Header is stable.
+ * - Rules are sorted alphabetically.
+ * - Format is aligned and stable for snapshot/diff.
+ */
+export function printSummary(matches: SummaryMatch[]): void {
+  if (!matches.length) {
+    process.stderr.write("LogShield Summary\n(no redactions detected)\n");
     return;
   }
 
-  const counter: Record<string, number> = {};
-
+  // Aggregate counts by rule name
+  const counts: Record<string, number> = {};
   for (const m of matches) {
-    counter[m.rule] = (counter[m.rule] || 0) + 1;
+    counts[m.rule] = (counts[m.rule] ?? 0) + 1;
   }
 
-  const entries = Object.entries(counter)
-    .map(([rule, count]) => ({ rule, count }))
-    .sort((a, b) => {
-      if (b.count !== a.count) return b.count - a.count;
-      return a.rule.localeCompare(b.rule);
-    });
+  // Sort rule names alphabetically (deterministic contract)
+  const rules = Object.keys(counts).sort((a, b) => a.localeCompare(b));
 
-  const maxLen = Math.max(...entries.map(e => e.rule.length));
-  const total = matches.length;
-  const label = total === 1 ? "redaction" : "redactions";
+  // Compute alignment width
+  const maxNameLen = Math.max(...rules.map((r) => r.length));
 
-  process.stderr.write(`logshield summary: ${total} ${label}\n`);
+  // Header
+  process.stderr.write("LogShield Summary\n");
 
-  for (const { rule, count } of entries) {
-    process.stderr.write(
-      `  ${rule.padEnd(maxLen)}  x${count}\n`
-    );
+  // Body
+  for (const rule of rules) {
+    const padded = rule.padEnd(maxNameLen, " ");
+    process.stderr.write(`  ${padded}  x${counts[rule]}\n`);
   }
 }

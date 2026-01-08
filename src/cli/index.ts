@@ -106,6 +106,11 @@ function renderDryRunReport(matches: { rule: string }[]) {
   process.stdout.write("Use without --dry-run to apply.\n");
 }
 
+function exitUsageError(message: string) {
+  writeErr(message.endsWith("\n") ? message : message + "\n");
+  process.exit(2);
+}
+
 async function main() {
   if (rawArgs.length === 0 || rawArgs.includes("--help")) {
     printHelp();
@@ -121,8 +126,7 @@ async function main() {
 
   const command = positionals[0];
   if (command !== "scan") {
-    writeErr("Unknown command\n");
-    process.exit(1);
+    exitUsageError("Unknown command");
   }
 
   const file = positionals[1];
@@ -136,25 +140,23 @@ async function main() {
   const stdinAuto = isStdinPiped();
   const useStdin = stdinFlag || stdinAuto;
 
+  // Usage/flag errors => exit code 2 (input/usage error)
   if (useStdin && file) {
-    writeErr("Cannot read from both STDIN and file\n");
-    process.exit(1);
+    exitUsageError("Cannot read from both STDIN and file");
   }
 
   if (dryRun && json) {
-    writeErr("--dry-run cannot be used with --json\n");
-    process.exit(1);
+    exitUsageError("--dry-run cannot be used with --json");
   }
 
   if (json && summary) {
-    writeErr("--summary cannot be used with --json\n");
-    process.exit(1);
+    exitUsageError("--summary cannot be used with --json");
   }
 
   try {
     const input = await readInput(useStdin ? undefined : file);
 
-    // FIX: forward dryRun into the engine so detection and behavior stay consistent.
+    // Forward dryRun into the engine so detection and behavior stay consistent.
     const result = sanitizeLog(input, { strict, dryRun });
 
     if (dryRun) {
@@ -167,6 +169,7 @@ async function main() {
       process.exit(0);
     }
 
+    // Default behavior: sanitized output to stdout (or JSON), summary to stderr.
     writeOutput(result, { json });
 
     if (summary) {

@@ -36,6 +36,32 @@ sk_test_1234567890abcdefghijklmnopqrstuvwxyz
     expect(result.matches[0].rule).toBe("PASSWORD");
   });
 
+  it("default: redacts x-api-key header values without corrupting the header name", () => {
+    const input = `x-api-key: sk_test_1234567890abcdef`;
+    const result = sanitizeLog(input);
+
+    expect(result.output).toBe("x-api-key: <REDACTED_API_KEY>");
+    expect(result.matches.length).toBe(1);
+    expect(result.matches[0].rule).toBe("API_KEY_HEADER");
+  });
+
+  it("default: redacts Authorization Bearer tokens exactly once (no double-count)", () => {
+    const input = `email=test@example.com Authorization: Bearer abcdefghijklmnop`;
+    const result = sanitizeLog(input);
+
+    // Output should be sanitized once for the bearer token.
+    expect(result.output).toBe(
+      "email=<REDACTED_EMAIL> Authorization: Bearer <REDACTED_TOKEN>"
+    );
+
+    // Matches should include exactly one bearer-related detection.
+    const bearerMatches = result.matches.filter((m) => m.rule === "AUTH_BEARER");
+    expect(bearerMatches.length).toBe(1);
+
+    // Total matches should be exactly 2: EMAIL + AUTH_BEARER
+    expect(result.matches.length).toBe(2);
+  });
+
   it("default: does NOT redact AWS access key", () => {
     const input = `AKIA1234567890TEST1234`;
     const result = sanitizeLog(input);
@@ -54,7 +80,9 @@ sk_test_1234567890abcdefghijklmnopqrstuvwxyz
   it("default: redacts credentials inside URLs but preserves the URL", () => {
     const input = `https://user:supersecret@example.com/path`;
     const result = sanitizeLog(input);
-    expect(result.output).toBe(`https://user:<REDACTED_PASSWORD>@example.com/path`);
+    expect(result.output).toBe(
+      `https://user:<REDACTED_PASSWORD>@example.com/path`
+    );
     expect(result.matches.some((m) => m.rule === "URL")).toBe(true);
   });
 
@@ -88,7 +116,9 @@ LS_STRIPE_LIVE_KEY_XXXXXXXXXXXXXXXX
     const result = sanitizeLog(input, { strict: true });
 
     expect(result.output).toContain("<REDACTED_STRIPE_KEY>");
-    expect(result.matches.some(m => m.rule === "STRIPE_SECRET_KEY")).toBe(true);
+    expect(result.matches.some((m) => m.rule === "STRIPE_SECRET_KEY")).toBe(
+      true
+    );
   });
 
   it("strict: redacts secrets inside JSON values", () => {
@@ -120,9 +150,7 @@ LS_STRIPE_LIVE_KEY_XXXXXXXXXXXXXXXX
   it("throws error if log exceeds 200KB", () => {
     const bigInput = "A".repeat(204_801);
 
-    expect(() => sanitizeLog(bigInput)).toThrow(
-      "Log size exceeds 200KB limit"
-    );
+    expect(() => sanitizeLog(bigInput)).toThrow("Log size exceeds 200KB limit");
   });
 
   it("returns empty output for empty input", () => {

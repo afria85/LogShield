@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.4.3
+
+### Fixed
+
+- Prevented API key redaction from corrupting header names (`x-api-key`)
+- Preserved key labels when redacting `api_key=...` values
+- Corrected CLI exit code for invalid flag combinations (`--json --dry-run` now exits with code 2)
+
+### Improved
+
+- Deterministic and aligned `--summary` output (alphabetical, indented)
+- Hardened CLI behavior with end-to-end golden tests
+- Strengthened regression coverage for rule overlap and precedence
+
+### Notes
+
+- No breaking changes
+- No new features
+- Hardening and correctness release
+
 ## v0.4.2
 
 ### Fixed

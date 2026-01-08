@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
 [![CI](https://github.com/afria85/LogShield/actions/workflows/ci.yml/badge.svg)](https://github.com/afria85/LogShield/actions/workflows/ci.yml)
 
-Your logs already contain secrets. You just don’t see them.
+Your logs already contain secrets. You just don't see them.
 
 LogShield is a small CLI that automatically redacts secrets from logs **before**
 you paste them into CI, GitHub issues, Slack, or send them to third-party support.
@@ -55,22 +55,28 @@ Use LogShield whenever logs leave your system:
 
 ```bash
 # Preview what would be redacted (does not modify output)
-echo "email=test@example.com token=sk_live_123" | logshield scan --dry-run
+echo "email=test@example.com Authorization: Bearer abcdefghijklmnop" | logshield scan --dry-run
 ```
 
 ```
 logshield (dry-run)
 Detected 2 redactions:
-  EMAIL               x1
-  STRIPE_SECRET_KEY   x1
+  AUTH_BEARER          x1
+  EMAIL                x1
 
 No output was modified.
 Use without --dry-run to apply.
 ```
 
+Notes:
+
+- The report is printed to stdout
+- No log content is echoed
+- Output is deterministic and CI-safe
+
 ```bash
 # Enforce redaction (sanitized output)
-echo "email=test@example.com token=sk_live_123" | logshield scan
+echo "email=test@example.com Authorization: Bearer abcdefghijklmnop" | logshield scan
 ```
 
 - Prefer `--dry-run` first in CI to verify you are not over-redacting.
@@ -140,8 +146,8 @@ Examples:
 
 ```
 <REDACTED_PASSWORD>
-<REDACTED_API_KEY_HEADER>
-<REDACTED_AUTH_BEARER>
+<REDACTED_API_KEY>
+<REDACTED_TOKEN>
 <REDACTED_EMAIL>
 ```
 
@@ -247,8 +253,8 @@ cat app.log | logshield scan --dry-run
 
 ```
 logshield (dry-run)
-Detected 5 redactions:
-  AUTH_BEARER          x2
+Detected 4 redactions:
+  AUTH_BEARER          x1
   EMAIL                x1
   OAUTH_ACCESS_TOKEN   x1
   PASSWORD             x1
@@ -345,9 +351,15 @@ Example:
 
 ```
 LogShield Summary
-PASSWORD: 2
-API_KEY_HEADER: 1
+  API_KEY_HEADER: 1
+  PASSWORD:       2
 ```
+
+Notes:
+
+- Sanitized log output is written to stdout
+- The summary is written to stderr
+- Rules are sorted alphabetically
 
 ---
 
@@ -362,7 +374,8 @@ logshield scan --json < logs.txt
 Notes:
 
 - `--json` **cannot** be combined with `--dry-run`
-- Output schema is stable within v0.4.x
+- Usage errors exit with code `2`
+- Output is always newline-terminated
 
 ---
 
