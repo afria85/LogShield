@@ -351,8 +351,8 @@ Example:
 
 ```
 LogShield Summary
-  API_KEY_HEADER: 1
-  PASSWORD:       2
+  API_KEY_HEADER  x1
+  PASSWORD        x2
 ```
 
 Notes:
@@ -381,11 +381,11 @@ Notes:
 
 ## Exit codes
 
-| Code | Meaning                              |
-| ---: | ------------------------------------ |
-|    0 | Success / no detection               |
-|    1 | Detection found (`--fail-on-detect`) |
-|    2 | Runtime or input error               |
+| Code | Meaning                                       |
+| ---: | --------------------------------------------- |
+|    0 | Success (detection does not change exit code) |
+|    1 | Detection found (`--fail-on-detect`)          |
+|    2 | Runtime or input error                        |
 
 ---
 
