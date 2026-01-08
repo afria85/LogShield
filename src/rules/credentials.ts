@@ -4,8 +4,12 @@ export const credentialRules: Rule[] = [
   // password=... or password: ...
   {
     name: "PASSWORD",
-    pattern: /\bpassword\s*[:=]\s*([^\s]+)/gi,
-    replace: () => "password=<REDACTED_PASSWORD>",
+    // Preserve delimiter and spacing so logs remain readable and diff-friendly.
+    // Examples:
+    //   password=secret  -> password=<REDACTED_PASSWORD>
+    //   Password : 123   -> Password : <REDACTED_PASSWORD>
+    pattern: /\b(password)(\s*[:=]\s*)([^\s]+)/gi,
+    replace: (_match, _ctx, groups) => `${groups[0]}${groups[1]}<REDACTED_PASSWORD>`,
   },
 
   // DB URL credential: postgres://user:pass@host

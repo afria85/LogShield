@@ -28,12 +28,43 @@ sk_test_1234567890abcdefghijklmnopqrstuvwxyz
     expect(result.matches[0].rule).toBe("PASSWORD");
   });
 
+  it("default: preserves delimiter and spacing for password fields", () => {
+    const input = `Password :   supersecret123`;
+    const result = sanitizeLog(input);
+
+    expect(result.output).toBe("Password :   <REDACTED_PASSWORD>");
+    expect(result.matches[0].rule).toBe("PASSWORD");
+  });
+
   it("default: does NOT redact AWS access key", () => {
     const input = `AKIA1234567890TEST1234`;
     const result = sanitizeLog(input);
 
     expect(result.output).toBe(input);
     expect(result.matches.length).toBe(0);
+  });
+
+  it("default: keeps normal URLs intact", () => {
+    const input = `https://example.com/path?q=hello&lang=en#section`;
+    const result = sanitizeLog(input);
+    expect(result.output).toBe(input);
+    expect(result.matches.length).toBe(0);
+  });
+
+  it("default: redacts credentials inside URLs but preserves the URL", () => {
+    const input = `https://user:supersecret@example.com/path`;
+    const result = sanitizeLog(input);
+    expect(result.output).toBe(`https://user:<REDACTED_PASSWORD>@example.com/path`);
+    expect(result.matches.some((m) => m.rule === "URL")).toBe(true);
+  });
+
+  it("default: redacts sensitive query/fragment params inside URLs", () => {
+    const input = `https://example.com/callback?code=ok&access_token=ABC123&lang=en#id_token=XYZ&foo=bar`;
+    const result = sanitizeLog(input);
+    expect(result.output).toBe(
+      `https://example.com/callback?code=ok&access_token=<REDACTED_URL_PARAM>&lang=en#id_token=<REDACTED_URL_PARAM>&foo=bar`
+    );
+    expect(result.matches.some((m) => m.rule === "URL")).toBe(true);
   });
 
   // =========================

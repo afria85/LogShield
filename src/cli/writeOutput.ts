@@ -3,7 +3,8 @@ export function writeOutput(
   opts: { json: boolean }
 ) {
   if (opts.json) {
-    process.stdout.write(JSON.stringify(result));
+    // Contract: JSON output must be newline-terminated for CI/tooling friendliness.
+    process.stdout.write(`${JSON.stringify(result)}\n`);
   } else {
     process.stdout.write(result.output);
   }

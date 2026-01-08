@@ -46,6 +46,10 @@ Options:
 `);
 }
 
+function writeErr(message: string) {
+  process.stderr.write(message);
+}
+
 function parseArgs(args: string[]) {
   const flags = new Set<string>();
   const positionals: string[] = [];
@@ -117,7 +121,7 @@ async function main() {
 
   const command = positionals[0];
   if (command !== "scan") {
-    process.stdout.write("Unknown command\n");
+    writeErr("Unknown command\n");
     process.exit(1);
   }
 
@@ -133,17 +137,17 @@ async function main() {
   const useStdin = stdinFlag || stdinAuto;
 
   if (useStdin && file) {
-    process.stdout.write("Cannot read from both STDIN and file\n");
+    writeErr("Cannot read from both STDIN and file\n");
     process.exit(1);
   }
 
   if (dryRun && json) {
-    process.stdout.write("--dry-run cannot be used with --json\n");
+    writeErr("--dry-run cannot be used with --json\n");
     process.exit(1);
   }
 
   if (json && summary) {
-    process.stdout.write("--summary cannot be used with --json\n");
+    writeErr("--summary cannot be used with --json\n");
     process.exit(1);
   }
 
@@ -175,8 +179,7 @@ async function main() {
 
     process.exit(0);
   } catch (err: any) {
-    process.stdout.write(err?.message || "Unexpected error");
-    process.stdout.write("\n");
+    writeErr((err?.message || "Unexpected error") + "\n");
     process.exit(2);
   }
 }

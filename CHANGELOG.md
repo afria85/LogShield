@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.4.2
+
+### Fixed
+
+- CLI errors are now written to stderr (CI-safe piping)
+- JSON output is newline-terminated
+- URL redaction is no longer overly aggressive; only credentials and sensitive parameters are redacted
+- PASSWORD redaction preserves original delimiter and spacing
+- Improved dry-run reporting consistency
+- Added contract tests for CLI output and URL behavior
+
 ## v0.4.1
 
 ### Fixed

@@ -27,7 +27,12 @@ export const tokenRules: Rule[] = [
 
   {
     name: "EMAIL",
-    pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
-    replace: () => "<REDACTED_EMAIL>",
+    // Avoid corrupting URLs with embedded credentials like:
+    //   https://user:pass@host
+    // In those cases, `pass@host` can look like an email.
+    // We therefore require a safe delimiter (whitespace/quotes/brackets/`=` or `: `) before the email.
+    pattern:
+      /(^|[\s"'\(\[\{<>,;]|=|:\s)([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/gim,
+    replace: (_match, _ctx, groups) => `${groups[0]}<REDACTED_EMAIL>`,
   },
 ];

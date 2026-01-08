@@ -21,18 +21,22 @@ cat app.log | logshield scan
 ```
 
 **Example input**
+
 ```txt
 POSTGRES_URL=postgres://user:supersecret@db.internal
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
+These are typical raw logs -- with secrets -- before you share them.
+
 **Output**
+
 ```txt
 POSTGRES_URL=postgres://user:<REDACTED_PASSWORD>@db.internal
 Authorization: Bearer <REDACTED_TOKEN>
 ```
 
-This is exactly what your logs look like today — until you share them.
+After LogShield, the same logs are safe to share.
 
 ---
 
@@ -243,10 +247,10 @@ cat app.log | logshield scan --dry-run
 
 ```
 logshield (dry-run)
-Detected 3 redactions:
-  OAUTH_ACCESS_TOKEN   x1
+Detected 5 redactions:
   AUTH_BEARER          x2
   EMAIL                x1
+  OAUTH_ACCESS_TOKEN   x1
   PASSWORD             x1
 
 No output was modified.
