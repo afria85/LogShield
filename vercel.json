@@ -20,12 +20,6 @@
 
   "redirects": [
     {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.logshield.dev" }],
-      "destination": "https://logshield.dev/$1",
-      "permanent": true
-    },
-    {
       "source": "/index.html",
       "destination": "/",
       "permanent": true
