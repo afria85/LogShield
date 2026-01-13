@@ -33,9 +33,33 @@ describe("Golden contract cases (pre-publish gate)", () => {
       expectedRules: ["PASSWORD"],
     },
     {
+      name: "PASSWORD: quoted value with spaces",
+      input: 'password="secret value"',
+      expectedOutput: 'password="<REDACTED_PASSWORD>"',
+      expectedRules: ["PASSWORD"],
+    },
+    {
+      name: "PASSWORD: JSON form",
+      input: '{"password": "secret value"}',
+      expectedOutput: '{"password": "<REDACTED_PASSWORD>"}',
+      expectedRules: ["PASSWORD"],
+    },
+    {
       name: "DB_URL_CREDENTIAL: redact only password in URL authority",
       input: "POSTGRES_URL=postgres://user:supersecret@db.internal",
       expectedOutput: "POSTGRES_URL=postgres://user:<REDACTED_PASSWORD>@db.internal",
+      expectedRules: ["DB_URL_CREDENTIAL"],
+    },
+    {
+      name: "DB_URL_CREDENTIAL: supports redis:// credentials",
+      input: "REDIS_URL=redis://user:supersecret@cache.internal",
+      expectedOutput: "REDIS_URL=redis://user:<REDACTED_PASSWORD>@cache.internal",
+      expectedRules: ["DB_URL_CREDENTIAL"],
+    },
+    {
+      name: "DB_URL_CREDENTIAL: supports mssql:// credentials",
+      input: "MSSQL_URL=mssql://user:supersecret@db.internal",
+      expectedOutput: "MSSQL_URL=mssql://user:<REDACTED_PASSWORD>@db.internal",
       expectedRules: ["DB_URL_CREDENTIAL"],
     },
     {

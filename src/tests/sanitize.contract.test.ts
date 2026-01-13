@@ -36,6 +36,22 @@ sk_test_1234567890abcdefghijklmnopqrstuvwxyz
     expect(result.matches[0].rule).toBe("PASSWORD");
   });
 
+  it("default: redacts quoted password values (including spaces)", () => {
+    const input = `password="secret value"`;
+    const result = sanitizeLog(input);
+
+    expect(result.output).toBe('password="<REDACTED_PASSWORD>"');
+    expect(result.matches[0].rule).toBe("PASSWORD");
+  });
+
+  it("default: redacts JSON password fields", () => {
+    const input = `{"password": "secret value"}`;
+    const result = sanitizeLog(input);
+
+    expect(result.output).toBe('{"password": "<REDACTED_PASSWORD>"}');
+    expect(result.matches[0].rule).toBe("PASSWORD");
+  });
+
   it("default: redacts x-api-key header values without corrupting the header name", () => {
     const input = `x-api-key: sk_test_1234567890abcdef`;
     const result = sanitizeLog(input);

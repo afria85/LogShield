@@ -8,15 +8,32 @@ export const credentialRules: Rule[] = [
     // Examples:
     //   password=secret  -> password=<REDACTED_PASSWORD>
     //   Password : 123   -> Password : <REDACTED_PASSWORD>
-    pattern: /\b(password)(\s*[:=]\s*)([^\s]+)/gi,
-    replace: (_match, _ctx, groups) =>
-      `${groups[0]}${groups[1]}<REDACTED_PASSWORD>`,
+    // Supports quoted keys/values and JSON forms:
+    //   password="secret value"        -> password="<REDACTED_PASSWORD>"
+    //   "password": "secret value"    -> "password": "<REDACTED_PASSWORD>"
+    // NOTE: for unquoted values, we stop at whitespace and common JSON delimiters.
+    pattern:
+      /\b(["']?password["']?)(\s*[:=]\s*)(?:(["'])([^"'\r\n]*?)\3|([^\s,}\]]+))/gi,
+    replace: (_match, _ctx, groups) => {
+      const key = groups[0];
+      const delim = groups[1];
+      const quote = groups[2];
+
+      if (quote) {
+        return `${key}${delim}${quote}<REDACTED_PASSWORD>${quote}`;
+      }
+
+      return `${key}${delim}<REDACTED_PASSWORD>`;
+    },
   },
 
   // DB URL credential: postgres://user:pass@host
   {
     name: "DB_URL_CREDENTIAL",
-    pattern: /\b(postgres|mysql|mongodb):\/\/([^:\s]+):([^@\s]+)@/gi,
+    // Support the most common DB/cache schemes.
+    // This focuses only on the user:pass@ authority portion.
+    pattern:
+      /\b(postgres(?:ql)?|mysql|mariadb|mongodb(?:\+srv)?|redis|rediss|mssql|sqlserver):\/\/([^:\s]+):([^@\s]+)@/gi,
     replace: (_match, _ctx, groups) =>
       `${groups[0]}://${groups[1]}:<REDACTED_PASSWORD>@`,
   },

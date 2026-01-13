@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.4
+
+### Fixed
+
+- Expanded PASSWORD redaction to cover quoted values (including spaces) and JSON forms (`"password": "..."`)
+- Expanded DB URL credential redaction to cover additional common schemes (`redis://`, `mssql://`, and variants)
+
+### Notes
+
+- No breaking changes
+- Behavior is still deterministic; this release reduces false negatives in common log formats
+
 ## v0.4.3
 
 ### Fixed
