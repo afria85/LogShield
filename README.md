@@ -393,13 +393,13 @@ Notes:
 
 Depending on rules and mode:
 
-- Passwords
+- Passwords (supports quoted and JSON forms)
 - API key headers
 - Authorization bearer tokens
 - JWTs
 - Emails
 - URLs with embedded credentials
-- Database credentials
+- Database credentials (including redis:// and mssql://)
 - Cloud provider credentials
 - Credit card numbers (Luhn-validated)
 
