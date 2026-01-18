@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A pragmatic threat model for log leakage and the minimum controls that reduce risk without killing debugging." />
+  <title>Log Sanitization: Threat Model, Leak Paths, and Practical Controls - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/log-sanitization-threat-model-and-controls.html">
+  <meta property="og:title" content="Log Sanitization: Threat Model, Leak Paths, and Practical Controls - LogShield Blog">
+  <meta property="og:description" content="A pragmatic threat model for log leakage and the minimum controls that reduce risk without killing debugging.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Log Sanitization: Threat Model, Leak Paths, and Practical Controls - LogShield Blog">
+  <meta name="twitter:description" content="A pragmatic threat model for log leakage and the minimum controls that reduce risk without killing debugging.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/log-sanitization-threat-model-and-controls.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../docs.html">Docs</a>
+      <a href="./">Blog</a>
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">Log Sanitization: Threat Model, Leak Paths, and Practical Controls</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          January 18, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          5 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>If you've ever pasted logs into a ticket, a chat, or an AI assistant, you've already done <em>log publishing</em>. The risk isn't theoretical: incident reviews routinely trace credential exposure back to copy/paste, CI output, or vendor support workflows.</p>
+
+<p>This post is a practical threat model for log leakage, plus the minimum controls that fit real developer workflows.</p>
+
+<h2>Threat model in one page</h2>
+
+<p>Before controls, define the model:</p>
+
+<ul>
+<li><strong>Asset:</strong> anything in logs that enables access or reveals sensitive context (credentials, tokens, session material, signed URLs, customer identifiers, internal hostnames).</li>
+<li><strong>Boundary:</strong> where you still control access and retention (your laptop, your repo, your internal systems).</li>
+<li><strong>Adversary:</strong> not always a "hacker" &mdash; often accidental oversharing, overly broad access, retention defaults, indexing/search, and third-party processors.</li>
+<li><strong>Failure mode:</strong> logs cross the boundary <strong>unsanitized</strong> and then get replicated, retained, and searchable.</li>
+</ul>
+
+<p>Once logs leave your boundary, assume they can be copied, indexed, and redistributed.</p>
+
+<h2>What counts as a leak</h2>
+
+<p>A leak is not just "prod credentials got stolen." In practice it looks mundane:</p>
+
+<ul>
+<li>A temporary token ends up in a public GitHub issue.</li>
+<li>A database URL with a password gets pasted into a vendor support portal.</li>
+<li>A stack trace contains a signed URL, session cookie, or Authorization header.</li>
+<li>A CI job prints environment variables for debugging and the logs are retained for 30&ndash;90 days by default.</li>
+</ul>
+
+<p>The real risk multiplier is <strong>replication</strong>: chat history, ticket systems, email threads, CI artifacts, log aggregators, and backups.</p>
+
+<h2>Common leak paths</h2>
+
+<p>Think in terms of surfaces where logs escape.</p>
+
+<p><strong>Human sharing</strong> &mdash; Slack/Teams/Discord, email threads, copy/paste into tickets. This is the most frequent path: someone needs help debugging and grabs the nearest snippet.</p>
+
+<p><strong>Automation</strong> &mdash; CI logs stored by the provider, uploading logs as artifacts, centralized log pipelines (ELK, Datadog, Splunk). These systems are designed to ingest everything, which means they will ingest secrets too unless you stop them.</p>
+
+<p><strong>Third-party processing</strong> &mdash; vendor diagnostics, "paste logs into our web form," external incident response, and AI assistants. The moment you send raw logs outside your boundary, you lose control over retention and secondary use.</p>
+
+<p>If any surface is outside your control, treat it as public-by-default and sanitize first.</p>
+
+<h2>What secrets look like in practice</h2>
+
+<p>Secrets rarely show up as a neat line that says <code>API_KEY=xyz</code>. They show up as:</p>
+
+<p>- tokens inside <code>Authorization: Bearer ...</code> - connection strings like <code>postgres://user:pass@host/db</code> - cloud keys (e.g., AWS access key IDs like <code>AKIA...</code>) - passwords buried inside JSON payloads - session cookies in <code>Set-Cookie</code> - signed URLs, JWTs, and opaque session material</p>
+
+<p>A realistic model assumes multiple shapes and formats: plain text, JSON, YAML, stack traces, and multiline output.</p>
+
+<h2>Controls that actually work</h2>
+
+<p>Below is the minimum set of controls that materially reduce risk without becoming a platform project.</p>
+
+<h3>1) Sanitize before logs leave your boundary</h3>
+
+<p>Treat sanitization as a pre-flight step:</p>
+
+<ul>
+<li>before you paste into chat</li>
+<li>before you attach CI artifacts</li>
+<li>before you open a public issue</li>
+<li>before you send anything to a vendor</li>
+</ul>
+
+<p>This is the only control that works across <em>all</em> leak paths.</p>
+
+<h3>2) Prefer deterministic redaction</h3>
+
+<p>Determinism matters operationally:</p>
+
+<ul>
+<li>repeatable CI checks</li>
+<li>reviewable diffs</li>
+<li>consistent incident response</li>
+<li>stable support workflows ("sanitize the same file twice, get the same output")</li>
+</ul>
+
+<p>If the same input can produce different output over time, teams stop trusting the tool &mdash; and the workflow breaks.</p>
+
+<h3>3) Keep it local-first</h3>
+
+<p>If sanitization sends raw logs to a remote service, you have moved the problem to a new boundary.</p>
+
+<p>Local-first processing keeps the raw material inside your control and reduces compliance surface area.</p>
+
+<h3>4) Preserve structure and labels</h3>
+
+<p>Over-redaction makes logs useless. Under-redaction leaks.</p>
+
+<p>The practical middle ground:</p>
+
+<ul>
+<li>keep keys and labels (so you know what was redacted)</li>
+<li>replace only sensitive values</li>
+<li>preserve formatting, especially for JSON</li>
+</ul>
+
+<p>This keeps debug value while still preventing leakage.</p>
+
+<h3>5) Add a preview mode</h3>
+
+<p>A preview mode (dry-run) answers "what would be redacted?" without modifying output. It improves adoption because teams can verify safety and accuracy before committing to the sanitized output.</p>
+
+<p>Preview is also useful for policy enforcement (e.g., fail CI if secrets are detected).</p>
+
+<h2>Controls mapped to leak paths</h2>
+
+<p>A simple mapping helps teams decide what to implement first:</p>
+
+<ul>
+<li><strong>Human sharing:</strong> local-first sanitizer + preview mode + a one-line policy</li>
+<li><strong>Automation (CI/artifacts):</strong> run sanitizer in CI + fail-on-detect + artifact hygiene (avoid uploading raw logs)</li>
+<li><strong>Third-party processing:</strong> sanitize locally before upload + deterministic outputs for review</li>
+</ul>
+
+<p>If you can only do one thing: enforce sanitization at the boundary crossing.</p>
+
+<h2>A simple policy that scales</h2>
+
+<p>You do not need a 20-page policy. You need one rule everyone remembers:</p>
+
+<p><strong>If logs leave the system, sanitize first.</strong></p>
+
+<p>Then provide a boring, repeatable command. For example:</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan</code></pre>
+
+<p>Or preview what would be redacted:</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span></code></pre>
+
+<p>If you want enforcement, add a CI check that fails when secrets are detected (and prints only metadata, not raw values).</p>
+
+<h2>The goal is safe sharing, not secrecy theater</h2>
+
+<p>Sanitization is not about making logs "perfect." It is about reducing risk while keeping enough signal to debug.</p>
+
+<p>If sanitization destroys debug value, people bypass it. If it is predictable, local, and easy, it becomes habit &mdash; and habit is what actually changes outcomes.</p>
+
+<p>Security controls win when they match developer workflows.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>
