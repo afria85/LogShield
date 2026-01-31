@@ -27,9 +27,14 @@ export function sanitizeLog(
   // IMPORTANT:
   // If dry-run, we still apply rules for detection,
   // but we must NOT mutate output.
+  //
+  // SECURITY:
+  // Do NOT return the raw input in the result shape when dryRun is enabled.
+  // Consumers may serialize the result (JSON logs, telemetry, etc.).
+  // Returning the raw input here would re-introduce a secret leakage path.
   if (ctx.dryRun) {
     applyRules(input, allRules, ctx, matches);
-    return { output: input, matches };
+    return { output: "", matches };
   }
 
   const output = applyRules(input, allRules, ctx, matches);

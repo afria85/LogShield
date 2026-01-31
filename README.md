@@ -218,6 +218,8 @@ logshield scan [file]
 
 If a file is not provided and input is piped, LogShield automatically reads from **STDIN**.
 
+Note: the npm package ships the CLI only; there is no supported JS API surface.
+
 ---
 
 ## CLI Flags
@@ -238,7 +240,7 @@ If a file is not provided and input is piped, LogShield automatically reads from
   Print a compact redaction summary
 
 - `--json`  
-  JSON output (cannot be combined with `--dry-run`)
+  JSON output (can be combined with `--dry-run`; output is empty in dry-run)
 
 - `--version`  
   Print CLI version
@@ -396,9 +398,16 @@ Structured output for tooling and automation:
 logshield scan --json < logs.txt
 ```
 
+Detection-only JSON (safe to serialize; no log content):
+
+```bash
+logshield scan --json --dry-run < logs.txt
+```
+
 Notes:
 
-- `--json` **cannot** be combined with `--dry-run`
+- `--json` can be combined with `--dry-run` for machine-readable detection
+- In `--dry-run` JSON mode, `output` is intentionally an empty string
 - Usage errors exit with code `2`
 - Output is always newline-terminated
 
@@ -451,7 +460,7 @@ Depending on rules and mode:
 LogShield guarantees:
 
 - Deterministic output
-- Stable behavior within **v0.4.x**
+- Stable behavior within the current minor line **v0.5.x**
 - No runtime dependencies
 - Snapshot-tested and contract-tested
 - No telemetry
@@ -495,4 +504,3 @@ See `SECURITY.md`.
 ## Support
 
 See `SUPPORT.md`.
-

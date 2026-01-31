@@ -57,14 +57,20 @@ const CONTENT_TYPES = new Map([
 function safeJoin(base, requestPath) {
   // decode URI and strip query/hash
   const clean = requestPath.split('?')[0].split('#')[0];
-  const decoded = decodeURIComponent(clean);
+  let decoded;
+  try {
+    decoded = decodeURIComponent(clean);
+  } catch {
+    return null;
+  }
 
-  // Normalize and prevent directory traversal.
-  const joined = path.join(base, decoded);
-  const normalized = path.normalize(joined);
+  // Normalize and prevent directory traversal (robust on Windows).
+  const safePath = decoded.startsWith('/') ? `.${decoded}` : `./${decoded}`;
+  const resolved = path.resolve(base, safePath);
+  const relative = path.relative(base, resolved);
 
-  if (!normalized.startsWith(base)) return null;
-  return normalized;
+  if (relative.startsWith('..') || path.isAbsolute(relative)) return null;
+  return resolved;
 }
 
 function listLanIps() {

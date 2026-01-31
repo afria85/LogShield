@@ -1,26 +1,28 @@
 {
   "name": "logshield-cli",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "license": "Apache-2.0",
   "type": "commonjs",
   "bin": {
     "logshield": "dist/cli/index.cjs"
   },
   "files": [
-    "dist",
+    "dist/cli",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "node scripts/build-cli.cjs",
-    "build:web": "vite build --outDir dist-web",
     "build:blog": "node scripts/build-blog.js",
-    "dev:web": "vite",
     "typecheck": "tsc -p tsconfig.core.json && tsc -p tsconfig.cli.json --noEmit",
     "pretest": "npm run build",
     "test": "vitest",
     "lint": "npm run typecheck",
+    "clean:dist": "node scripts/clean-dist.mjs",
+    "prepack": "npm run clean:dist && npm run build",
+    "pack:check": "npm pack --dry-run",
+    "release:check": "npm run prepublish:check && npm run pack:check",
     "prepublish:check": "npm run typecheck && npm test",
     "prepublishOnly": "npm run prepublish:check",
     "dev": "node scripts/dev-docs-server.mjs",
@@ -28,10 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
-    "autoprefixer": "^10.4.23",
     "esbuild": "^0.25.0",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "vitest": "^4.0.0"
   },

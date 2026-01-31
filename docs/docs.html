@@ -702,6 +702,7 @@
     <div class="content">
       <h2 id="overview">Overview</h2>
       <p>LogShield reads log data from stdin or files, applies explicit rule-based detection, and writes safe, structure-preserving output to stdout.</p>
+      <p><strong>Note:</strong> the npm package ships the CLI only; there is no supported JavaScript API surface.</p>
 
       <h3>Design Goals</h3>
       <div class="goals-grid">
@@ -903,7 +904,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
             </tr>
             <tr>
               <td><code>--strict</code></td>
-              <td>Aggressive, security-first redaction. Fails on ambiguous matches. Intended for CI and production.</td>
+              <td>Aggressive, security-first redaction. May redact more than default; intended for CI and production.</td>
             </tr>
             <tr>
               <td><code>--dry-run</code></td>
@@ -951,7 +952,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
           <tbody>
             <tr>
               <td><code>0</code></td>
-              <td>Success, no secrets detected</td>
+              <td>Success (detection does not change exit code)</td>
             </tr>
             <tr>
               <td><code>1</code></td>

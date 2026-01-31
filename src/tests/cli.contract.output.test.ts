@@ -31,11 +31,23 @@ describe("CLI output contracts", () => {
     expect(Array.isArray(parsed.matches)).toBe(true);
   });
 
-  it("usage/flag errors are written to STDERR and exit with code 2", () => {
-    const { stdout, stderr, status } = runCli(["scan", "--dry-run", "--json"], "");
+  it("--dry-run + --json is supported and does not leak raw input", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--dry-run", "--json"],
+      "password=SECRET\n"
+    );
 
-    expect(status).toBe(2);
-    expect(stdout).toBe("");
-    expect(stderr).toContain("--dry-run cannot be used with --json");
+    expect(status).toBe(0);
+    expect(stderr).toBe("");
+    expect(stdout.endsWith("\n")).toBe(true);
+
+    // Must still be valid JSON (newline trimmed).
+    const parsed = JSON.parse(stdout.trim());
+    expect(parsed.output).toBe("");
+    expect(Array.isArray(parsed.matches)).toBe(true);
+    expect(parsed.matches.length).toBeGreaterThan(0);
+
+    // No raw secret leakage via JSON serialization.
+    expect(stdout).not.toContain("SECRET");
   });
 });

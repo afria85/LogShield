@@ -79,10 +79,19 @@ describe("CLI golden contract (end-to-end)", () => {
     expect(r.code).toBe(1);
   });
 
-  it("--json + --dry-run is rejected with usage error code 2", () => {
+  it("--json + --dry-run outputs machine-readable detection without leaking input", () => {
     const r = run("password=secret123\n", ["--json", "--dry-run"]);
-    expect(r.code).toBe(2);
-    expect(r.stdout).toBe("");
-    expect(r.stderr).toContain("--dry-run cannot be used with --json");
+
+    expect(r.code).toBe(0);
+    expect(r.stderr).toBe("");
+    expect(r.stdout.endsWith("\n")).toBe(true);
+
+    const parsed = JSON.parse(r.stdout.trim());
+    expect(parsed.output).toBe("");
+    expect(parsed.matches.length).toBe(1);
+    expect(parsed.matches[0].rule).toBe("PASSWORD");
+    expect("value" in parsed.matches[0]).toBe(false);
+
+    expect(r.stdout).not.toContain("secret123");
   });
 });

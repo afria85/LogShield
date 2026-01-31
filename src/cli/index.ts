@@ -20,6 +20,17 @@ const rawArgs = process.argv
   .slice(2)
   .map((arg) => (arg === "-h" ? "--help" : arg));
 
+const ALLOWED_FLAGS = new Set([
+  "--strict",
+  "--dry-run",
+  "--stdin",
+  "--fail-on-detect",
+  "--json",
+  "--summary",
+  "--version",
+  "--help",
+]);
+
 function getVersion(): string {
   return typeof __LOGSHIELD_VERSION__ === "string"
     ? __LOGSHIELD_VERSION__
@@ -53,16 +64,25 @@ function writeErr(message: string) {
 function parseArgs(args: string[]) {
   const flags = new Set<string>();
   const positionals: string[] = [];
+  const unknownFlags: string[] = [];
 
   for (const arg of args) {
-    if (arg.startsWith("--")) {
-      flags.add(arg);
+    if (arg.startsWith("-")) {
+      if (arg.startsWith("--")) {
+        if (!ALLOWED_FLAGS.has(arg)) {
+          unknownFlags.push(arg);
+        } else {
+          flags.add(arg);
+        }
+      } else {
+        unknownFlags.push(arg);
+      }
     } else {
       positionals.push(arg);
     }
   }
 
-  return { flags, positionals };
+  return { flags, positionals, unknownFlags };
 }
 
 function isStdinPiped(): boolean {
@@ -112,17 +132,26 @@ function exitUsageError(message: string) {
 }
 
 async function main() {
-  if (rawArgs.length === 0 || rawArgs.includes("--help")) {
+  if (rawArgs.length === 0) {
     printHelp();
     process.exit(0);
   }
 
-  if (rawArgs.includes("--version")) {
-    process.stdout.write(`logshield v${getVersion()}\n`);
+  const { flags, positionals, unknownFlags } = parseArgs(rawArgs);
+
+  if (unknownFlags.length > 0) {
+    exitUsageError(`Unknown flag: ${unknownFlags[0]}`);
+  }
+
+  if (flags.has("--help")) {
+    printHelp();
     process.exit(0);
   }
 
-  const { flags, positionals } = parseArgs(rawArgs);
+  if (flags.has("--version")) {
+    process.stdout.write(`logshield v${getVersion()}\n`);
+    process.exit(0);
+  }
 
   const command = positionals[0];
   if (command !== "scan") {
@@ -145,21 +174,31 @@ async function main() {
     exitUsageError("Cannot read from both STDIN and file");
   }
 
-  if (dryRun && json) {
-    exitUsageError("--dry-run cannot be used with --json");
-  }
-
   if (json && summary) {
     exitUsageError("--summary cannot be used with --json");
   }
 
   try {
-    const input = await readInput(useStdin ? undefined : file);
+    const input = await readInput(useStdin ? undefined : file, {
+      forceStdin: stdinFlag,
+    });
 
     // Forward dryRun into the engine so detection and behavior stay consistent.
     const result = sanitizeLog(input, { strict, dryRun });
 
     if (dryRun) {
+      if (json) {
+        // Machine-readable detection result. Output is intentionally empty
+        // in dry-run mode to avoid leaking raw log content.
+        writeOutput(result, { json: true });
+
+        if (failOnDetect && result.matches.length > 0) {
+          process.exit(1);
+        }
+
+        process.exit(0);
+      }
+
       renderDryRunReport(result.matches);
 
       if (failOnDetect && result.matches.length > 0) {
