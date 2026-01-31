@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A checklist of guarantees (determinism, reviewability, local-first) that make log redaction safe for real workflows." />
+  <title>What a Log Sanitizer Must Guarantee - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/what-a-log-sanitizer-must-guarantee.html">
+  <meta property="og:title" content="What a Log Sanitizer Must Guarantee - LogShield Blog">
+  <meta property="og:description" content="A checklist of guarantees (determinism, reviewability, local-first) that make log redaction safe for real workflows.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What a Log Sanitizer Must Guarantee - LogShield Blog">
+  <meta name="twitter:description" content="A checklist of guarantees (determinism, reviewability, local-first) that make log redaction safe for real workflows.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/what-a-log-sanitizer-must-guarantee.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span class="nav-toggle-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html">Docs</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">What a Log Sanitizer Must Guarantee</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          January 31, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          4 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>Most advice about log sanitization boils down to "run a regex" or "don't share logs." Neither survives contact with real workflows. People will share logs under pressure, and ad-hoc scripts break the moment log formats change.</p>
+
+<p>I've found it more useful to think in terms of guarantees. If a sanitizer can't guarantee the basics, it's not safe to automate and it's hard to trust.</p>
+
+<h2>Guarantee 1: Deterministic output</h2>
+
+<p>Same input in, same output out. Every time.</p>
+
+<p>This matters because it's the difference between a tool you can wire into CI and a tool you only dare to use manually. If a sanitizer is probabilistic or time-dependent, you can't build reliable workflows around it.</p>
+
+<p>I've written about this before, but it's worth repeating: determinism is not a nice-to-have. It's what makes a tool trustable in production.</p>
+
+<h2>Guarantee 2: Local-first processing</h2>
+
+<p>Logs are sensitive by default. If sanitization requires sending raw logs to a remote service, you've created a new leak surface.</p>
+
+<p>Local-first doesn't mean "never use cloud services." It means the default, safest path is to process logs locally, and you can prove that nothing is transmitted.</p>
+
+<h2>Guarantee 3: Reviewability</h2>
+
+<p>A sanitizer shouldn't be a black box. At minimum, you need to be able to answer:</p>
+
+<ul>
+<li>What types of secrets were detected?</li>
+<li>How many redactions happened?</li>
+<li>Where did they occur (roughly), without leaking the secret itself?</li>
+</ul>
+
+<p>In LogShield, this is why <code>--dry-run</code> exists:</p>
+
+<pre><code><span class="code-comment"># Human review</span>
+<span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span>
+
+<span class="code-comment"># Machine-readable review (safe to archive in v0.5.0+ because output is empty)</span>
+<span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span> <span class="code-flag">--json</span></code></pre>
+
+<p>The point is to let people verify behavior before they trust automation.</p>
+
+<h2>Guarantee 4: Structure preservation</h2>
+
+<p>Sanitized logs need to remain useful. In practice that means:</p>
+
+<ul>
+<li>don't corrupt JSON</li>
+<li>don't destroy key names</li>
+<li>don't remove entire lines unless you have to</li>
+<li>keep enough context to debug</li>
+</ul>
+
+<p>If you redact a JSON value, keep keys and delimiters intact so parsers and dashboards keep working.</p>
+
+<p>This is where most ad-hoc scripts fail. They "solve" leakage by deleting content, and the result isn't actionable.</p>
+
+<h2>Guarantee 5: Bounded behavior (no surprises)</h2>
+
+<p>In enterprise workflows, predictability matters more than cleverness. A sanitizer needs:</p>
+
+<p>- stable exit codes (so CI can make decisions) - stable flag semantics (<code>--dry-run</code> must never modify output) - clear failure modes (invalid flags should error, not silently continue)</p>
+
+<p>A practical contract looks like:</p>
+
+<p>- exit code 0: command succeeded - exit code 1: detections found and <code>--fail-on-detect</code> was enabled - exit code 2: usage or runtime error (invalid flags, missing file, etc.)</p>
+
+<p>If you can't write tests for the tool's behavior, you won't be able to operate it safely.</p>
+
+<h2>Guarantee 6: Safe by default</h2>
+
+<p>The default invocation needs to be the safest one that still works.</p>
+
+<p>That usually means:</p>
+
+<ul>
+<li>no network calls</li>
+<li>no configuration required to get meaningful redaction</li>
+<li>no output formats that accidentally include raw secrets</li>
+</ul>
+
+<p>That last point is subtle. In versions before v0.5.0, LogShield's <code>--dry-run --json</code> output included the raw input in the result object. If you serialized that to a log aggregator, you'd re-leak the secrets you were trying to detect. v0.5.0 fixes this by returning an empty output field in dry-run mode.</p>
+
+<h2>Guarantee 7: Auditability (without retention)</h2>
+
+<p>You need to be able to prove what happened without storing the raw logs.</p>
+
+<p>That means:</p>
+
+<ul>
+<li>machine-readable summaries that are safe to archive</li>
+<li>counts and classifications (what types were detected)</li>
+<li>no raw input echoed back in result objects</li>
+</ul>
+
+<p>This is the difference between "it probably worked" and "we can show what happened" during incident response.</p>
+
+<h2>Guarantee 8: Maintainable rule set</h2>
+
+<p>Secrets evolve. Detection rules need to keep up. But rule updates have to be governable:</p>
+
+<ul>
+<li>additive changes should be safe</li>
+<li>breaking changes should be rare and explicit</li>
+<li>regressions should be caught by fixtures</li>
+</ul>
+
+<p>If a tool can't change without surprises, teams stop updating it. That's a different kind of risk.</p>
+
+<h2>A quick evaluation checklist</h2>
+
+<p>When you evaluate any log sanitizer &mdash; including your own scripts &mdash; ask:</p>
+
+<ul>
+<li>Is output deterministic?</li>
+<li>Is processing local-first?</li>
+<li>Can I preview and review redactions?</li>
+<li>Does it preserve structure and labels?</li>
+<li>Are exit codes and errors stable?</li>
+<li>Are results safe to serialize and store?</li>
+<li>Is the rule set tested against real fixtures?</li>
+</ul>
+
+<p>If you can answer "yes" to most of these, you're in reasonable shape.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+      <a href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>
