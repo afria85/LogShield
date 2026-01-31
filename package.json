@@ -20,6 +20,7 @@
     "typecheck": "tsc -p tsconfig.core.json && tsc -p tsconfig.cli.json --noEmit",
     "pretest": "npm run build",
     "test": "vitest",
+    "lint": "npm run typecheck",
     "prepublish:check": "npm run typecheck && npm test",
     "prepublishOnly": "npm run prepublish:check",
     "dev": "node scripts/dev-docs-server.mjs",
