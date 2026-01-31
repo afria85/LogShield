@@ -478,7 +478,7 @@ It is a **last-line safety net**, not a primary defense.
 
 ## License
 
-Apache-2.0 ? see `LICENSE`.
+Apache-2.0 &mdash; see `LICENSE`.
 
 ## Contributing
 
