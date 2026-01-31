@@ -5,6 +5,64 @@
   var header = document.getElementById('header');
   var backToTop = document.getElementById('backToTop');
 
+  // ==================== MOBILE NAV ====================
+  // Uses the .nav-toggle button + .nav-links container to avoid header overflow
+  // on small screens. Toggle state is stored on the <header> element via .nav-open.
+  var navToggle = document.getElementById('navToggle');
+  var navLinks = document.getElementById('navLinks');
+  var headerForNav = header || document.querySelector('header');
+
+  function closeNav() {
+    if (!headerForNav || !navToggle) return;
+    headerForNav.classList.remove('nav-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Open menu');
+  }
+
+  function openNav() {
+    if (!headerForNav || !navToggle) return;
+    headerForNav.classList.add('nav-open');
+    navToggle.setAttribute('aria-expanded', 'true');
+    navToggle.setAttribute('aria-label', 'Close menu');
+  }
+
+  function isNavOpen() {
+    return !!(headerForNav && headerForNav.classList.contains('nav-open'));
+  }
+
+  if (navToggle && navLinks && headerForNav) {
+    navToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (isNavOpen()) closeNav();
+      else openNav();
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+      if (!isNavOpen()) return;
+      var target = e.target;
+      if (navToggle.contains(target)) return;
+      if (navLinks.contains(target)) return;
+      closeNav();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeNav();
+    });
+
+    // Close after selecting a link
+    navLinks.addEventListener('click', function(e) {
+      var t = e.target;
+      if (t && t.tagName === 'A') closeNav();
+    });
+
+    // If resized to desktop widths, force-close
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 760) closeNav();
+    });
+  }
+
   window.addEventListener('scroll', function() {
     if (header) header.classList.toggle('scrolled', window.scrollY > 50);
     

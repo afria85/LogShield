@@ -3,6 +3,8 @@
 [![npm version](https://img.shields.io/npm/v/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
 [![npm downloads](https://img.shields.io/npm/dm/logshield-cli)](https://www.npmjs.com/package/logshield-cli)
 [![CI](https://github.com/afria85/LogShield/actions/workflows/ci.yml/badge.svg)](https://github.com/afria85/LogShield/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-Apache--2.0-3a3a3a)](https://github.com/afria85/LogShield/blob/main/LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-3a3a3a)](https://github.com/sponsors/afria85)
 
 Your logs already contain secrets. You just don't see them.
 
@@ -94,6 +96,29 @@ It is designed to be **predictable, conservative, and safe for production pipeli
 
 The website and documentation live in the `/docs` directory.
 They are deployed to **https://logshield.dev** via Vercel.
+
+## Project links
+
+- Website: https://logshield.dev
+- Docs: https://logshield.dev/docs.html
+- GitHub: https://github.com/afria85/LogShield
+- Sponsor: https://github.com/sponsors/afria85
+
+## Local preview (website)
+
+To preview the website on your computer:
+
+```bash
+npm run dev
+```
+
+To preview on a phone/tablet on the same Wi-Fi:
+
+```bash
+npm run dev:lan
+```
+
+Then open the printed LAN URL on your device.
 
 ---
 
@@ -457,3 +482,17 @@ It is a **last-line safety net**, not a primary defense.
 ## License
 
 Apache-2.0
+---
+
+## Contributing
+
+See `CONTRIBUTING.md`.
+
+## Security
+
+See `SECURITY.md`.
+
+## Support
+
+See `SUPPORT.md`.
+

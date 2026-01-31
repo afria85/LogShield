@@ -21,7 +21,9 @@
     "pretest": "npm run build",
     "test": "vitest",
     "prepublish:check": "npm run typecheck && npm test",
-    "prepublishOnly": "npm run prepublish:check"
+    "prepublishOnly": "npm run prepublish:check",
+    "dev": "node scripts/dev-docs-server.mjs",
+    "dev:lan": "node scripts/dev-docs-server.mjs --host 0.0.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
@@ -31,5 +33,31 @@
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "vitest": "^4.0.0"
+  },
+  "description": "Deterministic, rule-based CLI to sanitize secrets from logs. No AI. No cloud. No config.",
+  "keywords": [
+    "log-sanitization",
+    "secret-detection",
+    "redaction",
+    "security",
+    "devops",
+    "cli",
+    "deterministic",
+    "no-ai"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/afria85/LogShield.git"
+  },
+  "homepage": "https://logshield.dev",
+  "bugs": {
+    "url": "https://github.com/afria85/LogShield/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/afria85"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
