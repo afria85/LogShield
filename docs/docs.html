@@ -712,7 +712,7 @@
         </div>
         <div class="goal-item">
           <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span class="goal-text">Zero false positives by design</span>
+          <span class="goal-text">Prefer precision over recall (minimize false positives)</span>
         </div>
         <div class="goal-item">
           <svg class="goal-icon yes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -753,7 +753,16 @@
         <div class="code-body">
           <code><span class="cmd">logshield</span> <span class="flag">--version</span></code>
         </div>
+      
+      <div class="info-box note">
+        <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="info-box-content">
+          <strong>Windows PATH note</strong>
+          If <span class="mono">logshield</span> is not found after a global install, make sure your npm global bin directory is on <span class="mono">PATH</span>.
+          Run <span class="mono">npm prefix -g</span> and add that directory to your environment <span class="mono">PATH</span>.
+        </div>
       </div>
+</div>
 
       <h2 id="basic-usage">Basic Usage</h2>
       <p>Scan a log file:</p>
@@ -916,7 +925,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
             </tr>
             <tr>
               <td><code>--json</code></td>
-              <td>Machine-readable JSON output for programmatic consumption</td>
+              <td>Machine-readable JSON output (safe to serialize; supports --dry-run with empty output)</td>
             </tr>
             <tr>
               <td><code>--summary</code></td>
@@ -937,6 +946,29 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
           </tbody>
         </table>
       </div>
+
+      
+      <h3>JSON Output</h3>
+      <p>Use <code>--json</code> for structured output. In <code>--dry-run</code> JSON mode, the <code>output</code> field is intentionally an empty string to avoid accidental secret leakage through serialization.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">bash</span>
+        </div>
+        <div class="code-body">
+          <code><span class="cmd">echo</span> <span class="string">"password=secret123"</span> | <span class="cmd">logshield</span> <span class="flag">scan --json --dry-run</span></code>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">json</span>
+        </div>
+        <div class="code-body">
+          <code>{"output":"","matches":[{"rule":"PASSWORD"}]}</code>
+        </div>
+      </div>
+
 
       <h2 id="exit-codes">Exit Codes</h2>
       <p>LogShield uses explicit exit codes for automation. You should rely on exit codes in CI environments.</p>
@@ -960,7 +992,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
             </tr>
             <tr>
               <td><code>2</code></td>
-              <td>Invalid arguments or usage error</td>
+              <td>Invalid arguments, or input/runtime error</td>
             </tr>
           </tbody>
         </table>
@@ -1132,7 +1164,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
   <div class="footer-inner">
     <div class="footer-left">
       <a href="index.html" class="footer-logo">LogShield</a>
-      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+      <span class="footer-copy">2025–2026 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
     </div>
     <div class="footer-links">
       <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>

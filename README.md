@@ -46,7 +46,7 @@ After LogShield, the same logs are safe to share.
 
 Use LogShield whenever logs leave your system:
 
-- Before pasting logs into CI
+- Before logs end up in CI output or artifacts
 - Before attaching logs to GitHub issues
 - Before sending logs to third-party support
 - Before sharing logs in Slack or email
@@ -72,9 +72,9 @@ Use without --dry-run to apply.
 
 Notes:
 
-- The report is printed to stdout
+- The report is printed to **stderr**
 - No log content is echoed
-- Output is deterministic and CI-safe
+- stdout is reserved for machine output (sanitized logs / JSON)
 
 ```bash
 # Enforce redaction (sanitized output)
@@ -83,10 +83,6 @@ echo "email=test@example.com Authorization: Bearer abcdefghijklmnop" | logshield
 
 - Prefer `--dry-run` first in CI to verify you are not over-redacting.
 - Then switch to enforced mode once you are satisfied with the preview.
-
-LogShield is a CLI tool that scans logs and redacts **real secrets**
-(API keys, tokens, credentials) before logs are shared with others,
-AI tools, CI systems, or public channels.
 
 It is designed to be **predictable, conservative, and safe for production pipelines**.
 
@@ -103,24 +99,6 @@ They are deployed to **https://logshield.dev** via Vercel.
 - Docs: https://logshield.dev/docs.html
 - GitHub: https://github.com/afria85/LogShield
 - Sponsor: https://github.com/sponsors/afria85
-
-## Local preview (website)
-
-To preview the website on your computer:
-
-```bash
-npm run dev
-```
-
-To preview on a phone/tablet on the same Wi-Fi:
-
-```bash
-npm run dev:lan
-```
-
-Then open the printed LAN URL on your device.
-
----
 
 ## Why LogShield exists
 
@@ -154,7 +132,7 @@ The same input always produces the same output.
 - No environment-dependent behavior
 - Safe for CI, audits, and reproducibility
 
-### 2. Zero false-positive fatality
+### 2. Prefer precision over recall
 
 LogShield must **not** redact non-secrets.
 
@@ -220,6 +198,16 @@ If a file is not provided and input is piped, LogShield automatically reads from
 
 Note: the npm package ships the CLI only; there is no supported JS API surface.
 
+### Windows note
+
+If `logshield` is not found after a global install, ensure your npm global bin directory is on `PATH`.
+
+Check it with:
+
+- `npm prefix -g` (add this directory to PATH)
+
+Restart your terminal after updating PATH.
+
 ---
 
 ## CLI Flags
@@ -264,7 +252,7 @@ logshield scan app.log
 cat app.log | logshield scan
 ```
 
-`--stdin` is optional; piped input is auto-detected.
+`--stdin` is optional; piped input is auto-detected. Use `--stdin` to force reading from stdin in TTY/paste workflows.
 
 ---
 
@@ -333,7 +321,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - run: npm install -g logshield-cli
 
@@ -490,8 +478,7 @@ It is a **last-line safety net**, not a primary defense.
 
 ## License
 
-Apache-2.0
----
+Apache-2.0 ? see `LICENSE`.
 
 ## Contributing
 
