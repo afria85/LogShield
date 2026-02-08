@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="I tried entropy-based detection once. It found secrets the regex missed—and also flagged half my stack traces. Here's why I went back to boring, predictable rules." />
+  <title>Deterministic Redaction vs Heuristics: Why Predictability Wins in Incident Response - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/deterministic-redaction-vs-heuristics.html">
+  <meta property="og:title" content="Deterministic Redaction vs Heuristics: Why Predictability Wins in Incident Response - LogShield Blog">
+  <meta property="og:description" content="I tried entropy-based detection once. It found secrets the regex missed—and also flagged half my stack traces. Here's why I went back to boring, predictable rules.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Deterministic Redaction vs Heuristics: Why Predictability Wins in Incident Response - LogShield Blog">
+  <meta name="twitter:description" content="I tried entropy-based detection once. It found secrets the regex missed—and also flagged half my stack traces. Here's why I went back to boring, predictable rules.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/deterministic-redaction-vs-heuristics.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span class="nav-toggle-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html">Docs</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">Deterministic Redaction vs Heuristics: Why Predictability Wins in Incident Response</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          February 2, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          5 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>There's a seductive idea in security tooling: if we just make the detection smarter, we'll catch more secrets. Entropy analysis. Machine learning. Contextual scoring. These sound great in demos.</p>
+
+<p>Then you try to use them during an incident at 2 AM, and everything falls apart.</p>
+
+<p>I learned this the hard way when I experimented with an entropy-based secret scanner. It caught a leaked API key that my regex-based tool missed. Great, right? Except it also flagged random UUIDs, base64-encoded images in JSON responses, and a bunch of hex strings that turned out to be request IDs. The false positive rate made it unusable in automated workflows.</p>
+
+<p>The tool was smarter. But it wasn't more helpful.</p>
+
+<h2>The incident response test</h2>
+
+<p>Here's the scenario that matters: it's late, something broke, and you need to share logs with your team (or worse, with a vendor's support team). You have minutes, not hours.</p>
+
+<p>In that moment, you need to answer one question: "If I sanitize this log right now, will the output be safe to share?"</p>
+
+<p>With deterministic redaction, the answer is yes or no based on explicit rules. You can review them. You can test them. You can diff two runs and understand what changed.</p>
+
+<p>With heuristic detection, the answer is "probably, unless the model updated or the context shifted or the entropy threshold behaves differently on your log format."</p>
+
+<p>That uncertainty kills adoption.</p>
+
+<h2>What actually breaks during incidents</h2>
+
+<p>I've been through enough post-mortems to see the pattern. Logs leak not because the detection failed, but because the workflow broke:</p>
+
+<ul>
+<li>Someone bypasses the sanitizer because they're not sure what it will do.</li>
+<li>A CI pipeline produces different outputs on consecutive runs, and nobody trusts it anymore.</li>
+<li>The sanitized log gets diff-checked, but the diff is full of noise from probabilistic changes, so actual secrets slip through unnoticed.</li>
+</ul>
+
+<p>The problem isn't technical capability. It's operational trust.</p>
+
+<h2>Audit trails need boring answers</h2>
+
+<p>Compliance and audit workflows have a simple requirement: you need to explain what you did and prove it's repeatable.</p>
+
+<p>That conversation looks like this:</p>
+
+<p><strong>Auditor:</strong> "How do you ensure logs don't contain credentials before they're shared?"   <strong>You:</strong> "We run LogShield with these rules, which are tested against these fixtures, and produce deterministic output."</p>
+
+<p>That's an answer you can defend.</p>
+
+<p>Compare that to:</p>
+
+<p><strong>You:</strong> "We use an ML-based classifier that scores entropy and context, and it gets updated monthly."   <strong>Auditor:</strong> "How do you validate the updates?"   <strong>You:</strong> "..."</p>
+
+<p>The second approach isn't wrong. It's just harder to audit. And in regulated environments, "harder to audit" often means "not approved."</p>
+
+<h2>The practical middle ground</h2>
+
+<p>I'm not saying heuristic detection is useless. I'm saying it belongs in a different layer.</p>
+
+<p>The workflow I've settled on:</p>
+
+<p>1. <strong>At the boundary (human sharing, CI artifacts):</strong> deterministic redaction. Boring, predictable, reviewable. 2. <strong>In centralized storage (log aggregators, SIEM):</strong> add DLP with smarter detection if you want. 3. <strong>For policy enforcement:</strong> use the deterministic layer to fail builds or block uploads.</p>
+
+<p>This way, the riskiest path (logs leaving your control) is protected by the most reliable control.</p>
+
+<h2>When deterministic rules miss something</h2>
+
+<p>This will happen. You'll find a secret format that your rules don't cover yet.</p>
+
+<p>The correct response isn't to throw out determinism. It's to tighten the loop:</p>
+
+<ul>
+<li>Save the missed example (in a safe fixture, obviously).</li>
+<li>Write a rule that catches it.</li>
+<li>Add a test that proves the rule works.</li>
+<li>Ship an update.</li>
+</ul>
+
+<p>That's how you grow coverage without losing predictability. The rule set evolves, but it evolves explicitly.</p>
+
+<p>I maintain a growing test suite for LogShield that captures real leak patterns I've seen. When someone reports a false negative, I add it to the suite and update the rules. The next version catches it, and I can prove it with a test.</p>
+
+<h2>A small example that matters</h2>
+
+<p>Here's what dry-run mode looks like with deterministic redaction:</p>
+
+<pre><code>$ <span class="code-cmd">cat</span> <span class="code-file">incident-logs.txt</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span>
+
+<span class="code-cmd">logshield</span> (dry-run)
+Detected 3 redactions:
+  AUTH_BEARER     x1
+  PASSWORD        x2
+
+No output was modified.
+Use without <span class="code-flag">--dry-run</span> to apply.</code></pre>
+
+<p>That's it. No surprises. You know exactly what will be redacted before you commit to it.</p>
+
+<p>Now imagine the same workflow with a probabilistic tool where the output might change between runs. You'd have to sanitize, inspect, re-sanitize, and hope nothing shifted. That adds friction, and friction kills adoption.</p>
+
+<h2>The CI use case</h2>
+
+<p>If you want to enforce "no secrets in CI artifacts," you need a workflow that's stable enough to trust:</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">logs.txt</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span> <span class="code-flag">--fail-on-detect</span></code></pre>
+
+<p>This exits with code 1 if any redaction is detected. The build fails. You fix the source of the leak.</p>
+
+<p>That only works if the detection is deterministic. If it's probabilistic, you get flaky builds and teams start bypassing the check.</p>
+
+<h2>What I'd recommend</h2>
+
+<p>If you're building log sanitization into your workflow:</p>
+
+<ul>
+<li>Start with deterministic rules for the sharing boundary.</li>
+<li>Use dry-run mode to validate behavior before automating.</li>
+<li>Add heuristic layers later, if you need them, in less critical paths.</li>
+<li>Prioritize reviewability over cleverness.</li>
+</ul>
+
+<p>The goal isn't to catch every possible secret. The goal is to catch the ones that actually leak, in a way that teams will actually use.</p>
+
+<p>Boring wins.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+      <a href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>

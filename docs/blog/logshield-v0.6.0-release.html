@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="v0.6.0 adds the tokens that actually leak in real logs—GitHub PATs, Slack tokens, npm credentials—without changing how the tool behaves." />
+  <title>LogShield v0.6.0: Modern Token Coverage (GitHub, Slack, npm, PyPI, SendGrid) - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/logshield-v0.6.0-release.html">
+  <meta property="og:title" content="LogShield v0.6.0: Modern Token Coverage (GitHub, Slack, npm, PyPI, SendGrid) - LogShield Blog">
+  <meta property="og:description" content="v0.6.0 adds the tokens that actually leak in real logs—GitHub PATs, Slack tokens, npm credentials—without changing how the tool behaves.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LogShield v0.6.0: Modern Token Coverage (GitHub, Slack, npm, PyPI, SendGrid) - LogShield Blog">
+  <meta name="twitter:description" content="v0.6.0 adds the tokens that actually leak in real logs—GitHub PATs, Slack tokens, npm credentials—without changing how the tool behaves.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/logshield-v0.6.0-release.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span class="nav-toggle-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html">Docs</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">LogShield v0.6.0: Modern Token Coverage (GitHub, Slack, npm, PyPI, SendGrid)</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          February 8, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          4 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>I've been tracking GitHub issues and incident reports where secrets leaked through logs, and there's a clear pattern: modern platform tokens show up constantly. Not AWS keys. Not database passwords (though those leak too). It's <code>ghp_...</code> tokens, <code>xoxb-...</code> Slack credentials, and npm access tokens that people paste into tickets without realizing what they're sharing.</p>
+
+<p>v0.6.0 closes that gap. LogShield now catches these modern token formats in default mode, without requiring configuration or changing the CLI behavior you're used to.</p>
+
+<h2>What changed</h2>
+
+<p>The core guarantee hasn't changed: same input, same output, every time. No AI. No guessing. Just explicit pattern matching that you can test and trust.</p>
+
+<p>What's new is coverage:</p>
+
+<p><strong>GitHub tokens</strong> — Both classic prefixes (<code>ghp_</code>, <code>gho_</code>, <code>ghu_</code>, <code>ghs_</code>, <code>ghr_</code>) and fine-grained tokens (<code>github_pat_...</code>). These are everywhere in CI logs and stack traces.</p>
+
+<p><strong>Slack tokens</strong> — The common formats: <code>xoxb-</code>, <code>xoxp-</code>, <code>xoxa-</code>, <code>xoxs-</code>, <code>xoxr-</code>, and app tokens (<code>xapp-1-...</code>). If you've ever debugged a Slack integration, you know how easy it is to log these by accident.</p>
+
+<p><strong>npm tokens</strong> — Modern npm access tokens (<code>npm_...</code>) and the <code>.npmrc</code> format (<code>:_authToken=...</code>). I've seen these leak when people share build logs for debugging.</p>
+
+<p><strong>PyPI tokens</strong> — The current PyPI API token format (<code>pypi-...</code>). Less common than npm, but just as sensitive.</p>
+
+<p><strong>SendGrid keys</strong> — The three-part format (<code>SG.&lt;...&gt;.&lt;...&gt;</code>). Email service credentials leak surprisingly often in integration test output.</p>
+
+<p><strong>Private key blocks</strong> — Multi-line PEM and OpenSSH private keys, including encrypted variants. These show up when someone copies terminal output that includes key generation or when misconfigured logging dumps environment setup.</p>
+
+<p>All of these rules are prefix-anchored and length-bounded. The goal is precision: catch real secrets, avoid false positives. No entropy scoring, no probabilistic guessing.</p>
+
+<h2>A concrete example</h2>
+
+<p>Before v0.6.0, this would pass through unchanged:</p>
+
+<pre><code>token=ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+slack_token=xoxb-1234567890-123456789012-abcdefABCDEFabcdefABCDEF
+npm_token=npm_abcdefghijklmnopqrstuvwxyz0123456789</code></pre>
+
+<p>Now you get:</p>
+
+<pre><code>token=&lt;REDACTED_GITHUB_TOKEN&gt;
+slack_token=&lt;REDACTED_SLACK_TOKEN&gt;
+npm_token=&lt;REDACTED_NPM_TOKEN&gt;</code></pre>
+
+<p>The markers are explicit. You know what was redacted and why.</p>
+
+<h2>Why this matters for dry-run and JSON output</h2>
+
+<p>One failure mode I keep seeing in other tools: they detect secrets, then leak them again in their own output. The detection result includes the raw matched value, which gets logged to a dashboard or aggregated somewhere, and now you've just moved the problem.</p>
+
+<p>LogShield avoids this:</p>
+
+<p>- Dry-run mode doesn't echo log content. - JSON output doesn't include raw match values. - When you use <code>--dry-run</code> programmatically, the output field is intentionally empty.</p>
+
+<p>This makes it safe to pipe JSON results into monitoring systems or CI artifacts without creating a new leak vector.</p>
+
+<h2>Default mode vs strict mode (quick reminder)</h2>
+
+<p>Default mode is designed to stay low-noise. It catches the obvious stuff without destroying debugging context.</p>
+
+<p>Strict mode adds more aggressive patterns—credit card validation via Luhn, certain cloud vendor keys, things that have higher false positive risk. If you're working with highly variable logs or debugging unfamiliar systems, start with default mode. Only enable strict where the trade-off makes sense.</p>
+
+<h2>Upgrading</h2>
+
+<p>No CLI flag changes. No new required configuration. Just install v0.6.0 and you get broader coverage.</p>
+
+<p>If you have snapshot tests that assert exact redacted output, you'll need to update them—this release intentionally redacts more in default mode.</p>
+
+<p>Quick smoke test to validate the upgrade:</p>
+
+<pre><code><span class="code-cmd">echo</span> "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span></code></pre>
+
+<p>You should see <code>GITHUB_TOKEN</code> in the detection summary.</p>
+
+<h2>What's next</h2>
+
+<p>v0.6.0 focuses on coverage—catching the tokens that actually leak in real workflows. The next step is robustness.</p>
+
+<p>v0.7.x will add regex safety hardening for adversarial inputs, plus boundary tests near the 200KB safety cap. The goal is to make worst-case behavior predictable and bounded, not just best-case.</p>
+
+<p>After that, operator ergonomics: quiet mode, safe statistics, better handling of edge cases like mixed encodings.</p>
+
+<p>LogShield will continue to prioritize predictability over "catch everything" heuristics. In incident response and CI workflows, stability beats surprises.</p>
+
+<h2>One more thing</h2>
+
+<p>If you're using LogShield in production, I'd love to hear about it. What works? What doesn't? What leak patterns are you seeing that I'm missing?</p>
+
+<p>The goal is to make LogShield boring and reliable—the kind of tool you wire into your workflow and then forget about because it just works.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+      <a href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>
