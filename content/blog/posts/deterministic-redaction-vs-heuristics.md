@@ -40,16 +40,16 @@ Compliance and audit workflows have a simple requirement: you need to explain wh
 
 That conversation looks like this:
 
-**Auditor:** "How do you ensure logs don't contain credentials before they're shared?"  
-**You:** "We run LogShield with these rules, which are tested against these fixtures, and produce deterministic output."  
+> **Auditor:** "How do you ensure logs don't contain credentials before they're shared?"<br>
+> **You:** "We run LogShield with these rules, which are tested against these fixtures, and produce deterministic output."
 
 That's an answer you can defend.
 
 Compare that to:
 
-**You:** "We use an ML-based classifier that scores entropy and context, and it gets updated monthly."  
-**Auditor:** "How do you validate the updates?"  
-**You:** "..."
+> **You:** "We use an ML-based classifier that scores entropy and context, and it gets updated monthly."<br>
+> **Auditor:** "How do you validate the updates?"<br>
+> **You:** "..."
 
 The second approach isn't wrong. It's just harder to audit. And in regulated environments, "harder to audit" often means "not approved."
 
@@ -59,8 +59,8 @@ I'm not saying heuristic detection is useless. I'm saying it belongs in a differ
 
 The workflow I've settled on:
 
-1. **At the boundary (human sharing, CI artifacts):** deterministic redaction. Boring, predictable, reviewable.
-2. **In centralized storage (log aggregators, SIEM):** add DLP with smarter detection if you want.
+1. **At the boundary (human sharing, CI artifacts):** deterministic redaction. Boring, predictable, reviewable.<br>
+2. **In centralized storage (log aggregators, SIEM):** add DLP with smarter detection if you want.<br>
 3. **For policy enforcement:** use the deterministic layer to fail builds or block uploads.
 
 This way, the riskiest path (logs leaving your control) is protected by the most reliable control.
