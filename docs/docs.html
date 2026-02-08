@@ -674,6 +674,7 @@
       <div class="sidebar-links">
         <a href="#flags" class="sidebar-link">Flags</a>
         <a href="#exit-codes" class="sidebar-link">Exit Codes</a>
+        <a href="#input-limits" class="sidebar-link">Input Limits</a>
         <a href="#secret-types" class="sidebar-link">Secret Types</a>
       </div>
     </div>
@@ -998,13 +999,28 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
         </table>
       </div>
 
+
+      <h2 id="input-limits">Input Limits</h2>
+      <p>LogShield applies a safety cap to avoid runaway memory/CPU usage in pipelines.</p>
+      <ul>
+        <li>Maximum input size: <code>200KB</code></li>
+      </ul>
+      <p>If you need to scan larger logs, split them or pipe a slice (for example: <code>tail -n 2000 app.log | logshield scan</code>).</p>
+
       <h2 id="secret-types">Supported Secret Types</h2>
       <p>LogShield detects common secret patterns including:</p>
       <ul>
         <li>Passwords</li>
-        <li>API key headers</li>
+        <li>API keys (headers + key/value forms)</li>
         <li>Authorization Bearer tokens</li>
         <li>JWTs</li>
+        <li>GitHub tokens</li>
+        <li>Slack tokens</li>
+        <li>npm access tokens</li>
+        <li>npmrc auth tokens (<code>:_authToken=...</code>)</li>
+        <li>PyPI API tokens</li>
+        <li>SendGrid API keys</li>
+        <li>Private key blocks (PEM/OpenSSH, including ENCRYPTED PRIVATE KEY)</li>
         <li>Emails</li>
         <li>URLs with embedded credentials</li>
         <li>Database credentials (DB_URL)</li>

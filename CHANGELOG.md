@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.6.0
+
+### Added
+
+- Redact modern platform tokens (GitHub, Slack, npm, PyPI, SendGrid)
+- Redact npmrc auth tokens (`:_authToken=...`)
+- Redact private key blocks (PEM/OpenSSH, including ENCRYPTED PRIVATE KEY)
+
+### Docs
+
+- Clarified redaction coverage by mode (Default vs Strict) in README and docs
+- Documented the 200KB input safety cap
+
+### Notes
+
+- No CLI flag changes
+- This release may redact more secrets in default mode (intended)
+
 ## v0.5.0
 
 ### Security

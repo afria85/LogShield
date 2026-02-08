@@ -72,9 +72,9 @@ Use without --dry-run to apply.
 
 Notes:
 
-- The report is printed to **stderr**
+- The report is printed to **stdout** (human-readable)
 - No log content is echoed
-- stdout is reserved for machine output (sanitized logs / JSON)
+- In non-`--dry-run` mode, sanitized logs/JSON are written to stdout; summaries/errors go to stderr
 
 ```bash
 # Enforce redaction (sanitized output)
@@ -197,6 +197,11 @@ logshield scan [file]
 If a file is not provided and input is piped, LogShield automatically reads from **STDIN**.
 
 Note: the npm package ships the CLI only; there is no supported JS API surface.
+
+### Limits
+
+- Maximum input size: **200KB** (safety cap). Oversized input exits with code `2`.
+
 
 ### Windows note
 
@@ -413,16 +418,32 @@ Notes:
 
 ## What gets redacted
 
-Depending on rules and mode:
+LogShield uses a fixed, deterministic rule set. The exact coverage depends on the selected mode.
 
-- Passwords (supports quoted and JSON forms)
-- API key headers
-- Authorization bearer tokens
+### Default mode (recommended)
+
+- Passwords (quoted and JSON forms)
+- API key headers (e.g. `x-api-key: ...`)
+- API keys (e.g. `api_key=...`, `api-key: ...`)
+- Authorization Bearer tokens
 - JWTs
+- GitHub tokens (`ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`, and `github_pat_...`)
+- Slack tokens (`xox*` and `xapp-...`)
+- npm access tokens (`npm_...`)
+- npmrc auth tokens (`:_authToken=...`)
+- PyPI API tokens (`pypi-...`)
+- SendGrid API keys (`SG.<...>.<...>`)
+- Private key blocks (PEM/OpenSSH)
 - Emails
 - URLs with embedded credentials
-- Database credentials (including redis:// and mssql://)
-- Cloud provider credentials
+- Database URL credentials (including `redis://...` and `mssql://...`)
+- Cloud credentials in explicit labeled forms (e.g. `AWS_SECRET_ACCESS_KEY=...`)
+
+### Strict mode (adds)
+
+- Stripe secret keys (e.g. `sk_live_...`, `sk_test_...`)
+- AWS access keys (`AKIA...`)
+- AWS secret keys (strict fallback)
 - Credit card numbers (Luhn-validated)
 
 ---
@@ -448,7 +469,7 @@ Depending on rules and mode:
 LogShield guarantees:
 
 - Deterministic output
-- Stable behavior within the current minor line **v0.5.x**
+- Stable behavior within the current minor line **v0.6.x**
 - No runtime dependencies
 - Snapshot-tested and contract-tested
 - No telemetry
