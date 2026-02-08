@@ -59,8 +59,11 @@ I'm not saying heuristic detection is useless. I'm saying it belongs in a differ
 
 The workflow I've settled on:
 
-1. **At the boundary (human sharing, CI artifacts):** deterministic redaction. Boring, predictable, reviewable.
+1. **At the boundary (human sharing, CI artifacts):** deterministic redaction.  
+   Boring, predictable, reviewable.
+
 2. **In centralized storage (log aggregators, SIEM):** add DLP with smarter detection if you want.
+
 3. **For policy enforcement:** use the deterministic layer to fail builds or block uploads.
 
 This way, the riskiest path (logs leaving your control) is protected by the most reliable control.
