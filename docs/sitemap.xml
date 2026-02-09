@@ -2,15 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://logshield.dev/</loc>
-    <lastmod>2026-02-08</lastmod>
+    <lastmod>2026-02-09</lastmod>
   </url>
   <url>
     <loc>https://logshield.dev/docs.html</loc>
-    <lastmod>2026-02-08</lastmod>
+    <lastmod>2026-02-09</lastmod>
   </url>
   <url>
     <loc>https://logshield.dev/blog/</loc>
-    <lastmod>2026-02-08</lastmod>
+    <lastmod>2026-02-09</lastmod>
+  </url>
+  <url>
+    <loc>https://logshield.dev/blog/sanitize-logs-before-sharing-to-support-vendors.html</loc>
+    <lastmod>2026-02-09</lastmod>
   </url>
   <url>
     <loc>https://logshield.dev/blog/logshield-v0.6.0-release.html</loc>

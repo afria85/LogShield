@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A simple playbook you can adopt today to share useful logs while avoiding credential leaks." />
+  <title>Sanitize Logs Before Sharing to Support Vendors - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/sanitize-logs-before-sharing-to-support-vendors.html">
+  <meta property="og:title" content="Sanitize Logs Before Sharing to Support Vendors - LogShield Blog">
+  <meta property="og:description" content="A simple playbook you can adopt today to share useful logs while avoiding credential leaks.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sanitize Logs Before Sharing to Support Vendors - LogShield Blog">
+  <meta name="twitter:description" content="A simple playbook you can adopt today to share useful logs while avoiding credential leaks.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/sanitize-logs-before-sharing-to-support-vendors.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span class="nav-toggle-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html">Docs</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">Sanitize Logs Before Sharing to Support Vendors</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          February 9, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          4 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>The most common real-world leak path is not a breach. It is a support ticket.</p>
+
+<p>You are debugging something urgent. A vendor asks for "full logs". You attach them. Later, someone realizes the logs contained credentials or internal tokens.</p>
+
+<p>I've been on both sides of this. The engineer who sent the logs thinking it would help. The security person who found database credentials three weeks later in a vendor's ticketing system, indexed and searchable.</p>
+
+<p>This is avoidable if you make sanitization part of the support workflow.</p>
+
+<h2>A simple support-ticket playbook</h2>
+
+<h3>Step 1: Collect raw logs inside your boundary</h3>
+
+<p>Do not sanitize at the source yet. First, collect the best possible raw material:</p>
+
+<ul>
+<li>the failing request path</li>
+<li>timestamps and correlation IDs</li>
+<li>relevant stack traces</li>
+<li>configuration context (but not the whole config file)</li>
+</ul>
+
+<p>Keep this raw set internal.</p>
+
+<h3>Step 2: Sanitize for sharing</h3>
+
+<p>Run sanitization on the set you are about to share.</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">vendor.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> vendor.<span class="code-file">sanitized.log</span></code></pre>
+
+<p>If you want to see what would change first:</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">vendor.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span></code></pre>
+
+<p>Dry-run only reports what would be redacted; it doesn't write sanitized output. Use this to verify behavior before committing to the sanitized version.</p>
+
+<h3>Step 3: Validate the sanitized output</h3>
+
+<p>Do a quick pass:</p>
+
+<ul>
+<li>Does it still explain the failure?</li>
+<li>Are key identifiers preserved (request IDs, error codes, hostnames if allowed)?</li>
+<li>Are obvious secrets removed (tokens, passwords, connection strings)?</li>
+</ul>
+
+<p>If the output is useless, do not disable sanitization. Instead, reduce scope: share the smaller, more relevant subset of logs.</p>
+
+<p><strong>Concrete example of scope reduction:</strong>   Share only the 10&ndash;15 minutes around the failure window (by timestamp or correlation ID), not the entire day's worth of logs.</p>
+
+<h3>Step 4: Attach the sanitized artifact only</h3>
+
+<p>Send <code>vendor.sanitized.log</code>, not the raw log. Keep the raw log internal in case you need it later.</p>
+
+<h3>Step 5: Record what you shared</h3>
+
+<p>This is the part teams often skip, but it is where enterprise maturity shows up:</p>
+
+<ul>
+<li>Ticket ID</li>
+<li>Timestamp</li>
+<li>Which artifact was shared</li>
+<li>Who approved the share (if your process requires it)</li>
+<li>SHA-256 hash of the sanitized file</li>
+<li>Internal reference to where the raw log is stored</li>
+</ul>
+
+<p>Generate the hash before attaching:</p>
+
+<pre><code><span class="code-comment"># macOS/Linux</span>
+shasum <span class="code-flag">-a</span> 256 vendor.<span class="code-file">sanitized.log</span>
+
+<span class="code-comment"># Windows (PowerShell)</span>
+certutil <span class="code-flag">-hashfile</span> vendor.<span class="code-file">sanitized.log</span> SHA256</code></pre>
+
+<p>The hash gives you cryptographic proof of exactly what you sent. During an incident review or audit, you can verify "this is what we shared, nothing more."</p>
+
+<p><strong>Retention assumption:</strong> Treat vendor ticketing systems as long-retention and fully searchable. Once logs leave your boundary, assume they can be copied, indexed, and retained indefinitely.</p>
+
+<p>This is not bureaucracy. It is your audit trail.</p>
+
+<h2>What to redact vs what to keep</h2>
+
+<p>A practical rule: redact credentials and tokens, preserve troubleshooting context.</p>
+
+<p><strong>Redact:</strong></p>
+
+<ul>
+<li>Passwords</li>
+<li>API keys</li>
+<li>Session tokens</li>
+<li>Bearer tokens</li>
+<li>Database URLs with credentials</li>
+</ul>
+
+<p><strong>Keep (usually):</strong></p>
+
+<ul>
+<li>Timestamps</li>
+<li>Request IDs</li>
+<li>Error codes</li>
+<li>Stack traces (after sanitization)</li>
+<li>Endpoint paths (unless they include customer identifiers)</li>
+<li>Hostnames (if allowed by your policy)</li>
+</ul>
+
+<p><strong>Note:</strong> LogShield's default rules target common secret shapes (credentials, tokens, keys). For PII or customer data, add a separate DLP/PII layer or custom rules.</p>
+
+<h2>Avoid the "just send everything" reflex</h2>
+
+<p>Support engineers often ask for "full logs" because it reduces back-and-forth. You can still be helpful without oversharing.</p>
+
+<p>Instead of sending everything, include:</p>
+
+<ul>
+<li>A sanitized log file</li>
+<li>A short note: timeframe, action taken, expected vs actual behavior</li>
+</ul>
+
+<p>In practice, most vendors accept this &mdash; and good vendors should appreciate that you are thinking about security boundaries.</p>
+
+<h2>Why this matters</h2>
+
+<p>The two-minute habit of sanitizing before sharing is not about compliance theater. It is about not having to explain, months later, why your database password ended up in a third-party ticketing system that you do not control.</p>
+
+<p>The command is simple:</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> <span class="code-file">safe.log</span></code></pre>
+
+<p>The outcome matters.</p>
+
+<p>---</p>
+
+<p><strong>Next:</strong> How deterministic redaction beats heuristics in incident response, and why preserving structure matters more than people think.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+      <a href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>
