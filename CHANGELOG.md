@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.7.0
+
+### Security
+
+- Added a per-line safety cap (`64KB`) alongside the existing `200KB` total input cap
+- Overlong single-line input now fails with a deterministic bounded error instead of flowing into rule evaluation
+- Hardened the strict-mode credit card detector to reduce ambiguous separator-heavy matching on pathological near-miss input
+
+### Improved
+
+- Added adversarial regression coverage for line-length boundaries, multiline line reporting, and regex near-miss cases
+- Added bounded-failure contract coverage for CLI and detection-only code paths
+
+### Docs
+
+- Synced README limits documentation with the final bounded input behavior and error contract
+
+### Notes
+
+- No new CLI flags
+- No breaking changes to normal successful scan output
+- Input/usage bounded failures continue to exit with code `2`
+
 ## v0.6.0
 
 ### Added

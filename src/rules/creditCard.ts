@@ -5,7 +5,9 @@ import { isValidLuhn } from "../utils/luhn";
 export const creditCardRules: Rule[] = [
   {
     name: "CREDIT_CARD",
-    pattern: /\b(?:\d[ -]*?){13,19}\b/g,
+    // Keep separators simple and bounded between digits to avoid ambiguous
+    // repetition on long near-miss inputs.
+    pattern: /\b\d(?:[ -]?\d){12,18}\b/g,
     replace: (match, { strict }) => {
       if (!strict) return match;
       return isValidLuhn(match) ? "<REDACTED_CC>" : match;

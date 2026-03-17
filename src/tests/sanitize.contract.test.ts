@@ -1,5 +1,31 @@
 import { describe, it, expect } from "vitest";
 import { sanitizeLog } from "./sanitizeLog";
+import { MAX_INPUT_SIZE, MAX_LINE_LENGTH } from "../engine/guard";
+
+function makeBoundedMultilineInput(totalLength: number, lineLength = 1024): string {
+  if (totalLength <= 0) return "";
+
+  const safeLineLength = Math.min(lineLength, MAX_LINE_LENGTH);
+  let remaining = totalLength;
+  let output = "";
+
+  while (remaining > 0) {
+    if (remaining <= safeLineLength) {
+      output += "A".repeat(remaining);
+      break;
+    }
+
+    output += "A".repeat(safeLineLength);
+    remaining -= safeLineLength;
+
+    if (remaining === 0) break;
+
+    output += "\n";
+    remaining -= 1;
+  }
+
+  return output;
+}
 
 describe("LogShield sanitizeLog ? CONTRACT TEST", () => {
   // =========================
@@ -164,9 +190,54 @@ LS_STRIPE_LIVE_KEY_XXXXXXXXXXXXXXXX
   // =========================
 
   it("throws error if log exceeds 200KB", () => {
-    const bigInput = "A".repeat(204_801);
+    const bigInput = makeBoundedMultilineInput(MAX_INPUT_SIZE + 1);
 
     expect(() => sanitizeLog(bigInput)).toThrow("Log size exceeds 200KB limit");
+  });
+
+  it("accepts input exactly at the 200KB limit when each line stays within the line cap", () => {
+    const inputAtLimit = makeBoundedMultilineInput(MAX_INPUT_SIZE);
+
+    const result = sanitizeLog(inputAtLimit);
+
+    expect(result.output).toBe(inputAtLimit);
+    expect(result.matches.length).toBe(0);
+  });
+
+  it("accepts a line just below the line-length limit", () => {
+    const input = "A".repeat(MAX_LINE_LENGTH - 1);
+
+    const result = sanitizeLog(input);
+
+    expect(result.output).toBe(input);
+    expect(result.matches.length).toBe(0);
+  });
+
+  it("accepts a line exactly at the line-length limit", () => {
+    const input = "A".repeat(MAX_LINE_LENGTH);
+
+    const result = sanitizeLog(input);
+
+    expect(result.output).toBe(input);
+    expect(result.matches.length).toBe(0);
+  });
+
+  it("throws a deterministic error for a line just above the line-length limit", () => {
+    const input = "A".repeat(MAX_LINE_LENGTH + 1);
+
+    expect(() => sanitizeLog(input)).toThrow("Log line 1 exceeds 64KB limit");
+  });
+
+  it("fails fast on adversarial long single-line input before applying rules", () => {
+    const input = `password=${"(".repeat(MAX_LINE_LENGTH + 1)}`;
+
+    expect(() => sanitizeLog(input)).toThrow("Log line 1 exceeds 64KB limit");
+  });
+
+  it("reports the correct line number for an overlong line in multiline input", () => {
+    const input = ["ok", "still ok", "A".repeat(MAX_LINE_LENGTH + 1)].join("\n");
+
+    expect(() => sanitizeLog(input)).toThrow("Log line 3 exceeds 64KB limit");
   });
 
   it("returns empty output for empty input", () => {

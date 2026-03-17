@@ -201,6 +201,7 @@ Note: the npm package ships the CLI only; there is no supported JS API surface.
 ### Limits
 
 - Maximum input size: **200KB** (safety cap). Oversized input exits with code `2`.
+- Maximum line length: **64KB** per line. If any single line exceeds the cap, LogShield exits with code `2` and a deterministic `Log line <n> exceeds 64KB limit` error.
 
 
 ### Windows note

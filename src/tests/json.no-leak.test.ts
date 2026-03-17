@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sanitizeLog } from "../engine/sanitizeLog";
 import { scanLog } from "../engine/scanLog";
+import { MAX_LINE_LENGTH } from "../engine/guard";
 
 describe("JSON contract - no secret leakage", () => {
   it("sanitizeLog does not include raw matched values and never includes a `value` field", () => {
@@ -44,5 +45,11 @@ describe("JSON contract - no secret leakage", () => {
     expect(json).not.toContain('"value"');
     expect(result.matches.length).toBeGreaterThan(0);
     expect(result.matches.every((m) => typeof m.rule === "string")).toBe(true);
+  });
+
+  it("scanLog rejects overlong single-line input with the same bounded failure", () => {
+    const input = "A".repeat(MAX_LINE_LENGTH + 1);
+
+    expect(() => scanLog(input)).toThrow("Log line 1 exceeds 64KB limit");
   });
 });
