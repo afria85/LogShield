@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output." />
+  <title>LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/logshield-v0.7.0-release.html">
+  <meta property="og:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
+  <meta property="og:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
+  <meta name="twitter:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/logshield-v0.7.0-release.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span class="nav-toggle-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="../index.html">Home</a>
+        <a href="../docs.html">Docs</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          March 17, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          2 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>v0.7.0 is a hardening release. It does not add new CLI flags or broaden detection coverage for normal day-to-day logs. The focus is worst-case behavior: make pathological input handling explicit, bounded, and test-backed.</p>
+
+<h2>What changed</h2>
+
+<p>The existing global input cap remains in place:</p>
+
+<p>- <strong>Maximum input size:</strong> <code>200KB</code></p>
+
+<p>v0.7.0 adds a second bound:</p>
+
+<p>- <strong>Maximum line length:</strong> <code>64KB</code> per line</p>
+
+<p>If a single line exceeds that cap, LogShield now fails with a deterministic error:</p>
+
+<pre><code>Log line &lt;n&gt; exceeds 64KB limit</code></pre>
+
+<p>This failure continues to use <strong>exit code <code>2</code></strong>, the same contract already used for usage and input/runtime errors.</p>
+
+<h2>Why add a line cap?</h2>
+
+<p>The total input cap already bounded memory and overall processing cost. The remaining gap was pathological single-line input, where regex-heavy scans can still do more work than intended even inside a moderate total size.</p>
+
+<p>The line cap closes that gap without changing successful output for normal logs.</p>
+
+<h2>Regex safety hardening</h2>
+
+<p>This release also tightens one strict-mode matcher that had the weakest worst-case posture:</p>
+
+<p>- <strong><code>CREDIT_CARD</code></strong> remains Luhn-validated - the matcher was hardened to reduce separator-heavy ambiguous near-miss matching</p>
+
+<p>This is deliberately narrow. The goal was not to refactor the rule engine or change detection semantics broadly. The goal was to improve safety posture while preserving existing behavior.</p>
+
+<h2>Regression coverage</h2>
+
+<p>v0.7.0 adds targeted regression tests for:</p>
+
+<ul>
+<li>line length boundary behavior</li>
+<li>total input boundary behavior</li>
+<li>multiline line-number reporting</li>
+<li>regex near-miss cases</li>
+<li>adversarial inputs for strict-mode and detection-only paths</li>
+</ul>
+
+<p>That coverage is there to prove the bounds, not just describe them.</p>
+
+<h2>Compatibility</h2>
+
+<p>- <strong>No new CLI flags</strong> - <strong>No breaking change to normal successful scan/sanitize output</strong> - <strong>Exit code <code>2</code> remains the bounded failure contract</strong> for usage/input/runtime errors</p>
+
+<h2>Upgrade notes</h2>
+
+<p>Most users do not need to change anything.</p>
+
+<p>The only new behavior you may notice is on extreme single-line input. If your workflow intentionally feeds very large single-line blobs into LogShield, split them before scanning.</p>
+
+<p>Typical shell pattern:</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan</code></pre>
+
+<p>If the source can emit giant single-line payloads, pre-splitting or slicing is safer than relying on a single pass over an oversized line.</p>
+
+<h2>Summary</h2>
+
+<p>v0.7.0 is a bounded-behavior release:</p>
+
+<ul>
+<li>same normal successful output</li>
+<li>tighter worst-case posture</li>
+<li>explicit failure for extreme single-line input</li>
+<li>stronger regression coverage around pathological cases</li>
+</ul>
+
+<p>That is the entire point of this version.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="../index.html" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+      <a href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>

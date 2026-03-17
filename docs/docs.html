@@ -993,7 +993,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
             </tr>
             <tr>
               <td><code>2</code></td>
-              <td>Invalid arguments, or input/runtime error</td>
+              <td>Invalid arguments, bounded input failure, or runtime error</td>
             </tr>
           </tbody>
         </table>
@@ -1004,7 +1004,10 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
       <p>LogShield applies a safety cap to avoid runaway memory/CPU usage in pipelines.</p>
       <ul>
         <li>Maximum input size: <code>200KB</code></li>
+        <li>Maximum line length: <code>64KB</code> per line</li>
       </ul>
+      <p>If a single line exceeds the line cap, LogShield fails with exit code <code>2</code> and a deterministic <code>Log line &lt;n&gt; exceeds 64KB limit</code> error.</p>
+      <p>These bounds are part of the v0.7.0 regex safety hardening work to keep worst-case input behavior explicit and predictable.</p>
       <p>If you need to scan larger logs, split them or pipe a slice (for example: <code>tail -n 2000 app.log | logshield scan</code>).</p>
 
       <h2 id="secret-types">Supported Secret Types</h2>
@@ -1033,6 +1036,14 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
         <li>AWS access keys (AKIA...)</li>
         <li>AWS secret keys</li>
         <li>Credit card numbers (Luhn-validated)</li>
+      </ul>
+      <p>In v0.7.0, the strict-mode credit card matcher was tightened to reduce separator-heavy ambiguous near-miss matching without changing normal successful sanitize output.</p>
+
+      <h3>v0.7.0 Notes</h3>
+      <ul>
+        <li>No new CLI flags</li>
+        <li>No breaking change to normal successful scan/sanitize output</li>
+        <li>Adversarial regression coverage was added for input boundaries and regex near-miss cases</li>
       </ul>
 
       <p>See the <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">source code</a> for the full rule list.</p>

@@ -203,6 +203,18 @@ Note: the npm package ships the CLI only; there is no supported JS API surface.
 - Maximum input size: **200KB** (safety cap). Oversized input exits with code `2`.
 - Maximum line length: **64KB** per line. If any single line exceeds the cap, LogShield exits with code `2` and a deterministic `Log line <n> exceeds 64KB limit` error.
 
+### v0.7.0 safety posture
+
+- No new CLI flags were added for v0.7.0.
+- Normal successful scan/sanitize output is unchanged.
+- v0.7.0 focuses on bounded failure behavior for pathological input:
+  - total input remains capped at **200KB**
+  - each line is capped at **64KB**
+  - bounded input/usage failures continue to exit with code `2`
+- Regex safety hardening was added for adversarial input handling.
+- The strict-mode credit card matcher remains Luhn-validated and was tightened to reduce separator-heavy ambiguous near-miss matching.
+- Adversarial regression coverage was added for boundary and regex near-miss cases.
+
 
 ### Windows note
 
@@ -413,7 +425,7 @@ Notes:
 | ---: | --------------------------------------------- |
 |    0 | Success (detection does not change exit code) |
 |    1 | Detection found (`--fail-on-detect`)          |
-|    2 | Runtime or input error                        |
+|    2 | Usage, bounded input, or runtime error        |
 
 ---
 

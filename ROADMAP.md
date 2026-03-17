@@ -1,4 +1,4 @@
-# LogShield Roadmap (v0.6.0 → v1.0.0)
+# LogShield Roadmap (v0.7.0 → v1.0.0)
 
 This roadmap is intentionally conservative. LogShield prioritizes deterministic behavior, low false positives, and stable CLI contracts.
 
@@ -18,16 +18,18 @@ This roadmap is intentionally conservative. LogShield prioritizes deterministic 
 
 **Compatibility:** no CLI flag changes. Default mode may redact more secrets (intended).
 
-## v0.7.0 — Regex safety hardening (ReDoS posture)
+## v0.7.0 — Regex safety hardening (ReDoS posture, shipped)
 
 **Goal:** make worst-case inputs predictable and bounded.
 
 - Engine guardrails:
-  - Add `MAX_LINE_LENGTH` cap (e.g. 10KB) to limit pathological single-line regex behavior
-  - Keep total input size cap (200KB) as the primary global safety bound
+  - Added `MAX_LINE_LENGTH` cap (`64KB`) to limit pathological single-line regex behavior
+  - Kept total input size cap (`200KB`) as the primary global safety bound
+- Regex hardening:
+  - Hardened the strict-mode `CREDIT_CARD` matcher to reduce separator-heavy ambiguous near-miss matching
 - Tests:
-  - Add adversarial-regex regression tests (long runs, nested patterns)
-  - Add boundary tests (near 200KB, near MAX_LINE_LENGTH)
+  - Added adversarial-regex regression tests
+  - Added boundary tests near `200KB` and `MAX_LINE_LENGTH`
 
 **Compatibility:** new failure mode for extreme single-line inputs (explicit error + exit code 2).
 
