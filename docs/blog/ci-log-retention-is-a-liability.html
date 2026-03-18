@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output." />
-  <title>LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog</title>
+  <meta name="description" content="Why build logs are a common leak surface and how to sanitize output safely in CI pipelines." />
+  <title>CI Log Retention Is a Liability - LogShield Blog</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
@@ -14,19 +14,19 @@
   
   <!-- Open Graph -->
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://logshield.dev/blog/logshield-v0.7.0-release.html">
-  <meta property="og:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
-  <meta property="og:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  <meta property="og:url" content="https://logshield.dev/blog/ci-log-retention-is-a-liability.html">
+  <meta property="og:title" content="CI Log Retention Is a Liability - LogShield Blog">
+  <meta property="og:description" content="Why build logs are a common leak surface and how to sanitize output safely in CI pipelines.">
   <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
-  <meta name="twitter:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  <meta name="twitter:title" content="CI Log Retention Is a Liability - LogShield Blog">
+  <meta name="twitter:description" content="Why build logs are a common leak surface and how to sanitize output safely in CI pipelines.">
   
     <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
 <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://logshield.dev/blog/logshield-v0.7.0-release.html">
+  <link rel="canonical" href="https://logshield.dev/blog/ci-log-retention-is-a-liability.html">
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
@@ -80,81 +80,60 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back to Blog
       </a>
-      <h1 class="article-title">LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior</h1>
+      <h1 class="article-title">CI Log Retention Is a Liability</h1>
       <div class="article-meta">
         <span class="article-date">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          March 18, 2026
+          February 23, 2026
         </span>
         <span class="article-reading-time">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          3 min read
+          2 min read
         </span>
       </div>
     </div>
 
     <div class="article-content">
-<p>v0.7.0 is a hardening release. It does not add new CLI flags or broaden detection coverage for normal logs. The focus is narrower: make pathological input handling explicit, bounded, and test-backed.</p>
+<p>CI providers make it easy to forget a key fact: build logs are stored artifacts. They are retained, searchable, and frequently accessible to more people than production systems.</p>
 
-<h2>What changed</h2>
+<p>If you have ever printed an environment variable to debug a failing build, you already know how this becomes a leak.</p>
 
-<p>The existing global input cap remains:</p>
+<h2>Why CI logs are uniquely risky</h2>
 
-<ul>
-<li><strong>Maximum input size:</strong> 200KB</li>
-</ul>
+<p>Build jobs run with powerful credentials — deploy keys, registry tokens, cloud access. They aggregate output from many tools, some of which print sensitive values by accident. Logs are retained by default. And when something breaks, logs get shared widely.</p>
 
-<p>v0.7.0 adds a second bound:</p>
+<p>That combination makes CI one of the most common "whoops" surfaces.</p>
 
-<ul>
-<li><strong>Maximum line length:</strong> 64KB per line</li>
-</ul>
+<h2>A minimal control that works</h2>
 
-<p>If a single line exceeds the per-line cap, LogShield now fails with a deterministic error:</p>
+<p>The pattern is simple: run the job, pipe sensitive output through sanitization, store only the sanitized artifact.</p>
 
-<pre><code>Log line &lt;n&gt; exceeds 64KB limit</code></pre>
+<pre><code>some_command_that_logs <span class="code-pipe">&gt;</span> <span class="code-file">raw.log</span>
+<span class="code-cmd">cat</span> <span class="code-file">raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> <span class="code-file">sanitized.log</span></code></pre>
 
-<p>This failure uses <strong>exit code 2</strong>, the same contract already in place for usage and runtime errors.</p>
+<p>Upload <code>sanitized.log</code>. Not <code>raw.log</code>.</p>
 
-<h2>Why add a line cap?</h2>
+<h2>Failing builds when secrets appear</h2>
 
-<p>The total input cap already bounded memory and overall processing cost. The remaining gap was pathological single-line input, where regex-heavy scans can still do more work than expected even within a moderate total size.</p>
+<p>For higher assurance, fail the build when a redaction would have happened:</p>
 
-<p>The line cap closes that gap without touching successful output for normal logs.</p>
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span> <span class="code-flag">--fail-on-detect</span></code></pre>
 
-<h2>Regex safety hardening</h2>
+<p>This turns "secret in logs" into a visible failure instead of an invisible risk.</p>
 
-<p>This release also tightens the strict-mode credit card matcher. The previous pattern was more permissive on separator-heavy near-miss inputs - long runs of digits and separators that could cause weaker posture on adversarial input.</p>
+<h2>The "just mask it" trap</h2>
 
-<p>The change is targeted. The goal was to improve safety posture on that one rule while preserving existing detection semantics broadly.</p>
+<p>Most CI systems include built-in secret masking. It helps, but it is not sufficient. Masking only covers secrets that were explicitly registered. It does not handle connection strings or tokens outside that list, and it does not protect logs that get copied out of the CI system for sharing.</p>
 
-<h2>Regression coverage</h2>
+<p>Use masking as an extra layer. Do not rely on it as the primary control.</p>
 
-<p>v0.7.0 adds tests for line length boundary behavior, total input boundary behavior, multiline line-number reporting, near-miss regex cases, and adversarial inputs for strict-mode and detection-only paths.</p>
+<h2>A control engineers will actually use</h2>
 
-<p>That coverage is there to prove the bounds, not just describe them.</p>
+<p>The most effective controls are the easiest ones. If sanitization requires a platform change, it will not ship quickly. A single CLI command in the pipeline is usually the fastest path to meaningful risk reduction.</p>
 
-<h2>Compatibility</h2>
+<p>---</p>
 
-<ul>
-<li>No new CLI flags</li>
-<li>No breaking change to normal successful scan or sanitize output</li>
-<li>Exit code 2 remains the bounded failure contract for usage, input, and runtime errors</li>
-</ul>
-
-<h2>Upgrade notes</h2>
-
-<p>Most users will not notice any difference.</p>
-
-<p>If your workflow intentionally feeds very large single-line blobs into LogShield, split them before scanning. The standard pipe pattern is unaffected:</p>
-
-<pre><code><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan</code></pre>
-
-<p>To upgrade:</p>
-
-<pre><code><span class="code-cmd">npm</span> install <span class="code-flag">-g</span> <span class="code-cmd">logshield</span>-cli@0.7.0</code></pre>
-
-<p>LogShield is built on deterministic local sanitization. That promise is not only about what gets redacted - it is about how the tool behaves when input is bad or malformed. v0.7.0 improves that posture in three ways: clearer bounded behavior, a tighter matcher on one important rule, and stronger adversarial coverage to prevent regressions. Smaller than a feature release, but exactly the kind of change that builds trust in a tool used on sensitive logs.</p>
+<p>Next: a safe workflow for GitHub issues and public pastebins, where the risk profile changes when everything is indexed.</p>
     </div>
   </article>
 </main>

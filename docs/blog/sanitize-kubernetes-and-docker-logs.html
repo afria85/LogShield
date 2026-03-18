@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output." />
-  <title>LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog</title>
+  <meta name="description" content="Common secret shapes in containerized systems and what to redact without breaking readability." />
+  <title>Docker and Kubernetes Logs: Sanitization Patterns That Matter - LogShield Blog</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
@@ -14,19 +14,19 @@
   
   <!-- Open Graph -->
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://logshield.dev/blog/logshield-v0.7.0-release.html">
-  <meta property="og:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
-  <meta property="og:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  <meta property="og:url" content="https://logshield.dev/blog/sanitize-kubernetes-and-docker-logs.html">
+  <meta property="og:title" content="Docker and Kubernetes Logs: Sanitization Patterns That Matter - LogShield Blog">
+  <meta property="og:description" content="Common secret shapes in containerized systems and what to redact without breaking readability.">
   <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
-  <meta name="twitter:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  <meta name="twitter:title" content="Docker and Kubernetes Logs: Sanitization Patterns That Matter - LogShield Blog">
+  <meta name="twitter:description" content="Common secret shapes in containerized systems and what to redact without breaking readability.">
   
     <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
 <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://logshield.dev/blog/logshield-v0.7.0-release.html">
+  <link rel="canonical" href="https://logshield.dev/blog/sanitize-kubernetes-and-docker-logs.html">
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
@@ -80,81 +80,57 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back to Blog
       </a>
-      <h1 class="article-title">LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior</h1>
+      <h1 class="article-title">Docker and Kubernetes Logs: Sanitization Patterns That Matter</h1>
       <div class="article-meta">
         <span class="article-date">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          March 18, 2026
+          March 9, 2026
         </span>
         <span class="article-reading-time">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          3 min read
+          2 min read
         </span>
       </div>
     </div>
 
     <div class="article-content">
-<p>v0.7.0 is a hardening release. It does not add new CLI flags or broaden detection coverage for normal logs. The focus is narrower: make pathological input handling explicit, bounded, and test-backed.</p>
+<p>Containerized systems concentrate a lot of secrets in a few places: environment variables, mounted config, sidecar logs, and service-to-service traffic. The logs reflect that.</p>
 
-<h2>What changed</h2>
+<p>If you operate Docker or Kubernetes workloads, you will see the same secret shapes repeatedly.</p>
 
-<p>The existing global input cap remains:</p>
+<h2>The usual suspects</h2>
 
-<ul>
-<li><strong>Maximum input size:</strong> 200KB</li>
-</ul>
+<p>Connection strings are the most common: <code>postgres://user:pass@host/db</code>, Redis URLs, JDBC strings. Then cloud credentials in known formats, signed URLs, and tokens in headers — <code>Authorization: Bearer ...</code>, <code>X-API-Key: ...</code>. Apps that log request bodies or config fragments will also expose inline JSON payloads.</p>
 
-<p>v0.7.0 adds a second bound:</p>
+<p>None of these are exotic. They show up in normal debug output.</p>
 
-<ul>
-<li><strong>Maximum line length:</strong> 64KB per line</li>
-</ul>
+<h2>What makes Kubernetes logs tricky</h2>
 
-<p>If a single line exceeds the per-line cap, LogShield now fails with a deterministic error:</p>
+<p>Stdout and stderr are aggregated and shipped. Multiple workloads share the same log pipeline. Debug logging gets enabled under pressure when something breaks.</p>
 
-<pre><code>Log line &lt;n&gt; exceeds 64KB limit</code></pre>
+<p>The common failure mode is sanitizing too late — after logs already left the cluster. The safer posture is to sanitize before sharing logs externally, which keeps raw material inside your boundary.</p>
 
-<p>This failure uses <strong>exit code 2</strong>, the same contract already in place for usage and runtime errors.</p>
+<h2>A practical operator workflow</h2>
 
-<h2>Why add a line cap?</h2>
+<p>When you need to share logs outside the cluster:</p>
 
-<p>The total input cap already bounded memory and overall processing cost. The remaining gap was pathological single-line input, where regex-heavy scans can still do more work than expected even within a moderate total size.</p>
+<pre><code><span class="code-comment"># Extract the relevant slice</span>
+kubectl logs deploy/myapp <span class="code-flag">--since</span>=15m <span class="code-pipe">&gt;</span> <span class="code-file">raw.log</span>
 
-<p>The line cap closes that gap without touching successful output for normal logs.</p>
+<span class="code-comment"># Sanitize locally</span>
+<span class="code-cmd">cat</span> <span class="code-file">raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> <span class="code-file">sanitized.log</span>
 
-<h2>Regex safety hardening</h2>
+<span class="code-comment"># Share sanitized.log</span></code></pre>
 
-<p>This release also tightens the strict-mode credit card matcher. The previous pattern was more permissive on separator-heavy near-miss inputs - long runs of digits and separators that could cause weaker posture on adversarial input.</p>
+<p>The raw log stays internal. Only the sanitized version leaves.</p>
 
-<p>The change is targeted. The goal was to improve safety posture on that one rule while preserving existing detection semantics broadly.</p>
+<h2>Keep structure intact</h2>
 
-<h2>Regression coverage</h2>
+<p>Most Kubernetes logs are structured JSON. If your sanitizer corrupts JSON, you lose the ability to query and filter — which is most of the value. Redact values. Leave formatting alone.</p>
 
-<p>v0.7.0 adds tests for line length boundary behavior, total input boundary behavior, multiline line-number reporting, near-miss regex cases, and adversarial inputs for strict-mode and detection-only paths.</p>
+<p>---</p>
 
-<p>That coverage is there to prove the bounds, not just describe them.</p>
-
-<h2>Compatibility</h2>
-
-<ul>
-<li>No new CLI flags</li>
-<li>No breaking change to normal successful scan or sanitize output</li>
-<li>Exit code 2 remains the bounded failure contract for usage, input, and runtime errors</li>
-</ul>
-
-<h2>Upgrade notes</h2>
-
-<p>Most users will not notice any difference.</p>
-
-<p>If your workflow intentionally feeds very large single-line blobs into LogShield, split them before scanning. The standard pipe pattern is unaffected:</p>
-
-<pre><code><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan</code></pre>
-
-<p>To upgrade:</p>
-
-<pre><code><span class="code-cmd">npm</span> install <span class="code-flag">-g</span> <span class="code-cmd">logshield</span>-cli@0.7.0</code></pre>
-
-<p>LogShield is built on deterministic local sanitization. That promise is not only about what gets redacted - it is about how the tool behaves when input is bad or malformed. v0.7.0 improves that posture in three ways: clearer bounded behavior, a tighter matcher on one important rule, and stronger adversarial coverage to prevent regressions. Smaller than a feature release, but exactly the kind of change that builds trust in a tool used on sensitive logs.</p>
+<p>Next: structured JSON logs in more detail, including the classic pitfall of breaking parsers mid-pipeline.</p>
     </div>
   </article>
 </main>

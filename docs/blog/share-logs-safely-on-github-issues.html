@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output." />
-  <title>LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog</title>
+  <meta name="description" content="A workflow for safe debugging collaboration: sanitize first, then share, with examples and gotchas." />
+  <title>GitHub Issues and Pastebins: Share Logs Safely - LogShield Blog</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
@@ -14,19 +14,19 @@
   
   <!-- Open Graph -->
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://logshield.dev/blog/logshield-v0.7.0-release.html">
-  <meta property="og:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
-  <meta property="og:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  <meta property="og:url" content="https://logshield.dev/blog/share-logs-safely-on-github-issues.html">
+  <meta property="og:title" content="GitHub Issues and Pastebins: Share Logs Safely - LogShield Blog">
+  <meta property="og:description" content="A workflow for safe debugging collaboration: sanitize first, then share, with examples and gotchas.">
   <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior - LogShield Blog">
-  <meta name="twitter:description" content="v0.7.0 adds per-line guardrails, bounded failure behavior for pathological input, and adversarial regression coverage without changing normal successful scan output.">
+  <meta name="twitter:title" content="GitHub Issues and Pastebins: Share Logs Safely - LogShield Blog">
+  <meta name="twitter:description" content="A workflow for safe debugging collaboration: sanitize first, then share, with examples and gotchas.">
   
     <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
 <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://logshield.dev/blog/logshield-v0.7.0-release.html">
+  <link rel="canonical" href="https://logshield.dev/blog/share-logs-safely-on-github-issues.html">
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
@@ -80,81 +80,53 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back to Blog
       </a>
-      <h1 class="article-title">LogShield v0.7.0: Regex Safety Hardening and Bounded Input Behavior</h1>
+      <h1 class="article-title">GitHub Issues and Pastebins: Share Logs Safely</h1>
       <div class="article-meta">
         <span class="article-date">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          March 18, 2026
+          March 2, 2026
         </span>
         <span class="article-reading-time">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          3 min read
+          2 min read
         </span>
       </div>
     </div>
 
     <div class="article-content">
-<p>v0.7.0 is a hardening release. It does not add new CLI flags or broaden detection coverage for normal logs. The focus is narrower: make pathological input handling explicit, bounded, and test-backed.</p>
+<p>Public collaboration is powerful. It is also a different risk class.</p>
 
-<h2>What changed</h2>
+<p>When you open a GitHub issue on a public repo, you are not just sharing with maintainers. You are sharing with everyone, and the content is indexed by default.</p>
 
-<p>The existing global input cap remains:</p>
+<p>Here is a workflow that keeps collaboration fast without normalizing accidental leaks.</p>
 
-<ul>
-<li><strong>Maximum input size:</strong> 200KB</li>
-</ul>
+<h2>The workflow</h2>
 
-<p>v0.7.0 adds a second bound:</p>
+<p>Collect the minimal log slice that explains the problem. Run sanitization locally. Paste only sanitized output. If you need to attach a file, attach the sanitized version.</p>
 
-<ul>
-<li><strong>Maximum line length:</strong> 64KB per line</li>
-</ul>
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">error.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> error.<span class="code-file">sanitized.log</span></code></pre>
 
-<p>If a single line exceeds the per-line cap, LogShield now fails with a deterministic error:</p>
+<p>Then paste the relevant excerpt from <code>error.sanitized.log</code>.</p>
 
-<pre><code>Log line &lt;n&gt; exceeds 64KB limit</code></pre>
+<h2>Why minimal slice matters</h2>
 
-<p>This failure uses <strong>exit code 2</strong>, the same contract already in place for usage and runtime errors.</p>
+<p>Even sanitized logs can contain sensitive operational information: internal hostnames, customer identifiers in URLs, file paths that reveal internal structure. A smaller slice reduces both leakage risk and reader fatigue.</p>
 
-<h2>Why add a line cap?</h2>
+<p>This is not about being unhelpful. It is about sharing the right signal, not all the signal.</p>
 
-<p>The total input cap already bounded memory and overall processing cost. The remaining gap was pathological single-line input, where regex-heavy scans can still do more work than expected even within a moderate total size.</p>
+<h2>Pastebins are not private</h2>
 
-<p>The line cap closes that gap without touching successful output for normal logs.</p>
+<p>Temporary sharing links and public pastebins carry the same risk as a public issue. The link can leak, the content can be scraped, and many services retain content indefinitely. If you would not put it in a public issue, do not put it in a pastebin either.</p>
 
-<h2>Regex safety hardening</h2>
+<h2>A note on screenshots</h2>
 
-<p>This release also tightens the strict-mode credit card matcher. The previous pattern was more permissive on separator-heavy near-miss inputs - long runs of digits and separators that could cause weaker posture on adversarial input.</p>
+<p>Screenshots are sometimes used to avoid accidentally pasting credentials, but they are not a reliable substitute. They can still capture secrets. They are hard to search and audit. And the sanitization problem does not go away — it just becomes harder to verify.</p>
 
-<p>The change is targeted. The goal was to improve safety posture on that one rule while preserving existing detection semantics broadly.</p>
+<p>Sanitized text logs are the safer, more reviewable choice.</p>
 
-<h2>Regression coverage</h2>
+<p>---</p>
 
-<p>v0.7.0 adds tests for line length boundary behavior, total input boundary behavior, multiline line-number reporting, near-miss regex cases, and adversarial inputs for strict-mode and detection-only paths.</p>
-
-<p>That coverage is there to prove the bounds, not just describe them.</p>
-
-<h2>Compatibility</h2>
-
-<ul>
-<li>No new CLI flags</li>
-<li>No breaking change to normal successful scan or sanitize output</li>
-<li>Exit code 2 remains the bounded failure contract for usage, input, and runtime errors</li>
-</ul>
-
-<h2>Upgrade notes</h2>
-
-<p>Most users will not notice any difference.</p>
-
-<p>If your workflow intentionally feeds very large single-line blobs into LogShield, split them before scanning. The standard pipe pattern is unaffected:</p>
-
-<pre><code><span class="code-cmd">cat</span> <span class="code-file">app.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan</code></pre>
-
-<p>To upgrade:</p>
-
-<pre><code><span class="code-cmd">npm</span> install <span class="code-flag">-g</span> <span class="code-cmd">logshield</span>-cli@0.7.0</code></pre>
-
-<p>LogShield is built on deterministic local sanitization. That promise is not only about what gets redacted - it is about how the tool behaves when input is bad or malformed. v0.7.0 improves that posture in three ways: clearer bounded behavior, a tighter matcher on one important rule, and stronger adversarial coverage to prevent regressions. Smaller than a feature release, but exactly the kind of change that builds trust in a tool used on sensitive logs.</p>
+<p>Next: containerized systems. Docker and Kubernetes logs have their own secret shapes and common failure points.</p>
     </div>
   </article>
 </main>
