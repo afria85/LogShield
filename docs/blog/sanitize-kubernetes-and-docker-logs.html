@@ -88,7 +88,7 @@
         </span>
         <span class="article-reading-time">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          2 min read
+          4 min read
         </span>
       </div>
     </div>
@@ -96,37 +96,87 @@
     <div class="article-content">
 <p>Containerized systems concentrate a lot of secrets in a few places: environment variables, mounted config, sidecar logs, and service-to-service traffic. The logs reflect that.</p>
 
-<p>If you operate Docker or Kubernetes workloads, you will see the same secret shapes repeatedly.</p>
+<p>If you operate Docker or Kubernetes workloads, you will see the same secret shapes repeatedly — and a few that are specific to how containers handle configuration.</p>
 
-<h2>The usual suspects</h2>
+<h2>How secrets end up in container logs</h2>
 
-<p>Connection strings are the most common: <code>postgres://user:pass@host/db</code>, Redis URLs, JDBC strings. Then cloud credentials in known formats, signed URLs, and tokens in headers — <code>Authorization: Bearer ...</code>, <code>X-API-Key: ...</code>. Apps that log request bodies or config fragments will also expose inline JSON payloads.</p>
+<p>The most common path is environment variables. Container-based deployments pass credentials through env vars because it is the standard twelve-factor pattern: <code>DATABASE_URL</code>, <code>REDIS_URL</code>, <code>API_KEY</code>, <code>SECRET_KEY</code>. This works well right up until an application prints its configuration on startup for debugging purposes, or until an unhandled exception includes the full environment in its traceback.</p>
 
-<p>None of these are exotic. They show up in normal debug output.</p>
+<p>A startup log that looks like this is not unusual:</p>
+
+<pre><code>[INFO] Starting app with config:
+  DATABASE_URL=postgres://appuser:s3cr3tpass@db.internal:5432/prod
+  REDIS_URL=redis://:anotherpass@cache.internal:6379/0
+  API_KEY=sk-live-XXXXXXXXXXXXXXXXXXXXXXXX
+  PORT=8080</code></pre>
+
+<p>That output goes to stdout, gets collected by the container runtime, and ends up wherever your log pipeline sends it.</p>
+
+<p>The second common path is request logging. Applications that log full request and response bodies for debugging will capture whatever is in the Authorization header, any tokens in query strings, and any credentials in request payloads. In development this is often intentional. In production it is frequently left on by accident.</p>
+
+<h2>The usual suspects by format</h2>
+
+<p><strong>Connection strings</strong> are the most information-dense leak: <code>postgres://user:pass@host/db</code>, <code>redis://:pass@host:6379</code>, JDBC strings with embedded credentials. The entire credential is in one line, in a predictable format.</p>
+
+<p><strong>Tokens in headers</strong> appear when applications log HTTP traffic: <code>Authorization: Bearer eyJ...</code>, <code>X-API-Key: sk-live-...</code>. These are easy to miss because the header name looks innocuous.</p>
+
+<p><strong>Cloud credentials</strong> show up in build and deploy logs: access key IDs in known formats, signed S3 URLs with embedded credentials and expiry, service account tokens from mounted Kubernetes secrets.</p>
+
+<p><strong>Inline JSON payloads</strong> are the least predictable. Applications that log request bodies or configuration fragments can expose credentials buried inside nested JSON structures. These are harder to catch with simple patterns because the structure varies.</p>
 
 <h2>What makes Kubernetes logs tricky</h2>
 
-<p>Stdout and stderr are aggregated and shipped. Multiple workloads share the same log pipeline. Debug logging gets enabled under pressure when something breaks.</p>
+<p>Stdout and stderr from every container get aggregated and shipped by the kubelet. Multiple workloads share the same log pipeline. When something breaks, debug logging often gets enabled under pressure — and frequently stays on longer than intended.</p>
 
-<p>The common failure mode is sanitizing too late — after logs already left the cluster. The safer posture is to sanitize before sharing logs externally, which keeps raw material inside your boundary.</p>
+<p>There are a few Kubernetes-specific patterns worth knowing.</p>
 
-<h2>A practical operator workflow</h2>
+<p><strong>Init container output.</strong> Init containers often run configuration setup, database migrations, or secret injection. If they print environment variables or configuration state, that output goes into the same log stream as the main container.</p>
 
-<p>When you need to share logs outside the cluster:</p>
+<p><strong>Sidecar logs.</strong> Service mesh sidecars, log collectors, and monitoring agents all write to the same aggregated log stream. A misconfigured proxy that logs full request headers will put tokens into the same pipeline as your application logs.</p>
 
-<pre><code><span class="code-comment"># Extract the relevant slice</span>
+<p><strong>Event objects.</strong> <code>kubectl describe pod</code> and <code>kubectl get events</code> include event messages that can contain configuration details. These are not logs in the traditional sense, but teams often copy them into tickets as-is.</p>
+
+<h2>A practical workflow for sharing logs outside the cluster</h2>
+
+<pre><code><span class="code-comment"># Extract a time-bounded slice</span>
 kubectl logs deploy/myapp <span class="code-flag">--since</span>=15m <span class="code-pipe">&gt;</span> <span class="code-file">raw.log</span>
 
 <span class="code-comment"># Sanitize locally</span>
 <span class="code-cmd">cat</span> <span class="code-file">raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> <span class="code-file">sanitized.log</span>
 
-<span class="code-comment"># Share sanitized.log</span></code></pre>
+<span class="code-comment"># Verify what was redacted before sharing</span>
+<span class="code-cmd">cat</span> <span class="code-file">raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span>
 
-<p>The raw log stays internal. Only the sanitized version leaves.</p>
+<span class="code-comment"># Share only the sanitized file</span></code></pre>
+
+<p>The raw log stays on your machine. Only the sanitized version leaves your boundary.</p>
+
+<p>For multi-container pods, collect each container separately so you know which stream each line came from:</p>
+
+<pre><code>kubectl logs deploy/myapp <span class="code-flag">-c</span> app <span class="code-flag">--since</span>=15m <span class="code-pipe">&gt;</span> <span class="code-file">app-raw.log</span>
+kubectl logs deploy/myapp <span class="code-flag">-c</span> sidecar <span class="code-flag">--since</span>=15m <span class="code-pipe">&gt;</span> <span class="code-file">sidecar-raw.log</span>
+
+<span class="code-cmd">cat</span> <span class="code-file">app-raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> <span class="code-file">app-sanitized.log</span>
+<span class="code-cmd">cat</span> <span class="code-file">sidecar-raw.log</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> <span class="code-file">sidecar-sanitized.log</span></code></pre>
+
+<h2>Docker-specific patterns</h2>
+
+<p>Docker build logs deserve special attention. Multi-stage builds can print build arguments, and if a <code>--build-arg</code> contains a credential, it will appear in the build output:</p>
+
+<pre><code><span class="code-cmd">docker</span> build <span class="code-flag">--build-arg</span> NPM_TOKEN=npm_XXXX . 2<span class="code-pipe">&gt;</span>&amp;1 <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan</code></pre>
+
+<p><code>docker inspect</code> output also commonly contains environment variables in their full form. If you are copying inspect output into a ticket for debugging, treat it the same as log output:</p>
+
+<pre><code><span class="code-cmd">docker</span> inspect <span class="code-pipe">&lt;</span>container_id<span class="code-pipe">&gt;</span> <span class="code-pipe">&gt;</span> <span class="code-file">inspect.json</span>
+<span class="code-cmd">cat</span> <span class="code-file">inspect.json</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> inspect.<span class="code-file">sanitized.json</span></code></pre>
 
 <h2>Keep structure intact</h2>
 
-<p>Most Kubernetes logs are structured JSON. If your sanitizer corrupts JSON, you lose the ability to query and filter — which is most of the value. Redact values. Leave formatting alone.</p>
+<p>Most Kubernetes and Docker logs are structured JSON. Fluentd, Filebeat, and similar collectors emit JSON envelopes around the original log line, and many applications use structured logging libraries that output JSON directly.</p>
+
+<p>If your sanitizer corrupts JSON — by breaking string escapes, removing closing braces, or mangling unicode — you lose the ability to query and filter downstream. The log becomes an unparseable string in your aggregation system.</p>
+
+<p>Redact values. Leave formatting alone.</p>
 
 <p>---</p>
 
