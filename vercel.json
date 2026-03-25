@@ -20,6 +20,16 @@
 
   "redirects": [
     {
+      "source": "/features",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/features/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/index.html",
       "destination": "/",
       "permanent": true
