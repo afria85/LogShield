@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How predictable behavior and boring exit codes make sanitization automatable and trustworthy." />
+  <title>Design Guarantees: Dry-Run, Exit Codes, and CI-Friendly Behavior - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/design-guarantees-exit-codes-and-dry-run.html">
+  <meta property="og:title" content="Design Guarantees: Dry-Run, Exit Codes, and CI-Friendly Behavior - LogShield Blog">
+  <meta property="og:description" content="How predictable behavior and boring exit codes make sanitization automatable and trustworthy.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Design Guarantees: Dry-Run, Exit Codes, and CI-Friendly Behavior - LogShield Blog">
+  <meta name="twitter:description" content="How predictable behavior and boring exit codes make sanitization automatable and trustworthy.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/design-guarantees-exit-codes-and-dry-run.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span class="nav-toggle-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="/">Home</a>
+        <a href="../docs.html">Docs</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">Design Guarantees: Dry-Run, Exit Codes, and CI-Friendly Behavior</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          March 23, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          5 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>Security controls live or die by behavior under automation.</p>
+
+<p>If you want log sanitization to be more than a one-off manual step, the tool must behave predictably in scripts and CI. That means defining contracts upfront — and sticking to them. Dry-run mode and stable exit codes are two of the most important.</p>
+
+<h2>Dry-run is not a gimmick</h2>
+
+<p>A real dry-run must satisfy a strict contract:</p>
+
+<ul>
+<li>it does not emit sanitized log content</li>
+<li>it reports what would be redacted</li>
+<li>it is safe to run on sensitive input — no accidental echoing of raw values</li>
+</ul>
+
+<p>Dry-run is how you build internal trust. Engineers can preview and verify behavior before wiring the tool into pipelines. Without it, the only way to know what gets redacted is to run sanitization for real — which is not always reversible.</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">logs.txt</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span></code></pre>
+
+<p>The output tells you what would be redacted. No sanitized log stream is emitted. No raw log content is echoed back.</p>
+
+<p>This sounds simple. It has nontrivial implications for implementation: dry-run needs an explicit, testable contract. If the same flow can accidentally fall through and write output, you have built a leak path into the feature that is supposed to prevent one.</p>
+
+<h2>Exit codes are part of the API</h2>
+
+<p>In CI, exit codes are the decision point. Scripts do not read prose. They check return values.</p>
+
+<p>A reasonable contract:</p>
+
+<p>Exit code <code>0</code> means the command succeeded.</p>
+
+<p>Exit code <code>1</code> means secrets were detected with <code>--fail-on-detect</code>.</p>
+
+<p>Exit code <code>2</code> means invalid usage or a runtime/input failure.</p>
+
+<p>This is boring. It is also exactly what you want. Boring exit codes are stable, documentable, and scriptable.</p>
+
+<p>To enforce "no secrets in artifacts" as a CI gate:</p>
+
+<pre><code><span class="code-cmd">cat</span> <span class="code-file">logs.txt</span> <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-flag">--dry-run</span> <span class="code-flag">--fail-on-detect</span>
+<span class="code-cmd">echo</span> "Exit: $?"</code></pre>
+
+<p>If exit code is 1, the pipeline fails. No manual review step. No output-text parsing. The tool makes the decision; the script enforces it.</p>
+
+<p>The alternative — relying on output text parsing to determine success — is fragile. Output formats change. Log levels change. Exit codes, if you commit to them, are stable across versions.</p>
+
+<h2>Stdout vs stderr: define them deliberately</h2>
+
+<p>Output routing matters for piped usage:</p>
+
+<ul>
+<li><strong>stdout</strong>: sanitized content (the actual output you pipe downstream)</li>
+<li><strong>stderr</strong>: diagnostics or summaries that should not pollute the sanitized stream</li>
+</ul>
+
+<p>If diagnostic output bleeds into stdout, every downstream consumer — file writers, log shippers, parsers — has to deal with mixed content. That is a correctness problem and a security problem.</p>
+
+<p>LogShield's current contract is intentionally explicit:</p>
+
+<p>In default sanitize mode, LogShield writes sanitized output to stdout.</p>
+
+<p>With <code>--summary</code>, the summary is written to stderr.</p>
+
+<p>In default <code>--dry-run</code>, the detection report is printed to stdout and no log content is echoed.</p>
+
+<p>With <code>--json --dry-run</code>, LogShield produces machine-readable detection output with an intentionally empty <code>output</code> field.</p>
+
+<p>The important thing is not that every tool chooses the same routing. The important thing is that the routing is stable, documented, and safe for automation.</p>
+
+<h2>Error handling should be strict</h2>
+
+<p>A security control should fail closed.</p>
+
+<p>If someone passes conflicting flags, the tool should error with exit code 2 and a clear message — not silently pick one behavior. Silent fallback creates risk because the caller does not know what actually ran.</p>
+
+<p>Examples of inputs that should hard-fail:</p>
+
+<ul>
+<li>Unknown flag names (typos that disable intended behavior)</li>
+<li>Conflicting input sources (for example, trying to read both STDIN and a file at once)</li>
+<li>Bounded input failures and other runtime errors that make the result unsafe to trust</li>
+</ul>
+
+<p>Strict error handling is not user-hostile. It is the opposite: it catches misconfiguration before it causes a real incident.</p>
+
+<h2>Machine-friendly output requires deliberate design</h2>
+
+<p>There is a tension between human-readable and machine-readable output:</p>
+
+<ul>
+<li>humans want readable summaries with context</li>
+<li>machines want stable formats they can parse reliably</li>
+</ul>
+
+<p>The safe approach is to treat them as separate modes with separate flags. Do not try to make a single output format serve both — it ends up serving neither well.</p>
+
+<p>For machine-readable output, JSON is a reasonable choice. Define a schema, version it, and document it. If you change the schema in a minor version, you break scripts. Treat the output format as part of the public API.</p>
+
+<p>One thing to be especially cautious about: machine-readable dry-run output. It is easy to accidentally include raw input values in a "what would be redacted" report. If that output ends up in CI logs, you have leaked exactly what you were trying to protect.</p>
+
+<h2>The "control" mindset</h2>
+
+<p>When you design these behaviors, you are not just building a CLI. You are defining a control — something that will be embedded in:</p>
+
+<ul>
+<li>CI policies</li>
+<li>support workflows</li>
+<li>incident runbooks</li>
+<li>compliance evidence</li>
+</ul>
+
+<p>Controls have different requirements than tools. A tool can behave slightly differently across versions and still be useful. A control cannot — it must be auditable, deterministic, and stable. When behavior changes, it must be documented and versioned.</p>
+
+<p>That mindset naturally pushes you toward strict contracts: defined exit codes, stable output formats, explicit error modes, no silent fallbacks.</p>
+
+<p>The test for whether something is a control: could you point an auditor at its behavior spec and say "it always does this"? If not, it is still a tool.</p>
+
+<p>For the broader guarantee checklist behind that mindset, see <a href="what-a-log-sanitizer-must-guarantee.html" target="_blank" rel="noopener noreferrer">What a Log Sanitizer Must Guarantee</a>.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="/" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+      <a href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How to redact secrets in JSON logs while preserving valid JSON, key names, and downstream tooling." />
+  <title>Structured JSON Logs: Sanitization Without Breaking Parsers - LogShield Blog</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+  <meta name="theme-color" content="#00E5A0">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://logshield.dev/blog/sanitize-structured-json-logs.html">
+  <meta property="og:title" content="Structured JSON Logs: Sanitization Without Breaking Parsers - LogShield Blog">
+  <meta property="og:description" content="How to redact secrets in JSON logs while preserving valid JSON, key names, and downstream tooling.">
+  <meta property="og:image" content="https://logshield.dev/assets/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Structured JSON Logs: Sanitization Without Breaking Parsers - LogShield Blog">
+  <meta name="twitter:description" content="How to redact secrets in JSON logs while preserving valid JSON, key names, and downstream tooling.">
+  
+    <meta name="twitter:image" content="https://logshield.dev/assets/og-image.png">
+<meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://logshield.dev/blog/sanitize-structured-json-logs.html">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNQ12MZ7TM"></script>
+  <script defer src="/assets/ga.js"></script>
+
+  <!-- Styles - External CSS like main page -->
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<header id="header">
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 3L4 8.5V15C4 22.18 9.1 28.85 16 31C22.9 28.85 28 22.18 28 15V8.5L16 3Z" stroke="url(#logo-gradient)" stroke-width="2" fill="none"/>
+          <path d="M11 16L14 19L21 12" stroke="url(#check-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="3" x2="28" y2="31">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+            <linearGradient id="check-gradient" x1="11" y1="12" x2="21" y2="19">
+              <stop stop-color="#00E5A0"/>
+              <stop offset="1" stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span>LogShield</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+        <span class="nav-toggle-lines" aria-hidden="true"></span>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="/">Home</a>
+        <a href="../docs.html">Docs</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="nav-cta" href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="article-layout">
+  <article>
+    <div class="article-header">
+      <a href="./" class="article-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Blog
+      </a>
+      <h1 class="article-title">Structured JSON Logs: Sanitization Without Breaking Parsers</h1>
+      <div class="article-meta">
+        <span class="article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          March 16, 2026
+        </span>
+        <span class="article-reading-time">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          4 min read
+        </span>
+      </div>
+    </div>
+
+    <div class="article-content">
+<p>Structured logs are great until your redaction pipeline turns them into invalid JSON.</p>
+
+<p>When logs are JSON, you need two things at the same time:</p>
+
+<ul>
+<li>remove sensitive values</li>
+<li>keep the log parseable</li>
+</ul>
+
+<p>If you fail the second, your tooling breaks — search, correlation, dashboards all depend on valid structure. If you fail the first, you leak. Both failures are silent unless you test for them explicitly.</p>
+
+<h2>Why JSON sanitization is harder than plain-text sanitization</h2>
+
+<p>Plain-text redaction is pattern matching on a flat string. JSON adds quoting, escaping, delimiters, and nesting. A sanitizer that is careless about those details will corrupt it.</p>
+
+<p>The common failure modes:</p>
+
+<h3>1) Redacting by removing quotes</h3>
+
+<p>Bad example:</p>
+
+<pre><code>{"token": &lt;REDACTED&gt;}</code></pre>
+
+<p>Now it is not JSON. Any downstream parser — Elasticsearch, Loki, your own tooling — will drop or reject the log line.</p>
+
+<p>Correct example:</p>
+
+<pre><code>{"token": "&lt;REDACTED_TOKEN&gt;"}</code></pre>
+
+<p>The replacement must be a valid JSON string. The key stays. The value is replaced, not removed.</p>
+
+<h3>2) Corrupting escape sequences</h3>
+
+<p>Tokens and secrets often include characters that require escaping in JSON: quotes, backslashes, control characters. A sanitizer that does naive string replacement can break valid escaping.</p>
+
+<p>Concretely: if a token contains a <code>"</code> and your replacement logic patches text carelessly, you get an unbalanced string.</p>
+
+<p>The practical requirement is simpler: replacements must preserve valid JSON string boundaries and escaping. Do not splice text in ways that leave the line syntactically broken.</p>
+
+<h3>3) Redacting keys</h3>
+
+<p>Keys are not usually secrets. Keys are context.</p>
+
+<p>If you remove the key <code>authorization</code> entirely, you lose the signal that an authorization header was present. That information is useful for debugging and incident analysis — even when the value must not be logged.</p>
+
+<p>The right contract: <strong>keep keys, redact values</strong>.</p>
+
+<h3>4) Flattening nested objects</h3>
+
+<p>JSON logs often carry nested structure:</p>
+
+<pre><code>{
+  "http": {
+    "request": {
+      "headers": {
+        "authorization": "Bearer eyJhbGci..."
+      }
+    }
+  }
+}</code></pre>
+
+<p>A sanitizer that only handles obvious top-level cases will miss nested secrets entirely. Nested values still need to be covered without breaking the surrounding structure.</p>
+
+<h3>5) Treating arrays inconsistently</h3>
+
+<p>Arrays of strings and arrays of objects can both contain secrets. If your test fixtures only cover flat objects, you will miss realistic cases.</p>
+
+<h2>Preserve "shape" for analytics</h2>
+
+<p>Structured logs power dashboards and alerting. The fields that matter are rarely the ones that contain secrets:</p>
+
+<p>- <code>service</code> - <code>env</code> - <code>level</code> - <code>error_code</code> - <code>request_id</code> - <code>trace_id</code></p>
+
+<p>Sanitization should not touch these unless there is a specific reason. The goal is targeted redaction — remove what must not be logged, keep everything else intact.</p>
+
+<p>A sanitizer that removes too much is nearly as bad as one that removes too little. You lose the ability to debug, correlate, and alert.</p>
+
+<h2>JSONL vs JSON arrays</h2>
+
+<p>Most log pipelines emit JSONL (newline-delimited JSON), not JSON arrays. Each line is an independent JSON object. This matters for how you apply sanitization:</p>
+
+<ul>
+<li>JSONL: process line by line, validate each line independently</li>
+<li>JSON array: parse the full structure, walk it once</li>
+</ul>
+
+<p>A sanitizer that loads the entire file before processing is not suitable for streaming log pipelines. Line-by-line processing keeps memory bounded and latency low.</p>
+
+<h2>A simple correctness test</h2>
+
+<p>After sanitization, validate that output is still parseable:</p>
+
+<pre><code><span class="code-cmd">cat</span> raw.jsonl <span class="code-pipe">|</span> <span class="code-cmd">logshield</span> scan <span class="code-pipe">&gt;</span> sanitized.jsonl
+<span class="code-cmd">node</span> <span class="code-flag">-e</span> "
+  const fs = require('fs');
+  const lines = fs.readFileSync('sanitized.jsonl', 'utf8').trim().split('\n');
+  lines.forEach((line, i) =<span class="code-pipe">&gt;</span> {
+    try { JSON.parse(line); }
+    catch (e) { console.error('Invalid JSON on line', i + 1, e.message); process.exit(1); }
+  });
+  <span class="code-file">console.log</span>('All lines valid JSON');
+"</code></pre>
+
+<p>Parseability is a hard requirement, not a nice-to-have. Treat it the same way you treat redaction coverage — test for it explicitly, fail the pipeline if it breaks.</p>
+
+<h2>A note on testing coverage</h2>
+
+<p>Correctness testing has two axes:</p>
+
+<p>1. <strong>Redaction coverage</strong>: are all secrets removed? 2. <strong>Structural validity</strong>: is the output still valid JSON?</p>
+
+<p>Most teams test one or the other. Testing both, consistently, is what separates a tool from a control. Golden fixtures help here — commit known inputs and expected outputs, and run them on every change.</p>
+
+<p>For the broader contract around predictable automation behavior, see <a href="design-guarantees-exit-codes-and-dry-run.html" target="_blank" rel="noopener noreferrer">Design Guarantees: Dry-Run, Exit Codes, and CI-Friendly Behavior</a>.</p>
+    </div>
+  </article>
+</main>
+
+<!-- Back to Top Button - same as main page -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="/" class="footer-logo">LogShield</a>
+      <span class="footer-copy">2025 LogShield - <a href="https://github.com/afria85/LogShield/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="footer-license">Apache-2.0 License</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../docs.html">Documentation</a>
+      <a href="https://github.com/sponsors/afria85" target="_blank" rel="noopener noreferrer">Donate</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts - External JS like main page -->
+<script defer src="../main.js"></script>
+
+</body>
+</html>
