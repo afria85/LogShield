@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.1
+
+### Fixed
+
+- File input now takes precedence over auto-detected non-TTY stdin, while explicit `--stdin` plus a file remains a usage error
+- Enforced the `200KB` total input cap and `64KB` per-line cap by UTF-8 byte length instead of JavaScript character count
+- Corrected the README stability line from `v0.6.x` to `v0.7.x`
+
 ## v0.7.0
 
 ### Security

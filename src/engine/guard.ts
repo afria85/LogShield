@@ -4,14 +4,14 @@ export const MAX_LINE_LENGTH = 64 * 1024; // 64KB
 export function guardInput(input: string): string {
   if (!input) return "";
 
-  if (input.length > MAX_INPUT_SIZE) {
+  if (Buffer.byteLength(input, "utf8") > MAX_INPUT_SIZE) {
     throw new Error("Log size exceeds 200KB limit");
   }
 
   const lines = input.split(/\r?\n/);
 
   for (let i = 0; i < lines.length; i += 1) {
-    if (lines[i].length > MAX_LINE_LENGTH) {
+    if (Buffer.byteLength(lines[i], "utf8") > MAX_LINE_LENGTH) {
       const lineNumber = i + 1;
       throw new Error(`Log line ${lineNumber} exceeds 64KB limit`);
     }

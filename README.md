@@ -194,14 +194,14 @@ npm install -g logshield-cli
 logshield scan [file]
 ```
 
-If a file is not provided and input is piped, LogShield automatically reads from **STDIN**.
+If a file is provided, LogShield reads from that file. If no file is provided and input is piped, LogShield automatically reads from **STDIN**.
 
 Note: the npm package ships the CLI only; there is no supported JS API surface.
 
 ### Limits
 
-- Maximum input size: **200KB** (safety cap). Oversized input exits with code `2`.
-- Maximum line length: **64KB** per line. If any single line exceeds the cap, LogShield exits with code `2` and a deterministic `Log line <n> exceeds 64KB limit` error.
+- Maximum input size: **200KB** by UTF-8 byte length (safety cap). Oversized input exits with code `2`.
+- Maximum line length: **64KB** per line by UTF-8 byte length. If any single line exceeds the cap, LogShield exits with code `2` and a deterministic `Log line <n> exceeds 64KB limit` error.
 
 ### v0.7.0 safety posture
 
@@ -270,7 +270,7 @@ logshield scan app.log
 cat app.log | logshield scan
 ```
 
-`--stdin` is optional; piped input is auto-detected. Use `--stdin` to force reading from stdin in TTY/paste workflows.
+`--stdin` is optional; piped input is auto-detected when no file is provided. Use `--stdin` to force reading from stdin in TTY/paste workflows. Combining `--stdin` with a file is a usage error.
 
 ---
 
@@ -482,7 +482,7 @@ LogShield uses a fixed, deterministic rule set. The exact coverage depends on th
 LogShield guarantees:
 
 - Deterministic output
-- Stable behavior within the current minor line **v0.6.x**
+- Stable behavior within the current minor line **v0.7.x**
 - No runtime dependencies
 - Snapshot-tested and contract-tested
 - No telemetry

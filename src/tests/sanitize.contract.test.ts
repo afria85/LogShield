@@ -195,12 +195,38 @@ LS_STRIPE_LIVE_KEY_XXXXXXXXXXXXXXXX
     expect(() => sanitizeLog(bigInput)).toThrow("Log size exceeds 200KB limit");
   });
 
+  it("throws error if UTF-8 log exceeds 200KB by bytes", () => {
+    const inputAtByteLimit = [
+      ...Array.from({ length: 68 }, () => "€".repeat(1000)),
+      "€".repeat(244),
+    ].join("\n");
+    const bigInput = `${inputAtByteLimit}A`;
+
+    expect(Buffer.byteLength(bigInput, "utf8")).toBe(MAX_INPUT_SIZE + 1);
+    expect(bigInput.length).toBeLessThan(MAX_INPUT_SIZE);
+    expect(() => sanitizeLog(bigInput)).toThrow("Log size exceeds 200KB limit");
+  });
+
   it("accepts input exactly at the 200KB limit when each line stays within the line cap", () => {
     const inputAtLimit = makeBoundedMultilineInput(MAX_INPUT_SIZE);
 
     const result = sanitizeLog(inputAtLimit);
 
     expect(result.output).toBe(inputAtLimit);
+    expect(result.matches.length).toBe(0);
+  });
+
+  it("accepts UTF-8 input exactly at the 200KB byte limit", () => {
+    const inputAtByteLimit = [
+      ...Array.from({ length: 68 }, () => "€".repeat(1000)),
+      "€".repeat(244),
+    ].join("\n");
+
+    expect(Buffer.byteLength(inputAtByteLimit, "utf8")).toBe(MAX_INPUT_SIZE);
+
+    const result = sanitizeLog(inputAtByteLimit);
+
+    expect(result.output).toBe(inputAtByteLimit);
     expect(result.matches.length).toBe(0);
   });
 
@@ -222,9 +248,28 @@ LS_STRIPE_LIVE_KEY_XXXXXXXXXXXXXXXX
     expect(result.matches.length).toBe(0);
   });
 
+  it("accepts a UTF-8 line exactly at the 64KB byte limit", () => {
+    const input = `${"€".repeat(21845)}A`;
+
+    expect(Buffer.byteLength(input, "utf8")).toBe(MAX_LINE_LENGTH);
+
+    const result = sanitizeLog(input);
+
+    expect(result.output).toBe(input);
+    expect(result.matches.length).toBe(0);
+  });
+
   it("throws a deterministic error for a line just above the line-length limit", () => {
     const input = "A".repeat(MAX_LINE_LENGTH + 1);
 
+    expect(() => sanitizeLog(input)).toThrow("Log line 1 exceeds 64KB limit");
+  });
+
+  it("throws a deterministic error for a UTF-8 line over 64KB by bytes", () => {
+    const input = `${"€".repeat(21845)}AA`;
+
+    expect(Buffer.byteLength(input, "utf8")).toBe(MAX_LINE_LENGTH + 1);
+    expect(input.length).toBeLessThan(MAX_LINE_LENGTH);
     expect(() => sanitizeLog(input)).toThrow("Log line 1 exceeds 64KB limit");
   });
 

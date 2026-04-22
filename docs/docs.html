@@ -800,7 +800,7 @@
         <svg class="info-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         <div class="info-box-content">
           <strong>Auto-detection</strong>
-          STDIN is auto-detected when input is piped. No additional flags required.
+          STDIN is auto-detected when input is piped and no file is provided. No additional flags required for normal pipe workflows.
         </div>
       </div>
 
@@ -839,7 +839,7 @@
         </div>
       </div>
 
-      <p>When data is piped, LogShield automatically switches to stdin mode. The <code>--stdin</code> flag exists as an explicit override for edge cases.</p>
+      <p>When a file is provided, LogShield reads from that file. When no file is provided and data is piped, LogShield automatically switches to stdin mode. The <code>--stdin</code> flag exists as an explicit override for edge cases, and combining <code>--stdin</code> with a file is a usage error.</p>
 
       <h2 id="redaction-format">Redaction Format</h2>
       <p>All redacted values follow this format:</p>
@@ -1003,9 +1003,10 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
       <h2 id="input-limits">Input Limits</h2>
       <p>LogShield applies a safety cap to avoid runaway memory/CPU usage in pipelines.</p>
       <ul>
-        <li>Maximum input size: <code>200KB</code></li>
-        <li>Maximum line length: <code>64KB</code> per line</li>
+        <li>Maximum input size: <code>200KB</code> by UTF-8 byte length</li>
+        <li>Maximum line length: <code>64KB</code> per line by UTF-8 byte length</li>
       </ul>
+      <p>If the total input exceeds the input cap, LogShield fails with exit code <code>2</code> and a deterministic <code>Log size exceeds 200KB limit</code> error.</p>
       <p>If a single line exceeds the line cap, LogShield fails with exit code <code>2</code> and a deterministic <code>Log line &lt;n&gt; exceeds 64KB limit</code> error.</p>
       <p>These bounds are part of the v0.7.0 regex safety hardening work to keep worst-case input behavior explicit and predictable.</p>
       <p>If you need to scan larger logs, split them or pipe a slice (for example: <code>tail -n 2000 app.log | logshield scan</code>).</p>

@@ -167,10 +167,10 @@ async function main() {
   const dryRun = flags.has("--dry-run");
 
   const stdinAuto = isStdinPiped();
-  const useStdin = stdinFlag || stdinAuto;
+  const useStdin = stdinFlag || (!file && stdinAuto);
 
   // Usage/flag errors => exit code 2 (input/usage error)
-  if (useStdin && file) {
+  if (stdinFlag && file) {
     exitUsageError("Cannot read from both STDIN and file");
   }
 
