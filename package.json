@@ -1,6 +1,6 @@
 {
   "name": "logshield-cli",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "license": "Apache-2.0",
   "type": "commonjs",
   "bin": {
@@ -29,10 +29,11 @@
     "dev:lan": "node scripts/dev-docs-server.mjs --host 0.0.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3",
+    "@types/node": "^18.19.130",
     "esbuild": "^0.25.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.0"
+    "vite": "^6.4.3",
+    "vitest": "^3.2.7"
   },
   "description": "Deterministic, rule-based CLI to sanitize secrets from logs. No AI. No cloud. No config.",
   "keywords": [

@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.7.2
+
+### Maintenance
+
+- Patched development dependency vulnerabilities reported by `npm audit`
+- Kept the development/test toolchain compatible with the documented Node.js `>=18` runtime floor
+- Aligned Node.js type coverage with the minimum supported runtime
+
+### Notes
+
+- No CLI behavior changes
+- No redaction rule changes
+- No breaking changes
+
 ## v0.7.1
 
 ### Fixed
