@@ -1016,7 +1016,7 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
       </ul>
       <p>If the total input exceeds the input cap, LogShield fails with exit code <code>2</code> and a deterministic <code>Log size exceeds 200KB limit</code> error.</p>
       <p>If a single line exceeds the line cap, LogShield fails with exit code <code>2</code> and a deterministic <code>Log line &lt;n&gt; exceeds 64KB limit</code> error.</p>
-      <p>These bounds are part of the v0.7.0 regex safety hardening work to keep worst-case input behavior explicit and predictable.</p>
+      <p>These bounds are part of LogShield's current safety posture: worst-case input behavior stays explicit, predictable, and bounded.</p>
       <p>If you need to scan larger logs, split them or pipe a slice (for example: <code>tail -n 2000 app.log | logshield scan</code>).</p>
 
       <h2 id="secret-types">Supported Secret Types</h2>
@@ -1046,13 +1046,13 @@ email: <span class="redacted">&lt;REDACTED_EMAIL&gt;</span></code>
         <li>AWS secret keys</li>
         <li>Credit card numbers (Luhn-validated)</li>
       </ul>
-      <p>In v0.7.0, the strict-mode credit card matcher was tightened to reduce separator-heavy ambiguous near-miss matching without changing normal successful sanitize output.</p>
+      <p>The strict-mode credit card matcher is Luhn-validated and hardened against separator-heavy ambiguous near-miss input.</p>
 
-      <h3>v0.7.0 Notes</h3>
+      <h3>Current Notes</h3>
       <ul>
-        <li>No new CLI flags</li>
-        <li>No breaking change to normal successful scan/sanitize output</li>
-        <li>Adversarial regression coverage was added for input boundaries and regex near-miss cases</li>
+        <li>Normal successful scan/sanitize output remains stable by default</li>
+        <li>Operator flags such as <code>--quiet</code> and <code>--stats</code> are opt-in</li>
+        <li>Adversarial regression coverage protects input boundaries, malformed UTF-8 handling, multi-line blocks, and regex near-miss cases</li>
       </ul>
 
       <p>See the <a href="https://github.com/afria85/LogShield" target="_blank" rel="noopener noreferrer">source code</a> for the full rule list.</p>

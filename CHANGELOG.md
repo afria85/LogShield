@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8.1
+
+### Docs
+
+- Updated README and docs wording so the npm package page reflects the current v0.8.x posture instead of centering the historical v0.7.0 safety notes
+
+### Notes
+
+- Documentation-only patch
+- No CLI behavior changes
+- No redaction rule changes
+
 ## v0.8.0
 
 ### Added
