@@ -3,6 +3,10 @@
  * Keep this decoupled from engine types to avoid cross-layer import drift.
  */
 export type SummaryMatch = { rule: string };
+export type SummaryStats = {
+  linesProcessed: number;
+  processingMs: number;
+};
 
 /**
  * Print a compact, deterministic summary.
@@ -13,9 +17,13 @@ export type SummaryMatch = { rule: string };
  * - Rules are sorted alphabetically.
  * - Format is aligned and stable for snapshot/diff.
  */
-export function printSummary(matches: SummaryMatch[]): void {
+export function printSummary(
+  matches: SummaryMatch[],
+  options?: { stats?: SummaryStats }
+): void {
   if (!matches.length) {
     process.stderr.write("LogShield Summary\n(no redactions detected)\n");
+    printStats(options?.stats);
     return;
   }
 
@@ -39,4 +47,16 @@ export function printSummary(matches: SummaryMatch[]): void {
     const padded = rule.padEnd(maxNameLen, " ");
     process.stderr.write(`  ${padded}  x${counts[rule]}\n`);
   }
+
+  printStats(options?.stats);
+}
+
+function printStats(stats: SummaryStats | undefined): void {
+  if (!stats) {
+    return;
+  }
+
+  process.stderr.write("\nStats\n");
+  process.stderr.write(`  lines_processed  ${stats.linesProcessed}\n`);
+  process.stderr.write(`  processing_ms    ${stats.processingMs}\n`);
 }

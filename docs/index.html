@@ -439,9 +439,9 @@
 
       <div class="advanced-item">
         <div class="item-title"><code>--summary</code> Compact report</div>
-        <p>Rule-based summary of what was redacted.</p>
+        <p>Rule-based summary of what was redacted. Add <code>--stats</code> for line count and processing time.</p>
         <div class="advanced-code">
-          <span class="cmd">cat</span> <span class="file">app.log</span> <span class="pipe">|</span> <span class="cmd">logshield</span> <span class="flag">scan --summary</span>
+          <span class="cmd">cat</span> <span class="file">app.log</span> <span class="pipe">|</span> <span class="cmd">logshield</span> <span class="flag">scan --summary --stats</span>
         </div>
       </div>
     </div>
@@ -494,6 +494,20 @@
         <div class="flag-info">
           <div class="item-title">Summary</div>
           <p>Print compact redaction summary</p>
+        </div>
+      </div>
+      <div class="flag-item">
+        <span class="flag-code">--stats</span>
+        <div class="flag-info">
+          <div class="item-title">Stats</div>
+          <p>Add line count and processing time to summary</p>
+        </div>
+      </div>
+      <div class="flag-item">
+        <span class="flag-code">--quiet</span>
+        <div class="flag-info">
+          <div class="item-title">Quiet mode</div>
+          <p>Suppress human reports and summaries while keeping exit codes</p>
         </div>
       </div>
       <div class="flag-item">

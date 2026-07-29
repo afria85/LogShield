@@ -245,6 +245,12 @@ Restart your terminal after updating PATH.
 - `--summary`  
   Print a compact redaction summary
 
+- `--stats`
+  Include line count and processing time with `--summary`
+
+- `--quiet`
+  Suppress human dry-run reports and summaries while preserving exit codes
+
 - `--json`  
   JSON output (can be combined with `--dry-run`; output is empty in dry-run)
 
@@ -316,6 +322,12 @@ Typical CI pattern:
 
 ```bash
 logshield scan --dry-run --fail-on-detect < logs.txt
+```
+
+For silent CI gates, add `--quiet`. Detection still exits with code `1`, but no human dry-run report is printed:
+
+```bash
+logshield scan --dry-run --fail-on-detect --quiet < logs.txt
 ```
 
 ---
@@ -393,6 +405,25 @@ Notes:
 - Sanitized log output is written to stdout
 - The summary is written to stderr
 - Rules are sorted alphabetically
+- Add `--stats` to include line count and processing time in the summary
+- `--stats` requires `--summary` and is not supported with `--dry-run`
+- `--quiet` suppresses summaries, including stats
+
+```bash
+logshield scan --summary --stats < logs.txt
+```
+
+Example:
+
+```
+LogShield Summary
+  API_KEY_HEADER  x1
+  PASSWORD        x2
+
+Stats
+  lines_processed  42
+  processing_ms    3
+```
 
 ---
 
@@ -482,7 +513,7 @@ LogShield uses a fixed, deterministic rule set. The exact coverage depends on th
 LogShield guarantees:
 
 - Deterministic output
-- Stable behavior within the current minor line **v0.7.x**
+- Stable behavior within the current minor line **v0.8.x**
 - No runtime dependencies
 - Snapshot-tested and contract-tested
 - No telemetry

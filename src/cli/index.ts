@@ -27,6 +27,8 @@ const ALLOWED_FLAGS = new Set([
   "--fail-on-detect",
   "--json",
   "--summary",
+  "--stats",
+  "--quiet",
   "--version",
   "--help",
 ]);
@@ -52,6 +54,8 @@ Options:
   --fail-on-detect    Exit with code 1 if any redaction occurs
   --json              JSON output
   --summary           Print summary
+  --stats             Include processing stats with --summary
+  --quiet             Suppress human reports and summaries
   --version           Print version
   --help              Show help
 `);
@@ -126,6 +130,15 @@ function renderDryRunReport(matches: { rule: string }[]) {
   process.stdout.write("Use without --dry-run to apply.\n");
 }
 
+function countLines(input: string): number {
+  if (!input) {
+    return 0;
+  }
+
+  const lines = input.split(/\r?\n/);
+  return lines[lines.length - 1] === "" ? lines.length - 1 : lines.length;
+}
+
 function exitUsageError(message: string) {
   writeErr(message.endsWith("\n") ? message : message + "\n");
   process.exit(2);
@@ -162,6 +175,8 @@ async function main() {
   const strict = flags.has("--strict");
   const json = flags.has("--json");
   const summary = flags.has("--summary");
+  const stats = flags.has("--stats");
+  const quiet = flags.has("--quiet");
   const stdinFlag = flags.has("--stdin");
   const failOnDetect = flags.has("--fail-on-detect");
   const dryRun = flags.has("--dry-run");
@@ -178,13 +193,23 @@ async function main() {
     exitUsageError("--summary cannot be used with --json");
   }
 
+  if (stats && !summary) {
+    exitUsageError("--stats requires --summary");
+  }
+
+  if (stats && dryRun) {
+    exitUsageError("--stats cannot be used with --dry-run");
+  }
+
   try {
     const input = await readInput(useStdin ? undefined : file, {
       forceStdin: stdinFlag,
     });
 
     // Forward dryRun into the engine so detection and behavior stay consistent.
+    const startedAt = Date.now();
     const result = sanitizeLog(input, { strict, dryRun });
+    const processingMs = Math.max(0, Date.now() - startedAt);
 
     if (dryRun) {
       if (json) {
@@ -199,7 +224,9 @@ async function main() {
         process.exit(0);
       }
 
-      renderDryRunReport(result.matches);
+      if (!quiet) {
+        renderDryRunReport(result.matches);
+      }
 
       if (failOnDetect && result.matches.length > 0) {
         process.exit(1);
@@ -211,8 +238,18 @@ async function main() {
     // Default behavior: sanitized output to stdout (or JSON), summary to stderr.
     writeOutput(result, { json });
 
-    if (summary) {
-      printSummary(result.matches);
+    if (summary && !quiet) {
+      printSummary(
+        result.matches,
+        stats
+          ? {
+              stats: {
+                linesProcessed: countLines(input),
+                processingMs,
+              },
+            }
+          : undefined
+      );
     }
 
     if (failOnDetect && result.matches.length > 0) {

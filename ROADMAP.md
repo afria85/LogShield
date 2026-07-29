@@ -33,7 +33,7 @@ This roadmap is intentionally conservative. LogShield prioritizes deterministic 
 
 **Compatibility:** new failure mode for extreme single-line inputs (explicit error + exit code 2).
 
-## v0.8.0 — Operator ergonomics (without losing determinism)
+## v0.8.0 — Operator ergonomics (without losing determinism, shipped)
 
 **Goal:** improve usability in pipelines while keeping output contracts tight.
 

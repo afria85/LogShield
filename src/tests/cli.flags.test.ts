@@ -76,6 +76,85 @@ describe("CLI flag validation", () => {
     }
   });
 
+  it("--quiet suppresses the dry-run human report", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--dry-run", "--quiet"],
+      "password=secret123\n"
+    );
+
+    expect(status).toBe(0);
+    expect(stdout).toBe("");
+    expect(stderr).toBe("");
+  });
+
+  it("--quiet preserves --fail-on-detect exit behavior", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--dry-run", "--fail-on-detect", "--quiet"],
+      "password=secret123\n"
+    );
+
+    expect(status).toBe(1);
+    expect(stdout).toBe("");
+    expect(stderr).toBe("");
+  });
+
+  it("--quiet suppresses --summary without suppressing sanitized output", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--summary", "--quiet"],
+      "password=secret123"
+    );
+
+    expect(status).toBe(0);
+    expect(stdout).toBe("password=<REDACTED_PASSWORD>");
+    expect(stderr).toBe("");
+  });
+
+  it("--summary --stats includes line count and processing time", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--summary", "--stats"],
+      "password=secret123\nnormal line\n"
+    );
+
+    expect(status).toBe(0);
+    expect(stdout).toBe("password=<REDACTED_PASSWORD>\nnormal line\n");
+    expect(stderr).toMatch(
+      /^LogShield Summary\n  PASSWORD  x1\n\nStats\n  lines_processed  2\n  processing_ms    \d+\n$/
+    );
+  });
+
+  it("--quiet suppresses stats because stats are part of the human summary", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--summary", "--stats", "--quiet"],
+      "password=secret123\n"
+    );
+
+    expect(status).toBe(0);
+    expect(stdout).toBe("password=<REDACTED_PASSWORD>\n");
+    expect(stderr).toBe("");
+  });
+
+  it("rejects --stats without --summary", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--stats"],
+      "password=secret123\n"
+    );
+
+    expect(status).toBe(2);
+    expect(stdout).toBe("");
+    expect(stderr).toBe("--stats requires --summary\n");
+  });
+
+  it("rejects --stats with --dry-run", () => {
+    const { stdout, stderr, status } = runCli(
+      ["scan", "--dry-run", "--summary", "--stats"],
+      "password=secret123\n"
+    );
+
+    expect(status).toBe(2);
+    expect(stdout).toBe("");
+    expect(stderr).toBe("--stats cannot be used with --dry-run\n");
+  });
+
   it("rejects a UTF-8 line over 64KB by bytes", () => {
     const input = `${"€".repeat(21845)}AA`;
     const { stdout, stderr, status } = runCli(["scan"], input);

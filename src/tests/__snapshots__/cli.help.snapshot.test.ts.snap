@@ -15,6 +15,8 @@ Options:
   --fail-on-detect    Exit with code 1 if any redaction occurs
   --json              JSON output
   --summary           Print summary
+  --stats             Include processing stats with --summary
+  --quiet             Suppress human reports and summaries
   --version           Print version
   --help              Show help
 "
@@ -35,6 +37,8 @@ Options:
   --fail-on-detect    Exit with code 1 if any redaction occurs
   --json              JSON output
   --summary           Print summary
+  --stats             Include processing stats with --summary
+  --quiet             Suppress human reports and summaries
   --version           Print version
   --help              Show help
 "

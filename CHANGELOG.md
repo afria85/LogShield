@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.8.0
+
+### Added
+
+- Added `--quiet` to suppress human dry-run reports and summaries while preserving exit-code behavior
+- Added `--stats` for optional line count and processing time in `--summary` output
+- Added edge-case coverage for Unicode logs, malformed UTF-8 stdin best-effort handling, and multi-line private key blocks
+
+### Notes
+
+- No redaction rule changes
+- Output changes only when the new `--quiet` or `--stats` flags are used
+- `--stats` requires `--summary` and is not supported with `--dry-run`
+
 ## v0.7.2
 
 ### Maintenance

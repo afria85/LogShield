@@ -33,4 +33,44 @@ describe("--summary output contract", () => {
       "  PASSWORD        x2\n"
     );
   });
+
+  it("prints optional processing stats after the rule summary", () => {
+    const out = captureStderr(() =>
+      printSummary([{ rule: "PASSWORD" } as any], {
+        stats: {
+          linesProcessed: 3,
+          processingMs: 12,
+        },
+      })
+    );
+
+    expect(out).toBe(
+      "LogShield Summary\n" +
+      "  PASSWORD  x1\n" +
+      "\n" +
+      "Stats\n" +
+      "  lines_processed  3\n" +
+      "  processing_ms    12\n"
+    );
+  });
+
+  it("prints optional processing stats when no redactions are detected", () => {
+    const out = captureStderr(() =>
+      printSummary([], {
+        stats: {
+          linesProcessed: 1,
+          processingMs: 0,
+        },
+      })
+    );
+
+    expect(out).toBe(
+      "LogShield Summary\n" +
+      "(no redactions detected)\n" +
+      "\n" +
+      "Stats\n" +
+      "  lines_processed  1\n" +
+      "  processing_ms    0\n"
+    );
+  });
 });
